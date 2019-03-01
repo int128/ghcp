@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11.2
+    steps:
+      - run: go get golang.org/x/lint/golint
+      - run: go get github.com/mitchellh/gox
+      - run: go get github.com/tcnksm/ghr
+      - checkout
+      - run: golint
+      - run: go vet
+      - run: go test -v ./...
+      # release to GitHub on tag push
+      - run: |
+          if [ "$CIRCLE_TAG" ]; then
+            gox --osarch 'darwin/amd64 linux/amd64 windows/amd64' -output 'dist/{{.Dir}}_{{.OS}}_{{.Arch}}'
+            ghr -u "$CIRCLE_PROJECT_USERNAME" -r "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_TAG" dist
+          fi
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
