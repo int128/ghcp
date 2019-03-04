@@ -1,2 +1,38 @@
 # ghcp
-GitHub commit and push for release automation
+
+ghcp is a command to commit and push files to a repository on GitHub.
+It depends on GitHub API and works without Git commands.
+
+
+## Getting Started
+
+```
+Usage: ghcp [options] [path...]
+
+Options:
+  -m string
+    	Commit message
+  -r string
+    	GitHub repository name
+  -token string
+    	GitHub API token [$GITHUB_TOKEN]
+  -u string
+    	GitHub repository owner
+```
+
+You need to get a personal access token from GitHub settings.
+You can set the token by `-token` option or `GITHUB_TOKEN` environment variable.
+
+ghcp will upload the files and create a commit on the default branch (typically `master`).
+
+```
+% export GITHUB_TOKEN=YOUR_TOKEN
+
+% ghcp -u int128 -r sandbox -m 'Example Commit' dist/
+```
+
+
+## Contributions
+
+This is an open source software.
+Feel free to open issues and pull requests.

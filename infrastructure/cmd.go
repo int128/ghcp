@@ -30,8 +30,9 @@ func Run(ctx context.Context, args []string) int {
 		f.PrintDefaults()
 	}
 	var o options
-	f.StringVar(&o.RepositoryOwner, "owner", "", "GitHub repository owner")
-	f.StringVar(&o.RepositoryName, "repo", "", "GitHub repository name")
+	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner")
+	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name")
+	f.StringVar(&o.CommitMessage, "m", "", "Commit message")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 
 	if err := f.Parse(args[1:]); err != nil {

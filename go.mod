@@ -1,6 +1,7 @@
 module github.com/int128/ghcp
 
 require (
+	github.com/go-test/deep v1.0.1
 	github.com/golang/mock v1.2.0
 	github.com/google/go-github/v24 v24.0.1
 	github.com/pkg/errors v0.8.1

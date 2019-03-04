@@ -1,6 +1,10 @@
 package usecases
 
-import "context"
+import (
+	"context"
+
+	"github.com/int128/ghcp/git"
+)
 
 //go:generate mockgen -package mock_usecases -destination ../mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases/interfaces Push
 
@@ -9,7 +13,7 @@ type Push interface {
 }
 
 type PushIn struct {
-	RepositoryOwner string
-	RepositoryName  string
-	Paths           []string
+	Repository    git.RepositoryID
+	CommitMessage git.CommitMessage
+	Paths         []string
 }

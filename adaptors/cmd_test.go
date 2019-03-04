@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases/interfaces"
 	"github.com/int128/ghcp/usecases/mock_usecases"
 )
@@ -28,15 +29,16 @@ func TestCmd_Run(t *testing.T) {
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
-				RepositoryOwner: "owner",
-				RepositoryName:  "repo",
-				Paths:           []string{"file"},
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file"},
 			})
 
 		c := Cmd{Push: push}
 		err := c.Run(ctx, adaptors.CmdOptions{
 			RepositoryOwner: "owner",
 			RepositoryName:  "repo",
+			CommitMessage:   "commit-message",
 			Paths:           []string{"file"},
 		})
 		if err != nil {

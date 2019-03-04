@@ -10,6 +10,7 @@ import (
 
 var dependencies = []interface{}{
 	adaptors.NewCmd,
+	adaptors.NewFileSystem,
 	adaptors.NewGitHub,
 
 	usecases.NewPush,
