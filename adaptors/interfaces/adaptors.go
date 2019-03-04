@@ -6,7 +6,7 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces FileSystem,GitHub
+//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,GitHub
 
 type Cmd interface {
 	Run(ctx context.Context, o CmdOptions) error

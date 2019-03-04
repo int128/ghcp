@@ -23,7 +23,7 @@ Options:
 const envGitHubToken = "GITHUB_TOKEN"
 
 // Run parses the arguments and bootstraps the application.
-func Run(ctx context.Context, args []string) int {
+func Run(ctx context.Context, c di.Container, args []string) int {
 	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	f.Usage = func() {
 		fmt.Fprintf(f.Output(), usage, args[0])
@@ -47,12 +47,11 @@ func Run(ctx context.Context, args []string) int {
 		return 1
 	}
 
-	c, err := di.New(GitHubClientFactory(o.GitHubToken))
-	if err != nil {
-		log.Printf("Error: %s", err)
-		return 1
-	}
-	if err := c.Invoke(func(cmd adaptors.Cmd) error {
+	v3, v4 := NewGitHubClient(o.GitHubToken)
+	if err := c.Run(di.ExtraDependencies{
+		GitHubV3: v3,
+		GitHubV4: v4,
+	}, func(cmd adaptors.Cmd) error {
 		if err := cmd.Run(ctx, o.CmdOptions); err != nil {
 			return errors.WithStack(err)
 		}
