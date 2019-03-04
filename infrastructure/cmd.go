@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-const usage = `Usage: %s [options] [path...]
+const usage = `Usage: %s [options] [file or directory...]
 
-  ghcp performs commit and push to a GitHub repository.
+  ghcp commits and pushes files to a repository.
   It depends on GitHub API and works without git commands.
 
 Options:
@@ -30,9 +30,9 @@ func Run(ctx context.Context, args []string) int {
 		f.PrintDefaults()
 	}
 	var o options
-	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner")
-	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name")
-	f.StringVar(&o.CommitMessage, "m", "", "Commit message")
+	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner (mandatory)")
+	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name (mandatory)")
+	f.StringVar(&o.CommitMessage, "m", "", "Commit message (mandatory)")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 
 	if err := f.Parse(args[1:]); err != nil {

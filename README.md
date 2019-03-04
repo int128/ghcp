@@ -7,23 +7,26 @@ It depends on GitHub API and works without Git commands.
 ## Getting Started
 
 ```
-Usage: ghcp [options] [path...]
+Usage: ghcp [options] [file or directory...]
 
 Options:
   -m string
-    	Commit message
+    	Commit message (mandatory)
   -r string
-    	GitHub repository name
+    	GitHub repository name (mandatory)
   -token string
     	GitHub API token [$GITHUB_TOKEN]
   -u string
-    	GitHub repository owner
+    	GitHub repository owner (mandatory)
 ```
 
 You need to get a personal access token from GitHub settings.
 You can set the token by `-token` option or `GITHUB_TOKEN` environment variable.
 
-ghcp will upload the files and create a commit on the default branch (typically `master`).
+You need to specify repository owner and name.
+ghcp does not read `.git` and `.gitconfig`.
+
+ghcp will upload the files and create a commit on the default branch (typically master).
 
 ```
 % export GITHUB_TOKEN=YOUR_TOKEN
