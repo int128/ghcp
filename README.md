@@ -1,4 +1,4 @@
-# ghcp
+# ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
 ghcp is a command to commit and push files to a repository on GitHub.
 It depends on GitHub API and works without Git commands.
