@@ -3,7 +3,6 @@ package usecases
 
 import (
 	"context"
-	"log"
 
 	"github.com/int128/ghcp/adaptors/interfaces"
 	"github.com/int128/ghcp/git"
@@ -20,6 +19,7 @@ func NewPush(i Push) usecases.Push {
 type Push struct {
 	dig.In
 	FileSystem adaptors.FileSystem
+	Logger     adaptors.Logger
 	GitHub     adaptors.GitHub
 }
 
@@ -35,7 +35,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	if err != nil {
 		return errors.Wrapf(err, "error while getting the repository")
 	}
-	log.Printf("Logged in as %s", out.CurrentUserName)
+	u.Logger.Infof("Logged in as %s", out.CurrentUserName)
 
 	gitFiles := make([]git.File, len(filenames))
 	for i, filename := range filenames {
@@ -55,7 +55,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 			BlobSHA:  blobSHA,
 			//TODO: Executable
 		}
-		log.Printf("Uploaded %s as blob %s", filename, blobSHA)
+		u.Logger.Infof("Uploaded %s as blob %s", filename, blobSHA)
 	}
 
 	treeSHA, err := u.GitHub.CreateTree(ctx, adaptors.NewTree{
@@ -66,7 +66,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	if err != nil {
 		return errors.Wrapf(err, "error while creating a tree")
 	}
-	log.Printf("Created tree %s", treeSHA)
+	u.Logger.Infof("Created tree %s", treeSHA)
 
 	commitSHA, err := u.GitHub.CreateCommit(ctx, adaptors.NewCommit{
 		Repository:      out.Repository,
@@ -77,7 +77,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	if err != nil {
 		return errors.Wrapf(err, "error while creating a commit")
 	}
-	log.Printf("Created commit %s", commitSHA)
+	u.Logger.Infof("Created commit %s", commitSHA)
 
 	if err := u.GitHub.UpdateBranch(ctx, adaptors.NewBranch{
 		Repository: out.Repository,
@@ -86,7 +86,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	}, false); err != nil {
 		return errors.Wrapf(err, "error while creating a branch %s", out.DefaultBranchName)
 	}
-	log.Printf("Updated branch %s", out.DefaultBranchName)
+	u.Logger.Infof("Updated branch %s", out.DefaultBranchName)
 
 	return nil
 }

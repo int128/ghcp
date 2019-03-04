@@ -24,6 +24,11 @@ type FileSystem interface {
 	ReadAsBase64EncodedContent(filename string) (string, error)
 }
 
+type Logger interface {
+	Infof(format string, v ...interface{})
+	Debugf(format string, v ...interface{})
+}
+
 type GitHub interface {
 	GetRepository(ctx context.Context, in GetRepositoryIn) (*GetRepositoryOut, error)
 	CreateBranch(ctx context.Context, branch NewBranch) error

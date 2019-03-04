@@ -85,6 +85,7 @@ func TestPush_Do(t *testing.T) {
 
 		push := Push{
 			FileSystem: fileSystem,
+			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
 		err := push.Do(ctx, usecases.PushIn{

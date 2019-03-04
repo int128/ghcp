@@ -11,6 +11,7 @@ import (
 var dependencies = []interface{}{
 	adaptors.NewCmd,
 	adaptors.NewFileSystem,
+	adaptors.NewLogger,
 	adaptors.NewGitHub,
 
 	usecases.NewPush,
