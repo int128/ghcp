@@ -11,12 +11,13 @@ import (
 	"github.com/int128/ghcp/infrastructure/mock_infrastructure"
 )
 
-func TestRun(t *testing.T) {
+func TestCmd_Run(t *testing.T) {
 	ctx := context.TODO()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	t.Run("FullOptions", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		cmdAdaptor := mock_adaptors.NewMockCmd(ctrl)
 		cmdAdaptor.EXPECT().
 			Run(ctx, adaptors.CmdOptions{
@@ -49,7 +50,10 @@ func TestRun(t *testing.T) {
 			t.Errorf("exitCode wants 0 but %d", exitCode)
 		}
 	})
+
 	t.Run("NoGitHubToken", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		cmdAdaptor := mock_adaptors.NewMockCmd(ctrl)
 		clientConfig := mock_infrastructure.NewMockGitHubClientConfig(ctrl)
 		cmd := infrastructure.Cmd{

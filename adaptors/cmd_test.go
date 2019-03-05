@@ -12,11 +12,11 @@ import (
 )
 
 func TestCmd_Run(t *testing.T) {
-	ctx := context.Background()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	ctx := context.TODO()
 
 	t.Run("NoArgs", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		push := mock_usecases.NewMockPush(ctrl)
 		c := Cmd{Push: push}
 		err := c.Run(ctx, adaptors.CmdOptions{})
@@ -26,6 +26,9 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("OK", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
