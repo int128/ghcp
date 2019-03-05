@@ -30,7 +30,7 @@ type Logger interface {
 }
 
 type GitHub interface {
-	GetRepository(ctx context.Context, in GetRepositoryIn) (*GetRepositoryOut, error)
+	QueryRepository(ctx context.Context, in QueryRepositoryIn) (*QueryRepositoryOut, error)
 	CreateBranch(ctx context.Context, branch NewBranch) error
 	UpdateBranch(ctx context.Context, branch NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit NewCommit) (git.CommitSHA, error)
@@ -38,11 +38,11 @@ type GitHub interface {
 	CreateBlob(ctx context.Context, blob NewBlob) (git.BlobSHA, error)
 }
 
-type GetRepositoryIn struct {
+type QueryRepositoryIn struct {
 	Repository git.RepositoryID
 }
 
-type GetRepositoryOut struct {
+type QueryRepositoryOut struct {
 	CurrentUserName        string
 	Repository             git.RepositoryID
 	DefaultBranchName      git.BranchName

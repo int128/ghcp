@@ -29,7 +29,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 		return errors.Wrapf(err, "error while finding files")
 	}
 
-	out, err := u.GitHub.GetRepository(ctx, adaptors.GetRepositoryIn{
+	out, err := u.GitHub.QueryRepository(ctx, adaptors.QueryRepositoryIn{
 		Repository: git.RepositoryID{Owner: in.Repository.Owner, Name: in.Repository.Name},
 	})
 	if err != nil {

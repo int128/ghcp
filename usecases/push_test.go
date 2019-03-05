@@ -31,10 +31,10 @@ func TestPush_Do(t *testing.T) {
 
 		gitHub := mock_adaptors.NewMockGitHub(ctrl)
 		gitHub.EXPECT().
-			GetRepository(ctx, adaptors.GetRepositoryIn{
+			QueryRepository(ctx, adaptors.QueryRepositoryIn{
 				Repository: repositoryID,
 			}).
-			Return(&adaptors.GetRepositoryOut{
+			Return(&adaptors.QueryRepositoryOut{
 				CurrentUserName:        "current",
 				Repository:             repositoryID,
 				DefaultBranchName:      "master",

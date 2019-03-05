@@ -170,17 +170,17 @@ func (mr *MockGitHubMockRecorder) CreateTree(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockGitHub)(nil).CreateTree), arg0, arg1)
 }
 
-// GetRepository mocks base method
-func (m *MockGitHub) GetRepository(arg0 context.Context, arg1 interfaces.GetRepositoryIn) (*interfaces.GetRepositoryOut, error) {
-	ret := m.ctrl.Call(m, "GetRepository", arg0, arg1)
-	ret0, _ := ret[0].(*interfaces.GetRepositoryOut)
+// QueryRepository mocks base method
+func (m *MockGitHub) QueryRepository(arg0 context.Context, arg1 interfaces.QueryRepositoryIn) (*interfaces.QueryRepositoryOut, error) {
+	ret := m.ctrl.Call(m, "QueryRepository", arg0, arg1)
+	ret0, _ := ret[0].(*interfaces.QueryRepositoryOut)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetRepository indicates an expected call of GetRepository
-func (mr *MockGitHubMockRecorder) GetRepository(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRepository", reflect.TypeOf((*MockGitHub)(nil).GetRepository), arg0, arg1)
+// QueryRepository indicates an expected call of QueryRepository
+func (mr *MockGitHubMockRecorder) QueryRepository(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRepository", reflect.TypeOf((*MockGitHub)(nil).QueryRepository), arg0, arg1)
 }
 
 // UpdateBranch mocks base method

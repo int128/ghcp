@@ -23,7 +23,8 @@ type GitHub struct {
 	Client infrastructure.GitHubClient
 }
 
-func (c *GitHub) GetRepository(ctx context.Context, in adaptors.GetRepositoryIn) (*adaptors.GetRepositoryOut, error) {
+// QueryRepository returns the repository.
+func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositoryIn) (*adaptors.QueryRepositoryOut, error) {
 	var q struct {
 		Viewer struct {
 			Login string
@@ -53,7 +54,7 @@ func (c *GitHub) GetRepository(ctx context.Context, in adaptors.GetRepositoryIn)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, errors.Wrapf(err, "GitHub API error")
 	}
-	return &adaptors.GetRepositoryOut{
+	return &adaptors.QueryRepositoryOut{
 		CurrentUserName:        q.Viewer.Login,
 		Repository:             git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
 		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
