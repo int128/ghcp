@@ -22,14 +22,19 @@ Options:
 
 const envGitHubToken = "GITHUB_TOKEN"
 
-func NewCmd(i Cmd) infrastructure.Cmd {
-	return &i
+func NewCmd(in cmdIn) infrastructure.Cmd {
+	return &Cmd{in, os.Getenv}
 }
 
-type Cmd struct {
+type cmdIn struct {
 	dig.In
 	Cmd                adaptors.Cmd
 	GitHubClientConfig infrastructure.GitHubClientConfig
+}
+
+type Cmd struct {
+	cmdIn
+	Getenv func(string) string
 }
 
 // Run parses the arguments and bootstraps the application.
@@ -50,7 +55,7 @@ func (cmd *Cmd) Run(ctx context.Context, args []string) int {
 	}
 	o.Paths = f.Args()
 	if o.GitHubToken == "" {
-		o.GitHubToken = os.Getenv(envGitHubToken)
+		o.GitHubToken = cmd.Getenv(envGitHubToken)
 	}
 	if o.GitHubToken == "" {
 		log.Printf("Error: provide GitHub API token by $%s or -token", envGitHubToken)
