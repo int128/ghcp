@@ -34,6 +34,7 @@ type GitHub interface {
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
+	QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error)
 	CreateTree(ctx context.Context, tree git.NewTree) (git.TreeSHA, error)
 	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
 }
@@ -48,4 +49,13 @@ type QueryRepositoryOut struct {
 	DefaultBranchName      git.BranchName
 	DefaultBranchCommitSHA git.CommitSHA
 	DefaultBranchTreeSHA   git.TreeSHA
+}
+
+type QueryCommitIn struct {
+	Repository git.RepositoryID
+	CommitSHA  git.CommitSHA
+}
+
+type QueryCommitOut struct {
+	ChangedFiles int
 }

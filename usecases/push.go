@@ -79,6 +79,19 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
+	commit, err := u.GitHub.QueryCommit(ctx, adaptors.QueryCommitIn{
+		Repository: out.Repository,
+		CommitSHA:  commitSHA,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "error while getting the commit %s", commitSHA)
+	}
+	u.Logger.Infof("Commit: %d changed file(s)", commit.ChangedFiles)
+	if commit.ChangedFiles == 0 {
+		u.Logger.Infof("Nothing to commit")
+		return nil
+	}
+
 	if err := u.GitHub.UpdateBranch(ctx, git.NewBranch{
 		Repository: out.Repository,
 		BranchName: out.DefaultBranchName,

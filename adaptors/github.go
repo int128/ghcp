@@ -87,6 +87,30 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) 
 	return nil
 }
 
+// QueryCommit returns the commit.
+func (c *GitHub) QueryCommit(ctx context.Context, in adaptors.QueryCommitIn) (*adaptors.QueryCommitOut, error) {
+	var q struct {
+		Repository struct {
+			Object struct {
+				Commit struct {
+					ChangedFiles int
+				} `graphql:"... on Commit"`
+			} `graphql:"object(oid: $commitSHA)"`
+		} `graphql:"repository(owner: $owner, name: $repo)"`
+	}
+	v := map[string]interface{}{
+		"owner":     githubv4.String(in.Repository.Owner),
+		"repo":      githubv4.String(in.Repository.Name),
+		"commitSHA": githubv4.GitObjectID(in.CommitSHA),
+	}
+	if err := c.Client.Query(ctx, &q, v); err != nil {
+		return nil, errors.Wrapf(err, "GitHub API error")
+	}
+	return &adaptors.QueryCommitOut{
+		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
+	}, nil
+}
+
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
 	commit, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
