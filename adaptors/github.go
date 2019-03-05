@@ -7,18 +7,20 @@ import (
 	"github.com/google/go-github/v24/github"
 	"github.com/int128/ghcp/adaptors/interfaces"
 	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/infrastructure/interfaces"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
+	"go.uber.org/dig"
 )
 
-func NewGitHub(v3 *github.Client, v4 *githubv4.Client) adaptors.GitHub {
-	return &GitHub{v3, v4}
+func NewGitHub(i GitHub) adaptors.GitHub {
+	return &i
 }
 
 // GitHub provides GitHub API access.
 type GitHub struct {
-	v3 *github.Client
-	v4 *githubv4.Client
+	dig.In
+	Client infrastructure.GitHubClient
 }
 
 func (c *GitHub) GetRepository(ctx context.Context, in adaptors.GetRepositoryIn) (*adaptors.GetRepositoryOut, error) {
@@ -48,7 +50,7 @@ func (c *GitHub) GetRepository(ctx context.Context, in adaptors.GetRepositoryIn)
 		"owner": githubv4.String(in.Repository.Owner),
 		"repo":  githubv4.String(in.Repository.Name),
 	}
-	if err := c.v4.Query(ctx, &q, v); err != nil {
+	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, errors.Wrapf(err, "GitHub API error")
 	}
 	return &adaptors.GetRepositoryOut{
@@ -62,7 +64,7 @@ func (c *GitHub) GetRepository(ctx context.Context, in adaptors.GetRepositoryIn)
 
 // CreateBranch creates a branch and returns nil or an error.
 func (c *GitHub) CreateBranch(ctx context.Context, n adaptors.NewBranch) error {
-	_, _, err := c.v3.Git.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
+	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
 		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	})
@@ -74,7 +76,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, n adaptors.NewBranch) error {
 
 // UpdateBranch updates the branch and returns nil or an error.
 func (c *GitHub) UpdateBranch(ctx context.Context, n adaptors.NewBranch, force bool) error {
-	_, _, err := c.v3.Git.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
+	_, _, err := c.Client.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
 		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	}, force)
@@ -86,7 +88,7 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n adaptors.NewBranch, force b
 
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n adaptors.NewCommit) (git.CommitSHA, error) {
-	commit, _, err := c.v3.Git.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
+	commit, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
 		Message: github.String(string(n.Message)),
 		Parents: []github.Commit{{SHA: github.String(string(n.ParentCommitSHA))}},
 		Tree:    &github.Tree{SHA: github.String(string(n.TreeSHA))},
@@ -108,7 +110,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n adaptors.NewTree) (git.TreeSH
 			SHA:  github.String(string(file.BlobSHA)),
 		}
 	}
-	tree, _, err := c.v3.Git.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
+	tree, _, err := c.Client.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
 	if err != nil {
 		return "", errors.Wrapf(err, "GitHub API error")
 	}
@@ -117,7 +119,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n adaptors.NewTree) (git.TreeSH
 
 // CreateBlob creates a blob and returns SHA of it.
 func (c *GitHub) CreateBlob(ctx context.Context, n adaptors.NewBlob) (git.BlobSHA, error) {
-	blob, _, err := c.v3.Git.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
+	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
 		Encoding: github.String("base64"),
 		Content:  github.String(n.Content),
 	})

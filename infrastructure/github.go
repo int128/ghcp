@@ -4,17 +4,33 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/v24/github"
+	"github.com/int128/ghcp/infrastructure/interfaces"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
-// NewGitHubClient returns a function to create GitHub v3/v4 clients.
-func NewGitHubClient(token string) (*github.Client, *githubv4.Client) {
+// NewGitHubClient returns a GitHubClient.
+func NewGitHubClient() (infrastructure.GitHubClient, infrastructure.GitHubClientConfig) {
+	var token oauth2.Token
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Base:   http.DefaultTransport,
-			Source: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token}),
+			Source: oauth2.StaticTokenSource(&token),
 		},
 	}
-	return github.NewClient(hc), githubv4.NewClient(hc)
+	v4 := githubv4.NewClient(hc)
+	v3 := github.NewClient(hc)
+	c := &GitHubClient{v4, v3.Git, &token}
+	return c, c
+}
+
+type GitHubClient struct {
+	*githubv4.Client
+	*github.GitService
+
+	token *oauth2.Token
+}
+
+func (c *GitHubClient) SetToken(token string) {
+	c.token.AccessToken = token
 }

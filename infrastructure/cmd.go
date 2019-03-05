@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/int128/ghcp/adaptors/interfaces"
-	"github.com/int128/ghcp/di"
-	"github.com/pkg/errors"
+	"github.com/int128/ghcp/infrastructure/interfaces"
+	"go.uber.org/dig"
 )
 
 const usage = `Usage: %s [options] [file or directory...]
@@ -22,8 +22,18 @@ Options:
 
 const envGitHubToken = "GITHUB_TOKEN"
 
+func NewCmd(i Cmd) infrastructure.Cmd {
+	return &i
+}
+
+type Cmd struct {
+	dig.In
+	Cmd                adaptors.Cmd
+	GitHubClientConfig infrastructure.GitHubClientConfig
+}
+
 // Run parses the arguments and bootstraps the application.
-func Run(ctx context.Context, c di.Container, args []string) int {
+func (cmd *Cmd) Run(ctx context.Context, args []string) int {
 	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	f.Usage = func() {
 		fmt.Fprintf(f.Output(), usage, args[0])
@@ -46,17 +56,9 @@ func Run(ctx context.Context, c di.Container, args []string) int {
 		log.Printf("Error: provide GitHub API token by $%s or -token", envGitHubToken)
 		return 1
 	}
+	cmd.GitHubClientConfig.SetToken(o.GitHubToken)
 
-	v3, v4 := NewGitHubClient(o.GitHubToken)
-	if err := c.Run(di.ExtraDependencies{
-		GitHubV3: v3,
-		GitHubV4: v4,
-	}, func(cmd adaptors.Cmd) error {
-		if err := cmd.Run(ctx, o.CmdOptions); err != nil {
-			return errors.WithStack(err)
-		}
-		return nil
-	}); err != nil {
+	if err := cmd.Cmd.Run(ctx, o.CmdOptions); err != nil {
 		log.Printf("Error: %s", err)
 		return 1
 	}
