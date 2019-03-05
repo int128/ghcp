@@ -43,7 +43,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 		if err != nil {
 			return errors.Wrapf(err, "error while reading file %s", filename)
 		}
-		blobSHA, err := u.GitHub.CreateBlob(ctx, adaptors.NewBlob{
+		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
 			Repository: out.Repository,
 			Content:    content,
 		})
@@ -58,7 +58,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 		u.Logger.Infof("Uploaded %s as blob %s", filename, blobSHA)
 	}
 
-	treeSHA, err := u.GitHub.CreateTree(ctx, adaptors.NewTree{
+	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
 		Repository:  out.Repository,
 		BaseTreeSHA: out.DefaultBranchTreeSHA,
 		Files:       gitFiles,
@@ -68,7 +68,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	}
 	u.Logger.Infof("Created tree %s", treeSHA)
 
-	commitSHA, err := u.GitHub.CreateCommit(ctx, adaptors.NewCommit{
+	commitSHA, err := u.GitHub.CreateCommit(ctx, git.NewCommit{
 		Repository:      out.Repository,
 		Message:         in.CommitMessage,
 		ParentCommitSHA: out.DefaultBranchCommitSHA,
@@ -79,7 +79,7 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
-	if err := u.GitHub.UpdateBranch(ctx, adaptors.NewBranch{
+	if err := u.GitHub.UpdateBranch(ctx, git.NewBranch{
 		Repository: out.Repository,
 		BranchName: out.DefaultBranchName,
 		CommitSHA:  commitSHA,

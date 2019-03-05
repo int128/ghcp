@@ -42,19 +42,19 @@ func TestPush_Do(t *testing.T) {
 				DefaultBranchTreeSHA:   "masterTreeSHA",
 			}, nil)
 		gitHub.EXPECT().
-			CreateBlob(ctx, adaptors.NewBlob{
+			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
 				Content:    "base64content1",
 			}).
 			Return(git.BlobSHA("blobSHA"), nil)
 		gitHub.EXPECT().
-			CreateBlob(ctx, adaptors.NewBlob{
+			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
 				Content:    "base64content2",
 			}).
 			Return(git.BlobSHA("blobSHA"), nil)
 		gitHub.EXPECT().
-			CreateTree(ctx, adaptors.NewTree{
+			CreateTree(ctx, git.NewTree{
 				Repository:  repositoryID,
 				BaseTreeSHA: "masterTreeSHA",
 				Files: []git.File{
@@ -69,14 +69,14 @@ func TestPush_Do(t *testing.T) {
 			}).
 			Return(git.TreeSHA("treeSHA"), nil)
 		gitHub.EXPECT().
-			CreateCommit(ctx, adaptors.NewCommit{
+			CreateCommit(ctx, git.NewCommit{
 				Repository:      repositoryID,
 				TreeSHA:         "treeSHA",
 				ParentCommitSHA: "masterCommitSHA",
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			UpdateBranch(ctx, adaptors.NewBranch{
+			UpdateBranch(ctx, git.NewBranch{
 				Repository: repositoryID,
 				BranchName: "master",
 				CommitSHA:  "commitSHA",

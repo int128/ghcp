@@ -120,7 +120,7 @@ func (m *MockGitHub) EXPECT() *MockGitHubMockRecorder {
 }
 
 // CreateBlob mocks base method
-func (m *MockGitHub) CreateBlob(arg0 context.Context, arg1 interfaces.NewBlob) (git.BlobSHA, error) {
+func (m *MockGitHub) CreateBlob(arg0 context.Context, arg1 git.NewBlob) (git.BlobSHA, error) {
 	ret := m.ctrl.Call(m, "CreateBlob", arg0, arg1)
 	ret0, _ := ret[0].(git.BlobSHA)
 	ret1, _ := ret[1].(error)
@@ -133,7 +133,7 @@ func (mr *MockGitHubMockRecorder) CreateBlob(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // CreateBranch mocks base method
-func (m *MockGitHub) CreateBranch(arg0 context.Context, arg1 interfaces.NewBranch) error {
+func (m *MockGitHub) CreateBranch(arg0 context.Context, arg1 git.NewBranch) error {
 	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -145,7 +145,7 @@ func (mr *MockGitHubMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.C
 }
 
 // CreateCommit mocks base method
-func (m *MockGitHub) CreateCommit(arg0 context.Context, arg1 interfaces.NewCommit) (git.CommitSHA, error) {
+func (m *MockGitHub) CreateCommit(arg0 context.Context, arg1 git.NewCommit) (git.CommitSHA, error) {
 	ret := m.ctrl.Call(m, "CreateCommit", arg0, arg1)
 	ret0, _ := ret[0].(git.CommitSHA)
 	ret1, _ := ret[1].(error)
@@ -158,7 +158,7 @@ func (mr *MockGitHubMockRecorder) CreateCommit(arg0, arg1 interface{}) *gomock.C
 }
 
 // CreateTree mocks base method
-func (m *MockGitHub) CreateTree(arg0 context.Context, arg1 interfaces.NewTree) (git.TreeSHA, error) {
+func (m *MockGitHub) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.TreeSHA, error) {
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1)
 	ret0, _ := ret[0].(git.TreeSHA)
 	ret1, _ := ret[1].(error)
@@ -184,7 +184,7 @@ func (mr *MockGitHubMockRecorder) QueryRepository(arg0, arg1 interface{}) *gomoc
 }
 
 // UpdateBranch mocks base method
-func (m *MockGitHub) UpdateBranch(arg0 context.Context, arg1 interfaces.NewBranch, arg2 bool) error {
+func (m *MockGitHub) UpdateBranch(arg0 context.Context, arg1 git.NewBranch, arg2 bool) error {
 	ret := m.ctrl.Call(m, "UpdateBranch", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0

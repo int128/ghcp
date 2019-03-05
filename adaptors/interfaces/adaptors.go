@@ -31,11 +31,11 @@ type Logger interface {
 
 type GitHub interface {
 	QueryRepository(ctx context.Context, in QueryRepositoryIn) (*QueryRepositoryOut, error)
-	CreateBranch(ctx context.Context, branch NewBranch) error
-	UpdateBranch(ctx context.Context, branch NewBranch, force bool) error
-	CreateCommit(ctx context.Context, commit NewCommit) (git.CommitSHA, error)
-	CreateTree(ctx context.Context, tree NewTree) (git.TreeSHA, error)
-	CreateBlob(ctx context.Context, blob NewBlob) (git.BlobSHA, error)
+	CreateBranch(ctx context.Context, branch git.NewBranch) error
+	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
+	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
+	CreateTree(ctx context.Context, tree git.NewTree) (git.TreeSHA, error)
+	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
 }
 
 type QueryRepositoryIn struct {
@@ -48,28 +48,4 @@ type QueryRepositoryOut struct {
 	DefaultBranchName      git.BranchName
 	DefaultBranchCommitSHA git.CommitSHA
 	DefaultBranchTreeSHA   git.TreeSHA
-}
-
-type NewBranch struct {
-	Repository git.RepositoryID
-	BranchName git.BranchName
-	CommitSHA  git.CommitSHA
-}
-
-type NewCommit struct {
-	Repository      git.RepositoryID
-	Message         git.CommitMessage
-	ParentCommitSHA git.CommitSHA
-	TreeSHA         git.TreeSHA
-}
-
-type NewTree struct {
-	Repository  git.RepositoryID
-	BaseTreeSHA git.TreeSHA
-	Files       []git.File
-}
-
-type NewBlob struct {
-	Repository git.RepositoryID
-	Content    string // base64 encoded content
 }

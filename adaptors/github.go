@@ -64,7 +64,7 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 }
 
 // CreateBranch creates a branch and returns nil or an error.
-func (c *GitHub) CreateBranch(ctx context.Context, n adaptors.NewBranch) error {
+func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
 		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
@@ -76,7 +76,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, n adaptors.NewBranch) error {
 }
 
 // UpdateBranch updates the branch and returns nil or an error.
-func (c *GitHub) UpdateBranch(ctx context.Context, n adaptors.NewBranch, force bool) error {
+func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) error {
 	_, _, err := c.Client.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
 		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
@@ -88,7 +88,7 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n adaptors.NewBranch, force b
 }
 
 // CreateCommit creates a commit and returns SHA of it.
-func (c *GitHub) CreateCommit(ctx context.Context, n adaptors.NewCommit) (git.CommitSHA, error) {
+func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
 	commit, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
 		Message: github.String(string(n.Message)),
 		Parents: []github.Commit{{SHA: github.String(string(n.ParentCommitSHA))}},
@@ -101,7 +101,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n adaptors.NewCommit) (git.Co
 }
 
 // CreateTree creates a tree and returns SHA of it.
-func (c *GitHub) CreateTree(ctx context.Context, n adaptors.NewTree) (git.TreeSHA, error) {
+func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, error) {
 	entries := make([]github.TreeEntry, len(n.Files))
 	for i, file := range n.Files {
 		entries[i] = github.TreeEntry{
@@ -119,7 +119,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n adaptors.NewTree) (git.TreeSH
 }
 
 // CreateBlob creates a blob and returns SHA of it.
-func (c *GitHub) CreateBlob(ctx context.Context, n adaptors.NewBlob) (git.BlobSHA, error) {
+func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, error) {
 	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
 		Encoding: github.String("base64"),
 		Content:  github.String(n.Content),
