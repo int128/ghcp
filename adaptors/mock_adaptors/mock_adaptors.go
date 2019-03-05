@@ -170,6 +170,19 @@ func (mr *MockGitHubMockRecorder) CreateTree(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockGitHub)(nil).CreateTree), arg0, arg1)
 }
 
+// QueryCommit mocks base method
+func (m *MockGitHub) QueryCommit(arg0 context.Context, arg1 interfaces.QueryCommitIn) (*interfaces.QueryCommitOut, error) {
+	ret := m.ctrl.Call(m, "QueryCommit", arg0, arg1)
+	ret0, _ := ret[0].(*interfaces.QueryCommitOut)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryCommit indicates an expected call of QueryCommit
+func (mr *MockGitHubMockRecorder) QueryCommit(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryCommit", reflect.TypeOf((*MockGitHub)(nil).QueryCommit), arg0, arg1)
+}
+
 // QueryRepository mocks base method
 func (m *MockGitHub) QueryRepository(arg0 context.Context, arg1 interfaces.QueryRepositoryIn) (*interfaces.QueryRepositoryOut, error) {
 	ret := m.ctrl.Call(m, "QueryRepository", arg0, arg1)

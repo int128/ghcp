@@ -34,6 +34,9 @@ ghcp will upload the files and create a commit on the default branch (typically 
 % ghcp -u int128 -r sandbox -m 'Example Commit' dist/
 ```
 
+ghcp does not create a new commit if the default branch has same files.
+Therefore it prevents an empty commit.
+
 
 ## Contributions
 
