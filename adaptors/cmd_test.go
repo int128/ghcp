@@ -20,8 +20,6 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		env := mock_adaptors.NewMockEnv(ctrl)
-
 		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
 		clientInit.EXPECT().
 			Init(infrastructure.GitHubClientInitOptions{
@@ -38,8 +36,9 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			Push:             push,
-			Env:              env,
+			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: clientInit,
 		}
 		args := []string{
@@ -84,6 +83,7 @@ func TestCmd_Run(t *testing.T) {
 			Push:             push,
 			Env:              env,
 			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: clientInit,
 		}
 		args := []string{
@@ -109,14 +109,12 @@ func TestCmd_Run(t *testing.T) {
 			Get(envGitHubToken).
 			Return("")
 
-		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-		push := mock_usecases.NewMockPush(ctrl)
-
 		cmd := Cmd{
-			Push:             push,
+			Push:             mock_usecases.NewMockPush(ctrl),
 			Env:              env,
 			Logger:           mock_adaptors.NewLogger(t),
-			GitHubClientInit: clientInit,
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: mock_infrastructure.NewMockGitHubClientInit(ctrl),
 		}
 		args := []string{
 			"ghcp",
@@ -136,8 +134,6 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		env := mock_adaptors.NewMockEnv(ctrl)
-
 		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
 		clientInit.EXPECT().
 			Init(infrastructure.GitHubClientInitOptions{
@@ -155,8 +151,9 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			Push:             push,
-			Env:              env,
+			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: clientInit,
 		}
 		args := []string{
@@ -166,6 +163,51 @@ func TestCmd_Run(t *testing.T) {
 			"-r", "repo",
 			"-m", "commit-message",
 			"-dry-run",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != 0 {
+			t.Errorf("exitCode wants 0 but %d", exitCode)
+		}
+	})
+
+	t.Run("Debug", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
+		clientInit.EXPECT().
+			Init(infrastructure.GitHubClientInitOptions{
+				Token: "YOUR_TOKEN",
+			})
+
+		push := mock_usecases.NewMockPush(ctrl)
+		push.EXPECT().
+			Do(ctx, usecases.PushIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+			})
+
+		loggerConfig := mock_adaptors.NewMockLoggerConfig(ctrl)
+		loggerConfig.EXPECT().
+			SetDebug(true)
+
+		cmd := Cmd{
+			Push:             push,
+			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     loggerConfig,
+			GitHubClientInit: clientInit,
+		}
+		args := []string{
+			"ghcp",
+			"-token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"-debug",
 			"file1",
 			"file2",
 		}

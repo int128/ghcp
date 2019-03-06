@@ -6,7 +6,7 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,Env,GitHub
+//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,Env,LoggerConfig,GitHub
 
 type Cmd interface {
 	Run(ctx context.Context, args []string) int
@@ -29,8 +29,14 @@ type Env interface {
 }
 
 type Logger interface {
+	Errorf(format string, v ...interface{})
+	Warnf(format string, v ...interface{})
 	Infof(format string, v ...interface{})
 	Debugf(format string, v ...interface{})
+}
+
+type LoggerConfig interface {
+	SetDebug(debug bool)
 }
 
 type GitHub interface {

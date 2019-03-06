@@ -33,6 +33,7 @@ type Cmd struct {
 	Push             usecases.Push
 	Env              adaptors.Env
 	Logger           adaptors.Logger
+	LoggerConfig     adaptors.LoggerConfig
 	GitHubClientInit infrastructure.GitHubClientInit
 }
 
@@ -45,17 +46,22 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	var o struct {
 		pushOptions
 		GitHubToken string
+		Debug       bool
 	}
 	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner (mandatory)")
 	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name (mandatory)")
 	f.StringVar(&o.CommitMessage, "m", "", "Commit message (mandatory)")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
 
 	if err := f.Parse(args[1:]); err != nil {
 		return 1
 	}
 	o.Paths = f.Args()
+	if o.Debug {
+		c.LoggerConfig.SetDebug(true)
+	}
 	if o.GitHubToken == "" {
 		o.GitHubToken = c.Env.Get(envGitHubToken)
 	}
