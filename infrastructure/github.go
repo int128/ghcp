@@ -9,28 +9,29 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// NewGitHubClient returns a GitHubClient.
-func NewGitHubClient() (infrastructure.GitHubClient, infrastructure.GitHubClientConfig) {
-	var token oauth2.Token
-	hc := &http.Client{
-		Transport: &oauth2.Transport{
-			Base:   http.DefaultTransport,
-			Source: oauth2.StaticTokenSource(&token),
-		},
-	}
-	v4 := githubv4.NewClient(hc)
-	v3 := github.NewClient(hc)
-	c := &GitHubClient{v4, v3.Git, &token}
-	return c, c
+// NewGitHubClient returns a GitHubClient and GitHubClientInit.
+func NewGitHubClient() (infrastructure.GitHubClient, infrastructure.GitHubClientInit) {
+	var c GitHubClient
+	c.Init(infrastructure.GitHubClientInitOptions{})
+	return &c, &c
 }
 
 type GitHubClient struct {
 	*githubv4.Client
 	*github.GitService
-
-	token *oauth2.Token
 }
 
-func (c *GitHubClient) SetToken(token string) {
-	c.token.AccessToken = token
+// Init initializes this client with the options.
+func (c *GitHubClient) Init(options infrastructure.GitHubClientInitOptions) {
+	hc := &http.Client{
+		Transport: &oauth2.Transport{
+			Base:   http.DefaultTransport,
+			Source: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: options.Token}),
+		},
+	}
+	v4 := githubv4.NewClient(hc)
+	v3 := github.NewClient(hc)
+
+	c.Client = v4
+	c.GitService = v3.Git
 }

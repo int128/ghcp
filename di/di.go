@@ -10,14 +10,14 @@ import (
 )
 
 var dependencies = []interface{}{
+	usecases.NewPush,
+
 	adaptors.NewCmd,
 	adaptors.NewFileSystem,
+	adaptors.NewEnv,
 	adaptors.NewLogger,
 	adaptors.NewGitHub,
 
-	usecases.NewPush,
-
-	infrastructure.NewCmd,
 	infrastructure.NewGitHubClient,
 }
 

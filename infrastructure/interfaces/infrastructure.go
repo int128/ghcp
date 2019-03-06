@@ -6,11 +6,7 @@ import (
 	"github.com/google/go-github/v24/github"
 )
 
-//go:generate mockgen -package mock_infrastructure -destination ../mock_infrastructure/mock_infrastructure.go github.com/int128/ghcp/infrastructure/interfaces Cmd,GitHubClient,GitHubClientConfig
-
-type Cmd interface {
-	Run(ctx context.Context, args []string) int
-}
+//go:generate mockgen -package mock_infrastructure -destination ../mock_infrastructure/mock_infrastructure.go github.com/int128/ghcp/infrastructure/interfaces GitHubClient,GitHubClientInit
 
 type GitHubClient interface {
 	// v4 API
@@ -24,6 +20,10 @@ type GitHubClient interface {
 	CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)
 }
 
-type GitHubClientConfig interface {
-	SetToken(token string)
+type GitHubClientInit interface {
+	Init(options GitHubClientInitOptions)
+}
+
+type GitHubClientInitOptions struct {
+	Token string
 }

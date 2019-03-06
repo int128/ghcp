@@ -6,10 +6,10 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,GitHub
+//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,Env,GitHub
 
 type Cmd interface {
-	Run(ctx context.Context, o CmdOptions) error
+	Run(ctx context.Context, args []string) int
 }
 
 type CmdOptions struct {
@@ -22,6 +22,10 @@ type CmdOptions struct {
 type FileSystem interface {
 	FindFiles(paths []string) ([]string, error)
 	ReadAsBase64EncodedContent(filename string) (string, error)
+}
+
+type Env interface {
+	Get(key string) string
 }
 
 type Logger interface {

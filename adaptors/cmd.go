@@ -2,25 +2,85 @@ package adaptors
 
 import (
 	"context"
+	"flag"
+	"fmt"
 
 	"github.com/int128/ghcp/adaptors/interfaces"
 	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/infrastructure/interfaces"
 	"github.com/int128/ghcp/usecases/interfaces"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 )
 
+const usage = `Usage: %s [options] [file or directory...]
+
+  ghcp commits and pushes files to a repository.
+  It depends on GitHub API and works without git commands.
+
+Options:
+`
+
+const envGitHubToken = "GITHUB_TOKEN"
+
 func NewCmd(i Cmd) adaptors.Cmd {
 	return &i
 }
 
-// Cmd represents a controller for command line interface.
+// Cmd interacts with command line interface.
 type Cmd struct {
 	dig.In
-	Push usecases.Push
+	Push             usecases.Push
+	Env              adaptors.Env
+	Logger           adaptors.Logger
+	GitHubClientInit infrastructure.GitHubClientInit
 }
 
-func (c *Cmd) Run(ctx context.Context, o adaptors.CmdOptions) error {
+func (c *Cmd) Run(ctx context.Context, args []string) int {
+	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
+	f.Usage = func() {
+		fmt.Fprintf(f.Output(), usage, args[0])
+		f.PrintDefaults()
+	}
+	var o struct {
+		pushOptions
+		GitHubToken string
+	}
+	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner (mandatory)")
+	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name (mandatory)")
+	f.StringVar(&o.CommitMessage, "m", "", "Commit message (mandatory)")
+	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
+
+	if err := f.Parse(args[1:]); err != nil {
+		return 1
+	}
+	o.Paths = f.Args()
+	if o.GitHubToken == "" {
+		o.GitHubToken = c.Env.Get(envGitHubToken)
+	}
+	if o.GitHubToken == "" {
+		c.Logger.Infof("Error: provide GitHub API token by $%s or -token", envGitHubToken)
+		return 1
+	}
+	c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
+		Token: o.GitHubToken,
+	})
+
+	if err := c.push(ctx, o.pushOptions); err != nil {
+		c.Logger.Infof("Error: %s", err)
+		return 1
+	}
+	return 0
+}
+
+type pushOptions struct {
+	RepositoryOwner string
+	RepositoryName  string
+	CommitMessage   string
+	Paths           []string
+}
+
+func (c *Cmd) push(ctx context.Context, o pushOptions) error {
 	if o.RepositoryOwner == "" {
 		return errors.New("provide GitHub repository owner")
 	}
