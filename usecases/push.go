@@ -92,14 +92,19 @@ func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
 		return nil
 	}
 
+	if in.DryRun {
+		u.Logger.Infof("Do not update %s branch due to dry-run", out.DefaultBranchName)
+		return nil
+	}
+
 	if err := u.GitHub.UpdateBranch(ctx, git.NewBranch{
 		Repository: out.Repository,
 		BranchName: out.DefaultBranchName,
 		CommitSHA:  commitSHA,
 	}, false); err != nil {
-		return errors.Wrapf(err, "error while creating a branch %s", out.DefaultBranchName)
+		return errors.Wrapf(err, "error while updating %s branch", out.DefaultBranchName)
 	}
-	u.Logger.Infof("Updated branch %s", out.DefaultBranchName)
+	u.Logger.Infof("Updated %s branch", out.DefaultBranchName)
 
 	return nil
 }

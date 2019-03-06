@@ -10,6 +10,8 @@ It depends on GitHub API and works without Git commands.
 Usage: ghcp [options] [file or directory...]
 
 Options:
+  -dry-run
+    	Upload files but do not update the branch actually
   -m string
     	Commit message (mandatory)
   -r string

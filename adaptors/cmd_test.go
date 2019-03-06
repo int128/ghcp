@@ -131,4 +131,47 @@ func TestCmd_Run(t *testing.T) {
 			t.Errorf("exitCode wants 1 but %d", exitCode)
 		}
 	})
+
+	t.Run("DryRun", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		env := mock_adaptors.NewMockEnv(ctrl)
+
+		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
+		clientInit.EXPECT().
+			Init(infrastructure.GitHubClientInitOptions{
+				Token: "YOUR_TOKEN",
+			})
+
+		push := mock_usecases.NewMockPush(ctrl)
+		push.EXPECT().
+			Do(ctx, usecases.PushIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+				DryRun:        true,
+			})
+
+		cmd := Cmd{
+			Push:             push,
+			Env:              env,
+			Logger:           mock_adaptors.NewLogger(t),
+			GitHubClientInit: clientInit,
+		}
+		args := []string{
+			"ghcp",
+			"-token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"-dry-run",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != 0 {
+			t.Errorf("exitCode wants 0 but %d", exitCode)
+		}
+	})
 }

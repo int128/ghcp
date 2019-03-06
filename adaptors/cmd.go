@@ -50,6 +50,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name (mandatory)")
 	f.StringVar(&o.CommitMessage, "m", "", "Commit message (mandatory)")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
+	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 
 	if err := f.Parse(args[1:]); err != nil {
 		return 1
@@ -78,6 +79,7 @@ type pushOptions struct {
 	RepositoryName  string
 	CommitMessage   string
 	Paths           []string
+	DryRun          bool
 }
 
 func (c *Cmd) push(ctx context.Context, o pushOptions) error {
@@ -101,6 +103,7 @@ func (c *Cmd) push(ctx context.Context, o pushOptions) error {
 		},
 		CommitMessage: git.CommitMessage(o.CommitMessage),
 		Paths:         o.Paths,
+		DryRun:        o.DryRun,
 	}); err != nil {
 		return errors.Wrapf(err, "error while commit and push")
 	}
