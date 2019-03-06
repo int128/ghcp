@@ -185,4 +185,86 @@ func TestPush_Do(t *testing.T) {
 			t.Errorf("Do returned error: %+v", err)
 		}
 	})
+
+	t.Run("DryRun", func(t *testing.T) {
+		fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
+		fileSystem.EXPECT().
+			FindFiles([]string{"path"}).
+			Return([]string{"file1", "file2"}, nil)
+		fileSystem.EXPECT().
+			ReadAsBase64EncodedContent("file1").
+			Return("base64content1", nil)
+		fileSystem.EXPECT().
+			ReadAsBase64EncodedContent("file2").
+			Return("base64content2", nil)
+
+		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub.EXPECT().
+			QueryRepository(ctx, adaptors.QueryRepositoryIn{
+				Repository: repositoryID,
+			}).
+			Return(&adaptors.QueryRepositoryOut{
+				CurrentUserName:        "current",
+				Repository:             repositoryID,
+				DefaultBranchName:      "master",
+				DefaultBranchCommitSHA: "masterCommitSHA",
+				DefaultBranchTreeSHA:   "masterTreeSHA",
+			}, nil)
+		gitHub.EXPECT().
+			CreateBlob(ctx, git.NewBlob{
+				Repository: repositoryID,
+				Content:    "base64content1",
+			}).
+			Return(git.BlobSHA("blobSHA"), nil)
+		gitHub.EXPECT().
+			CreateBlob(ctx, git.NewBlob{
+				Repository: repositoryID,
+				Content:    "base64content2",
+			}).
+			Return(git.BlobSHA("blobSHA"), nil)
+		gitHub.EXPECT().
+			CreateTree(ctx, git.NewTree{
+				Repository:  repositoryID,
+				BaseTreeSHA: "masterTreeSHA",
+				Files: []git.File{
+					{
+						Filename: "file1",
+						BlobSHA:  "blobSHA",
+					}, {
+						Filename: "file2",
+						BlobSHA:  "blobSHA",
+					},
+				},
+			}).
+			Return(git.TreeSHA("treeSHA"), nil)
+		gitHub.EXPECT().
+			CreateCommit(ctx, git.NewCommit{
+				Repository:      repositoryID,
+				TreeSHA:         "treeSHA",
+				ParentCommitSHA: "masterCommitSHA",
+			}).
+			Return(git.CommitSHA("commitSHA"), nil)
+		gitHub.EXPECT().
+			QueryCommit(ctx, adaptors.QueryCommitIn{
+				Repository: repositoryID,
+				CommitSHA:  "commitSHA",
+			}).
+			Return(&adaptors.QueryCommitOut{
+				ChangedFiles: 1,
+			}, nil)
+
+		push := Push{
+			FileSystem: fileSystem,
+			Logger:     mock_adaptors.NewLogger(t),
+			GitHub:     gitHub,
+		}
+		err := push.Do(ctx, usecases.PushIn{
+			Repository: repositoryID,
+			Paths:      []string{"path"},
+			DryRun:     true,
+		})
+		if err != nil {
+			t.Errorf("Do returned error: %+v", err)
+		}
+	})
 }

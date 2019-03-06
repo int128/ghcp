@@ -16,4 +16,5 @@ type PushIn struct {
 	Repository    git.RepositoryID
 	CommitMessage git.CommitMessage
 	Paths         []string
+	DryRun        bool
 }
