@@ -14,18 +14,12 @@ import (
 )
 
 func TestCmd_Run(t *testing.T) {
+	const cmdName = "ghcp"
 	ctx := context.TODO()
 
 	t.Run("FullOptions", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-
-		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-		clientInit.EXPECT().
-			Init(infrastructure.GitHubClientInitOptions{
-				Token: "YOUR_TOKEN",
-			})
-
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
@@ -39,10 +33,10 @@ func TestCmd_Run(t *testing.T) {
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
-			GitHubClientInit: clientInit,
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
 		}
 		args := []string{
-			"ghcp",
+			cmdName,
 			"-token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
@@ -65,12 +59,6 @@ func TestCmd_Run(t *testing.T) {
 			Get(envGitHubToken).
 			Return("YOUR_TOKEN")
 
-		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-		clientInit.EXPECT().
-			Init(infrastructure.GitHubClientInitOptions{
-				Token: "YOUR_TOKEN",
-			})
-
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
@@ -84,10 +72,10 @@ func TestCmd_Run(t *testing.T) {
 			Env:              env,
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
-			GitHubClientInit: clientInit,
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
 		}
 		args := []string{
-			"ghcp",
+			cmdName,
 			"-u", "owner",
 			"-r", "repo",
 			"-m", "commit-message",
@@ -117,7 +105,7 @@ func TestCmd_Run(t *testing.T) {
 			GitHubClientInit: mock_infrastructure.NewMockGitHubClientInit(ctrl),
 		}
 		args := []string{
-			"ghcp",
+			cmdName,
 			"-u", "owner",
 			"-r", "repo",
 			"-m", "commit-message",
@@ -134,12 +122,6 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-		clientInit.EXPECT().
-			Init(infrastructure.GitHubClientInitOptions{
-				Token: "YOUR_TOKEN",
-			})
-
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
@@ -154,10 +136,10 @@ func TestCmd_Run(t *testing.T) {
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
-			GitHubClientInit: clientInit,
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
 		}
 		args := []string{
-			"ghcp",
+			cmdName,
 			"-token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
@@ -176,12 +158,6 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-		clientInit.EXPECT().
-			Init(infrastructure.GitHubClientInitOptions{
-				Token: "YOUR_TOKEN",
-			})
-
 		push := mock_usecases.NewMockPush(ctrl)
 		push.EXPECT().
 			Do(ctx, usecases.PushIn{
@@ -199,10 +175,10 @@ func TestCmd_Run(t *testing.T) {
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     loggerConfig,
-			GitHubClientInit: clientInit,
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
 		}
 		args := []string{
-			"ghcp",
+			cmdName,
 			"-token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
@@ -216,4 +192,11 @@ func TestCmd_Run(t *testing.T) {
 			t.Errorf("exitCode wants 0 but %d", exitCode)
 		}
 	})
+}
+
+func newGitHubClientInit(ctrl *gomock.Controller, o infrastructure.GitHubClientInitOptions) *mock_infrastructure.MockGitHubClientInit {
+	clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
+	clientInit.EXPECT().
+		Init(o)
+	return clientInit
 }
