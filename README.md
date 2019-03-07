@@ -19,18 +19,12 @@ Run `ghcp -h` to see help:
 Usage: ghcp [options] [file or directory...]
 
 Options:
-  -debug
-    	Show debug logs
-  -dry-run
-    	Upload files but do not update the branch actually
-  -m string
-    	Commit message (mandatory)
-  -r string
-    	GitHub repository name (mandatory)
-  -token string
-    	GitHub API token [$GITHUB_TOKEN]
-  -u string
-    	GitHub repository owner (mandatory)
+      --debug            Show debug logs
+      --dry-run          Upload files but do not update the branch actually
+  -m, --message string   Commit message (mandatory)
+  -u, --owner string     GitHub repository owner (mandatory)
+  -r, --repo string      GitHub repository name (mandatory)
+      --token string     GitHub API token [$GITHUB_TOKEN]
 ```
 
 To upload the files and create a commit on the default branch (typically master):

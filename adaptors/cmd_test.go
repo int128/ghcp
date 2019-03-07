@@ -37,7 +37,7 @@ func TestCmd_Run(t *testing.T) {
 		}
 		args := []string{
 			cmdName,
-			"-token", "YOUR_TOKEN",
+			"--token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
 			"-m", "commit-message",
@@ -140,11 +140,11 @@ func TestCmd_Run(t *testing.T) {
 		}
 		args := []string{
 			cmdName,
-			"-token", "YOUR_TOKEN",
+			"--token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
 			"-m", "commit-message",
-			"-dry-run",
+			"--dry-run",
 			"file1",
 			"file2",
 		}
@@ -179,11 +179,11 @@ func TestCmd_Run(t *testing.T) {
 		}
 		args := []string{
 			cmdName,
-			"-token", "YOUR_TOKEN",
+			"--token", "YOUR_TOKEN",
 			"-u", "owner",
 			"-r", "repo",
 			"-m", "commit-message",
-			"-debug",
+			"--debug",
 			"file1",
 			"file2",
 		}

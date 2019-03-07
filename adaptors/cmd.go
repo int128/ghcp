@@ -2,7 +2,6 @@ package adaptors
 
 import (
 	"context"
-	"flag"
 	"fmt"
 
 	"github.com/int128/ghcp/adaptors/interfaces"
@@ -10,16 +9,19 @@ import (
 	"github.com/int128/ghcp/infrastructure/interfaces"
 	"github.com/int128/ghcp/usecases/interfaces"
 	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
 	"go.uber.org/dig"
 )
 
-const usage = `Usage: %s [options] [file or directory...]
+const usage = `Help:
 
-  ghcp commits and pushes files to a repository.
+Usage: %s [options] [file or directory...]
+
+  ghcp copies files to a GitHub repository.
   It depends on GitHub API and works without git commands.
 
 Options:
-`
+%s`
 
 const envGitHubToken = "GITHUB_TOKEN"
 
@@ -38,24 +40,27 @@ type Cmd struct {
 }
 
 func (c *Cmd) Run(ctx context.Context, args []string) int {
-	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
+	f := pflag.NewFlagSet(args[0], pflag.ContinueOnError)
 	f.Usage = func() {
-		fmt.Fprintf(f.Output(), usage, args[0])
-		f.PrintDefaults()
+		c.Logger.Infof(usage, args[0], f.FlagUsages())
 	}
 	var o struct {
 		pushOptions
 		GitHubToken string
 		Debug       bool
 	}
-	f.StringVar(&o.RepositoryOwner, "u", "", "GitHub repository owner (mandatory)")
-	f.StringVar(&o.RepositoryName, "r", "", "GitHub repository name (mandatory)")
-	f.StringVar(&o.CommitMessage, "m", "", "Commit message (mandatory)")
+	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
+	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
+	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
 
 	if err := f.Parse(args[1:]); err != nil {
+		if err == pflag.ErrHelp {
+			return 1
+		}
+		c.Logger.Errorf("Invalid arguments: %s", err)
 		return 1
 	}
 	o.Paths = f.Args()
