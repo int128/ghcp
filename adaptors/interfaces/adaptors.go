@@ -26,6 +26,7 @@ type FileSystem interface {
 
 type Env interface {
 	Getenv(key string) string
+	Chdir(dir string) error
 }
 
 type Logger interface {

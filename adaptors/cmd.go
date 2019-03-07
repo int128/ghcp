@@ -55,12 +55,14 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	}
 	var o struct {
 		copyOptions
+		Chdir       string
 		GitHubToken string
 		Debug       bool
 	}
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
 	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
+	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
@@ -76,6 +78,13 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 
 	if o.Debug {
 		c.LoggerConfig.SetDebug(true)
+	}
+	if o.Chdir != "" {
+		if err := c.Env.Chdir(o.Chdir); err != nil {
+			c.Logger.Errorf("Could not change to directory %s: %s", o.Chdir, err)
+			return exitCodePreconditionError
+		}
+		c.Logger.Infof("Changed to directory %s", o.Chdir)
 	}
 	if o.GitHubToken == "" {
 		o.GitHubToken = c.Env.Getenv(envGitHubToken)
