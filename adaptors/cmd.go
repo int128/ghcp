@@ -66,7 +66,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		o.GitHubToken = c.Env.Get(envGitHubToken)
 	}
 	if o.GitHubToken == "" {
-		c.Logger.Infof("Error: provide GitHub API token by $%s or -token", envGitHubToken)
+		c.Logger.Errorf("Error: provide GitHub API token by $%s or -token", envGitHubToken)
 		return 1
 	}
 	c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
@@ -74,7 +74,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	})
 
 	if err := c.push(ctx, o.pushOptions); err != nil {
-		c.Logger.Infof("Error: %s", err)
+		c.Logger.Errorf("Error: %s", err)
 		return 1
 	}
 	return 0
