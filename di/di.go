@@ -10,7 +10,7 @@ import (
 )
 
 var dependencies = []interface{}{
-	usecases.NewPush,
+	usecases.NewCopyUseCase,
 
 	adaptors.NewCmd,
 	adaptors.NewFileSystem,

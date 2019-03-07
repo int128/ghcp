@@ -11,7 +11,7 @@ import (
 	"github.com/int128/ghcp/usecases/interfaces"
 )
 
-func TestPush_Do(t *testing.T) {
+func TestCopyUseCase_Do(t *testing.T) {
 	ctx := context.TODO()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -91,12 +91,12 @@ func TestPush_Do(t *testing.T) {
 			}, false).
 			Return(nil)
 
-		push := Push{
+		useCase := CopyUseCase{
 			FileSystem: fileSystem,
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		err := push.Do(ctx, usecases.PushIn{
+		err := useCase.Do(ctx, usecases.CopyUseCaseIn{
 			Repository: repositoryID,
 			Paths:      []string{"path"},
 		})
@@ -172,12 +172,12 @@ func TestPush_Do(t *testing.T) {
 				ChangedFiles: 0,
 			}, nil)
 
-		push := Push{
+		useCase := CopyUseCase{
 			FileSystem: fileSystem,
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		err := push.Do(ctx, usecases.PushIn{
+		err := useCase.Do(ctx, usecases.CopyUseCaseIn{
 			Repository: repositoryID,
 			Paths:      []string{"path"},
 		})
@@ -253,12 +253,12 @@ func TestPush_Do(t *testing.T) {
 				ChangedFiles: 1,
 			}, nil)
 
-		push := Push{
+		useCase := CopyUseCase{
 			FileSystem: fileSystem,
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		err := push.Do(ctx, usecases.PushIn{
+		err := useCase.Do(ctx, usecases.CopyUseCaseIn{
 			Repository: repositoryID,
 			Paths:      []string{"path"},
 			DryRun:     true,

@@ -21,16 +21,16 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		push := mock_usecases.NewMockPush(ctrl)
-		push.EXPECT().
-			Do(ctx, usecases.PushIn{
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
 				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitMessage: "commit-message",
 				Paths:         []string{"file1", "file2"},
 			})
 
 		cmd := Cmd{
-			Push:             push,
+			CopyUseCase:      copyUseCase,
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -55,9 +55,9 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		push := mock_usecases.NewMockPush(ctrl)
-		push.EXPECT().
-			Do(ctx, usecases.PushIn{
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
 				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitMessage: "commit-message",
 				Paths:         []string{"file1", "file2"},
@@ -65,7 +65,7 @@ func TestCmd_Run(t *testing.T) {
 			})
 
 		cmd := Cmd{
-			Push:             push,
+			CopyUseCase:      copyUseCase,
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -91,9 +91,9 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		push := mock_usecases.NewMockPush(ctrl)
-		push.EXPECT().
-			Do(ctx, usecases.PushIn{
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
 				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitMessage: "commit-message",
 				Paths:         []string{"file1", "file2"},
@@ -104,7 +104,7 @@ func TestCmd_Run(t *testing.T) {
 			SetDebug(true)
 
 		cmd := Cmd{
-			Push:             push,
+			CopyUseCase:      copyUseCase,
 			Env:              mock_adaptors.NewMockEnv(ctrl),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     loggerConfig,
@@ -135,16 +135,16 @@ func TestCmd_Run(t *testing.T) {
 			Getenv(envGitHubToken).
 			Return("YOUR_TOKEN")
 
-		push := mock_usecases.NewMockPush(ctrl)
-		push.EXPECT().
-			Do(ctx, usecases.PushIn{
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
 				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitMessage: "commit-message",
 				Paths:         []string{"file1", "file2"},
 			})
 
 		cmd := Cmd{
-			Push:             push,
+			CopyUseCase:      copyUseCase,
 			Env:              env,
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -174,7 +174,7 @@ func TestCmd_Run(t *testing.T) {
 			Return("")
 
 		cmd := Cmd{
-			Push:             mock_usecases.NewMockPush(ctrl),
+			CopyUseCase:      mock_usecases.NewMockCopyUseCase(ctrl),
 			Env:              env,
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -235,7 +235,7 @@ func TestCmd_Run(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				cmd := Cmd{
-					Push:             mock_usecases.NewMockPush(ctrl),
+					CopyUseCase:      mock_usecases.NewMockCopyUseCase(ctrl),
 					Env:              mock_adaptors.NewMockEnv(ctrl),
 					Logger:           mock_adaptors.NewLogger(t),
 					LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),

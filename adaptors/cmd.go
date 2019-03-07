@@ -30,7 +30,7 @@ const (
 	exitCodeOK                = 0
 	exitCodeGenericError      = 10
 	exitCodePreconditionError = 11
-	exitCodePushError         = 20
+	exitCodeCopyError         = 20
 )
 
 func NewCmd(i Cmd) adaptors.Cmd {
@@ -40,7 +40,7 @@ func NewCmd(i Cmd) adaptors.Cmd {
 // Cmd interacts with command line interface.
 type Cmd struct {
 	dig.In
-	Push             usecases.Push
+	CopyUseCase      usecases.CopyUseCase
 	Env              adaptors.Env
 	Logger           adaptors.Logger
 	LoggerConfig     adaptors.LoggerConfig
@@ -54,7 +54,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		c.Logger.Infof(usage, args[0], f.FlagUsages())
 	}
 	var o struct {
-		pushOptions
+		copyOptions
 		GitHubToken string
 		Debug       bool
 	}
@@ -88,15 +88,15 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		Token: o.GitHubToken,
 	})
 
-	return c.push(ctx, o.pushOptions)
+	return c.copy(ctx, o.copyOptions)
 }
 
-func (c *Cmd) push(ctx context.Context, o pushOptions) int {
+func (c *Cmd) copy(ctx context.Context, o copyOptions) int {
 	if err := o.validate(); err != nil {
 		c.Logger.Errorf("Invalid arguments: %s", err)
 		return exitCodePreconditionError
 	}
-	if err := c.Push.Do(ctx, usecases.PushIn{
+	if err := c.CopyUseCase.Do(ctx, usecases.CopyUseCaseIn{
 		Repository: git.RepositoryID{
 			Owner: o.RepositoryOwner,
 			Name:  o.RepositoryName,
@@ -105,13 +105,13 @@ func (c *Cmd) push(ctx context.Context, o pushOptions) int {
 		Paths:         o.Paths,
 		DryRun:        o.DryRun,
 	}); err != nil {
-		c.Logger.Errorf("Could not push files: %s", err)
-		return exitCodePushError
+		c.Logger.Errorf("Could not copy files: %s", err)
+		return exitCodeCopyError
 	}
 	return exitCodeOK
 }
 
-type pushOptions struct {
+type copyOptions struct {
 	RepositoryOwner string
 	RepositoryName  string
 	CommitMessage   string
@@ -119,7 +119,7 @@ type pushOptions struct {
 	DryRun          bool
 }
 
-func (o *pushOptions) validate() error {
+func (o *copyOptions) validate() error {
 	var msg []string
 	if o.RepositoryOwner == "" {
 		msg = append(msg, "GitHub repository owner")

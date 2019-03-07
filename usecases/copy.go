@@ -11,19 +11,19 @@ import (
 	"go.uber.org/dig"
 )
 
-func NewPush(i Push) usecases.Push {
+func NewCopyUseCase(i CopyUseCase) usecases.CopyUseCase {
 	return &i
 }
 
-// Push performs commit and push files to the repository.
-type Push struct {
+// CopyUseCase performs copying files to the repository.
+type CopyUseCase struct {
 	dig.In
 	FileSystem adaptors.FileSystem
 	Logger     adaptors.Logger
 	GitHub     adaptors.GitHub
 }
 
-func (u *Push) Do(ctx context.Context, in usecases.PushIn) error {
+func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	filenames, err := u.FileSystem.FindFiles(in.Paths)
 	if err != nil {
 		return errors.Wrapf(err, "error while finding files")

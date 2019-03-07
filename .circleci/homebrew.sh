@@ -6,7 +6,7 @@ dist_sha256=$(shasum -a 256 -b dist/ghcp_darwin_amd64 | cut -f1 -d' ')
 
 cat <<EOF
 class Ghcp < Formula
-  desc "Commit and Push files to GitHub repository"
+  desc "Copy files to a repository using GitHub API"
   homepage "https://github.com/int128/ghcp"
   url "https://github.com/int128/ghcp/releases/download/${CIRCLE_TAG}/ghcp_darwin_amd64"
   version "${CIRCLE_TAG}"
