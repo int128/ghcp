@@ -25,7 +25,7 @@ type FileSystem interface {
 }
 
 type Env interface {
-	Get(key string) string
+	Getenv(key string) string
 }
 
 type Logger interface {

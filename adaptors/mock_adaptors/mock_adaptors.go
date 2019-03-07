@@ -119,16 +119,16 @@ func (m *MockEnv) EXPECT() *MockEnvMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method
-func (m *MockEnv) Get(arg0 string) string {
-	ret := m.ctrl.Call(m, "Get", arg0)
+// Getenv mocks base method
+func (m *MockEnv) Getenv(arg0 string) string {
+	ret := m.ctrl.Call(m, "Getenv", arg0)
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Get indicates an expected call of Get
-func (mr *MockEnvMockRecorder) Get(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockEnv)(nil).Get), arg0)
+// Getenv indicates an expected call of Getenv
+func (mr *MockEnvMockRecorder) Getenv(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Getenv", reflect.TypeOf((*MockEnv)(nil).Getenv), arg0)
 }
 
 // MockLoggerConfig is a mock of LoggerConfig interface

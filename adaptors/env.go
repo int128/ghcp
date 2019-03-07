@@ -10,9 +10,10 @@ func NewEnv() adaptors.Env {
 	return &Env{}
 }
 
-// Env provides access to environment variables.
+// Env provides environment dependencies,
+// such as environment variables.
 type Env struct{}
 
-func (e *Env) Get(key string) string {
+func (e *Env) Getenv(key string) string {
 	return os.Getenv(key)
 }
