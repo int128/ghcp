@@ -126,6 +126,45 @@ func TestCmd_Run(t *testing.T) {
 		}
 	})
 
+	t.Run("--directory", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+			})
+
+		env := mock_adaptors.NewMockEnv(ctrl)
+		env.EXPECT().
+			Chdir("dir")
+
+		cmd := Cmd{
+			CopyUseCase:      copyUseCase,
+			Env:              env,
+			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+		}
+		args := []string{
+			cmdName,
+			"--token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"-C", "dir",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+		}
+	})
+
 	t.Run("env/GITHUB_TOKEN", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

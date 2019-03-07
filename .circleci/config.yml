@@ -21,8 +21,7 @@ jobs:
       - run: |
           if [ "$CIRCLE_TAG" ]; then
             ./.circleci/homebrew.sh > dist/ghcp.rb
-            cd dist
-            ./ghcp_linux_amd64 -u "$CIRCLE_PROJECT_USERNAME" -r "homebrew-$CIRCLE_PROJECT_REPONAME" -m "$CIRCLE_TAG" ghcp.rb
+            ./ghcp_linux_amd64 -u "$CIRCLE_PROJECT_USERNAME" -r "homebrew-$CIRCLE_PROJECT_REPONAME" -m "$CIRCLE_TAG" -C dist ghcp.rb
           fi
 
 workflows:

@@ -119,6 +119,18 @@ func (m *MockEnv) EXPECT() *MockEnvMockRecorder {
 	return m.recorder
 }
 
+// Chdir mocks base method
+func (m *MockEnv) Chdir(arg0 string) error {
+	ret := m.ctrl.Call(m, "Chdir", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Chdir indicates an expected call of Chdir
+func (mr *MockEnvMockRecorder) Chdir(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chdir", reflect.TypeOf((*MockEnv)(nil).Chdir), arg0)
+}
+
 // Getenv mocks base method
 func (m *MockEnv) Getenv(arg0 string) string {
 	ret := m.ctrl.Call(m, "Getenv", arg0)
