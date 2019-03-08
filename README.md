@@ -74,14 +74,13 @@ You need to create a repository with prefix `homebrew-`, for example `homebrew-h
 Generate a formula as like:
 
 ```sh
-dist_sha256=$(shasum -a 256 -b your_app | cut -f1 -d' ')
-cat <<EOF
+cat > hello.rb <<EOF
 class Hello < Formula
   desc "Your awesome application"
   homepage "https://github.com/YOUR/hello"
   url "https://github.com/YOUR/hello/releases/download/v1.0.0/hello_darwin_amd64"
   version "v1.0.0"
-  sha256 "${dist_sha256}"
+  sha256 "$(shasum -a 256 -b hello | cut -f1 -d' ')"
 
   def install
     bin.install "hello_darwin_amd64" => "hello"
@@ -97,7 +96,7 @@ EOF
 You can release the formula to the tap repository.
 
 ```sh
-ghcp -u YOUR -r homebrew-hello -m v1.0.0 ghcp.rb
+ghcp -u YOUR -r homebrew-hello -m v1.0.0 hello.rb
 ```
 
 Now you can install the formula:
@@ -109,6 +108,13 @@ brew install hello
 
 ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self and CircleCI.
 See also [Makefile](Makefile) and [.circleci/config.yaml](.circleci/config.yaml).
+
+
+## Related works
+
+You can upload files to GitHub Releases by [`ghr`](https://github.com/tcnksm/ghr).
+
+You can generate change log from Git history by [`ghch`](https://github.com/Songmu/ghch).
 
 
 ## Contributions
