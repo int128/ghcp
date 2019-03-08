@@ -1,19 +1,27 @@
 # ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
-ghcp is a command to copy (commit and push) files to a repository on GitHub.
+ghcp is a command to copy files to a repository on GitHub, like `git commit` and `git push`.
 It depends on GitHub API and works without Git commands.
 
 
 ## Getting Started
 
-Download [the latest release](https://github.com/int128/ghcp/releases) or install from brew tap:
+Download [the latest release](https://github.com/int128/ghcp/releases) or install by brew tap:
 
 ```sh
 brew tap int128/ghcp
 brew install ghcp
 ```
 
-Run `ghcp -h` to see help:
+To copy the files in directory `dist/` to the repository `int128/sandbox` with commit message `message`:
+
+```sh
+ghcp -u int128 -r sandbox -m message dist/
+```
+
+You need to get your personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
+
+### Usage
 
 ```
 Usage: ghcp [options] [file or directory...]
@@ -28,19 +36,10 @@ Options:
       --token string       GitHub API token [$GITHUB_TOKEN]
 ```
 
-To upload the files and create a commit on the default branch (typically master):
-
-```
-% export GITHUB_TOKEN=YOUR_TOKEN
-% ghcp -u int128 -r sandbox -m 'Example Commit' dist/
-```
-
-You need to set your personal access token by `-token` option or `GITHUB_TOKEN` environment variable.
-
-ghcp does not create a new commit if the default branch has same files.
+It does not create a new commit if the default branch has same files.
 Therefore it prevents an empty commit.
 
-ghcp does not respect the current Git state or Git config.
+It does not respect the current Git config and Git state.
 You need to always set owner and name of a repository.
 
 
@@ -52,14 +51,14 @@ TODO
 
 Here is an example for CircleCI:
 
-```sh
+```yaml
 version: 2
 jobs:
   build:
     steps:
       - run: |
           curl -L -o /tmp/ghcp https://github.com/int128/ghcp/releases/download/$GHCP_VERSION/ghcp_linux_amd64
-          /tmp/ghcp -u owner -r repo -m "release" index.html
+          /tmp/ghcp -u owner -r repo -m "message" index.html
 ```
 
 ### GitHub Pages
@@ -68,38 +67,48 @@ TODO
 
 ### Homebrew tap
 
-You can release your formula to the Homebrew tap.
+You can release your formula to a tap repository.
 
-1. Create a repository with prefix `homebrew-`, e.g. [`homebrew-ghcp`](https://github.com/int128/homebrew-ghcp).
-1. Create a formula as like:
+You need to create a repository with prefix `homebrew-`, for example `homebrew-hello`.
+
+Generate a formula as like:
+
 ```sh
 dist_sha256=$(shasum -a 256 -b your_app | cut -f1 -d' ')
 cat <<EOF
-class YourApp < Formula
+class Hello < Formula
   desc "Your awesome application"
-  homepage "https://github.com/YOUR/REPO"
-  url "https://github.com/YOUR/REPO/releases/download/v1.0.0/your_app_darwin_amd64"
+  homepage "https://github.com/YOUR/hello"
+  url "https://github.com/YOUR/hello/releases/download/v1.0.0/hello_darwin_amd64"
   version "v1.0.0"
   sha256 "${dist_sha256}"
 
   def install
-    bin.install "your_app_darwin_amd64" => "your_app"
+    bin.install "hello_darwin_amd64" => "hello"
   end
 
   test do
-    system "#{bin}/your_app -h"
+    system "#{bin}/hello -h"
   end
 end
 EOF
 ```
-1. Release the formula to the tap repository.
-```sh
-ghcp -u int128 -r homebrew-ghcp -m v1.0.0 ghcp.rb
-```
-1. Test the formula by `brew tap` and `brew install`.
 
-ghcp is released to the tap by using ghcp self.
-See also the scripts in [.circleci](.circleci).
+You can release the formula to the tap repository.
+
+```sh
+ghcp -u YOUR -r homebrew-hello -m v1.0.0 ghcp.rb
+```
+
+Now you can install the formula:
+
+```sh
+brew tap YOUR/hello
+brew install hello
+```
+
+ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self and CircleCI.
+See also [Makefile](Makefile) and [.circleci/config.yaml](.circleci/config.yaml).
 
 
 ## Contributions
