@@ -1,9 +1,6 @@
 #!/bin/bash -xe
 
-test "$CIRCLE_TAG"
-
-dist_sha256=$(shasum -a 256 -b dist/ghcp_darwin_amd64 | cut -f1 -d' ')
-
+dist_sha256=$(shasum -a 256 -b dist/bin/ghcp_darwin_amd64 | cut -f1 -d' ')
 cat <<EOF
 class Ghcp < Formula
   desc "Copy files to a repository using GitHub API"
