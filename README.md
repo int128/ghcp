@@ -13,10 +13,16 @@ brew tap int128/ghcp
 brew install ghcp
 ```
 
-To copy the files in directory `dist/` to the repository `int128/sandbox` with commit message `message`:
+To copy the files in directory `dist/` to the default branch of the repository `int128/sandbox`:
 
 ```sh
 ghcp -u int128 -r sandbox -m message dist/
+```
+
+To copy the files in directory `dist/` to the branch `gh-pages` of the repository `int128/sandbox`:
+
+```sh
+ghcp -u int128 -r sandbox -b gh-pages -m message dist/
 ```
 
 You need to get your personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
@@ -27,6 +33,7 @@ You need to get your personal access token from [GitHub settings](https://github
 Usage: ghcp [options] [file or directory...]
 
 Options:
+  -b, --branch string      Branch name (default: default branch of repository)
       --debug              Show debug logs
   -C, --directory string   Change to directory before copy
       --dry-run            Upload files but do not update the branch actually
@@ -36,7 +43,7 @@ Options:
       --token string       GitHub API token [$GITHUB_TOKEN]
 ```
 
-It does not create a new commit if the default branch has same files.
+It does not create a new commit if the branch has same files.
 Therefore it prevents an empty commit.
 
 It does not respect the current Git config and Git state.

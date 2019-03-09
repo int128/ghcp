@@ -2,7 +2,6 @@ package adaptors
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/go-github/v24/github"
 	"github.com/int128/ghcp/adaptors/interfaces"
@@ -33,7 +32,7 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 			Name  string
 			Owner struct{ Login string }
 
-			// default branch (name, commit SHA and tree SHA)
+			// default branch
 			DefaultBranchRef struct {
 				Name   string
 				Target struct {
@@ -45,11 +44,24 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 					} `graphql:"... on Commit"`
 				}
 			}
+
+			// branch (optional)
+			Ref struct {
+				Target struct {
+					Commit struct {
+						Oid  string
+						Tree struct {
+							Oid string
+						}
+					} `graphql:"... on Commit"`
+				}
+			} `graphql:"ref(qualifiedName: $ref)"`
 		} `graphql:"repository(owner: $owner, name: $repo)"`
 	}
 	v := map[string]interface{}{
 		"owner": githubv4.String(in.Repository.Owner),
 		"repo":  githubv4.String(in.Repository.Name),
+		"ref":   githubv4.String(in.BranchName.QualifiedName()),
 	}
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, errors.Wrapf(err, "GitHub API error")
@@ -60,13 +72,15 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
 		DefaultBranchCommitSHA: git.CommitSHA(q.Repository.DefaultBranchRef.Target.Commit.Oid),
 		DefaultBranchTreeSHA:   git.TreeSHA(q.Repository.DefaultBranchRef.Target.Commit.Tree.Oid),
+		BranchCommitSHA:        git.CommitSHA(q.Repository.Ref.Target.Commit.Oid),
+		BranchTreeSHA:          git.TreeSHA(q.Repository.Ref.Target.Commit.Tree.Oid),
 	}, nil
 }
 
 // CreateBranch creates a branch and returns nil or an error.
 func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
+		Ref:    github.String(n.BranchName.QualifiedName()),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	})
 	if err != nil {
@@ -78,7 +92,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 // UpdateBranch updates the branch and returns nil or an error.
 func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) error {
 	_, _, err := c.Client.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(fmt.Sprintf("refs/heads/%s", n.BranchName)),
+		Ref:    github.String(n.BranchName.QualifiedName()),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	}, force)
 	if err != nil {

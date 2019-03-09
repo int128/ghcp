@@ -1,6 +1,8 @@
 // Package git provides models of Git objects.
 package git
 
+import "fmt"
+
 // RepositoryID represents a pointer to a repository.
 type RepositoryID struct {
 	Owner string
@@ -9,6 +11,15 @@ type RepositoryID struct {
 
 // BranchName represents name of a branch.
 type BranchName string
+
+// QualifiedName returns the qualified name that is "refs/heads/name".
+// If the BranchName is empty, it returns empty.
+func (b BranchName) QualifiedName() string {
+	if b == "" {
+		return ""
+	}
+	return fmt.Sprintf("refs/heads/%s", b)
+}
 
 // NewBranch represents a branch.
 type NewBranch struct {

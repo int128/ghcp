@@ -15,6 +15,7 @@ type CopyUseCase interface {
 type CopyUseCaseIn struct {
 	Repository    git.RepositoryID
 	CommitMessage git.CommitMessage
+	BranchName    git.BranchName // default branch if empty
 	Paths         []string
 	DryRun        bool
 }
