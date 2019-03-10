@@ -52,6 +52,7 @@ type GitHub interface {
 
 type QueryRepositoryIn struct {
 	Repository git.RepositoryID
+	BranchName git.BranchName // optional
 }
 
 type QueryRepositoryOut struct {
@@ -60,6 +61,8 @@ type QueryRepositoryOut struct {
 	DefaultBranchName      git.BranchName
 	DefaultBranchCommitSHA git.CommitSHA
 	DefaultBranchTreeSHA   git.TreeSHA
+	BranchCommitSHA        git.CommitSHA // empty if the branch does not exist
+	BranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
 }
 
 type QueryCommitIn struct {

@@ -31,20 +31,65 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 
 	out, err := u.GitHub.QueryRepository(ctx, adaptors.QueryRepositoryIn{
 		Repository: git.RepositoryID{Owner: in.Repository.Owner, Name: in.Repository.Name},
+		BranchName: in.BranchName,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "error while getting the repository")
 	}
 	u.Logger.Infof("Logged in as %s", out.CurrentUserName)
 
-	gitFiles := make([]git.File, len(filenames))
-	for i, filename := range filenames {
+	if in.BranchName == "" {
+		// copy to the default branch
+		if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
+			Filenames:       filenames,
+			Repository:      out.Repository,
+			CommitMessage:   in.CommitMessage,
+			BranchName:      out.DefaultBranchName,
+			ParentCommitSHA: out.DefaultBranchCommitSHA,
+			ParentTreeSHA:   out.DefaultBranchTreeSHA,
+			DryRun:          in.DryRun,
+		}); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
+	}
+
+	if out.BranchCommitSHA == "" || out.BranchTreeSHA == "" {
+		return errors.Errorf("branch %s does not exist", in.BranchName)
+	}
+	if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
+		Filenames:       filenames,
+		Repository:      out.Repository,
+		CommitMessage:   in.CommitMessage,
+		BranchName:      in.BranchName,
+		ParentCommitSHA: out.BranchCommitSHA,
+		ParentTreeSHA:   out.BranchTreeSHA,
+		DryRun:          in.DryRun,
+	}); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+type copyToExistingBranchIn struct {
+	Filenames       []string
+	Repository      git.RepositoryID
+	CommitMessage   git.CommitMessage
+	BranchName      git.BranchName
+	ParentCommitSHA git.CommitSHA
+	ParentTreeSHA   git.TreeSHA
+	DryRun          bool
+}
+
+func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistingBranchIn) error {
+	gitFiles := make([]git.File, len(in.Filenames))
+	for i, filename := range in.Filenames {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(filename)
 		if err != nil {
 			return errors.Wrapf(err, "error while reading file %s", filename)
 		}
 		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
-			Repository: out.Repository,
+			Repository: in.Repository,
 			Content:    content,
 		})
 		if err != nil {
@@ -59,8 +104,8 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	}
 
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
-		Repository:  out.Repository,
-		BaseTreeSHA: out.DefaultBranchTreeSHA,
+		Repository:  in.Repository,
+		BaseTreeSHA: in.ParentTreeSHA,
 		Files:       gitFiles,
 	})
 	if err != nil {
@@ -69,9 +114,9 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	u.Logger.Infof("Created tree %s", treeSHA)
 
 	commitSHA, err := u.GitHub.CreateCommit(ctx, git.NewCommit{
-		Repository:      out.Repository,
+		Repository:      in.Repository,
 		Message:         in.CommitMessage,
-		ParentCommitSHA: out.DefaultBranchCommitSHA,
+		ParentCommitSHA: in.ParentCommitSHA,
 		TreeSHA:         treeSHA,
 	})
 	if err != nil {
@@ -80,7 +125,7 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	u.Logger.Infof("Created commit %s", commitSHA)
 
 	commit, err := u.GitHub.QueryCommit(ctx, adaptors.QueryCommitIn{
-		Repository: out.Repository,
+		Repository: in.Repository,
 		CommitSHA:  commitSHA,
 	})
 	if err != nil {
@@ -93,18 +138,18 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	}
 
 	if in.DryRun {
-		u.Logger.Infof("Do not update %s branch due to dry-run", out.DefaultBranchName)
+		u.Logger.Infof("Do not update %s branch due to dry-run", in.BranchName)
 		return nil
 	}
 
 	if err := u.GitHub.UpdateBranch(ctx, git.NewBranch{
-		Repository: out.Repository,
-		BranchName: out.DefaultBranchName,
+		Repository: in.Repository,
+		BranchName: in.BranchName,
 		CommitSHA:  commitSHA,
 	}, false); err != nil {
-		return errors.Wrapf(err, "error while updating %s branch", out.DefaultBranchName)
+		return errors.Wrapf(err, "error while updating %s branch", in.BranchName)
 	}
-	u.Logger.Infof("Updated %s branch", out.DefaultBranchName)
+	u.Logger.Infof("Updated %s branch", in.BranchName)
 
 	return nil
 }

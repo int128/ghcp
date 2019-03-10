@@ -62,6 +62,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
 	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
+	f.StringVarP(&o.Branch, "branch", "b", "", "Branch name (default: default branch of repository)")
 	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
@@ -111,6 +112,7 @@ func (c *Cmd) copy(ctx context.Context, o copyOptions) int {
 			Name:  o.RepositoryName,
 		},
 		CommitMessage: git.CommitMessage(o.CommitMessage),
+		BranchName:    git.BranchName(o.Branch),
 		Paths:         o.Paths,
 		DryRun:        o.DryRun,
 	}); err != nil {
@@ -124,6 +126,7 @@ type copyOptions struct {
 	RepositoryOwner string
 	RepositoryName  string
 	CommitMessage   string
+	Branch          string // optional
 	Paths           []string
 	DryRun          bool
 }
