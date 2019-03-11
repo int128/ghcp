@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
-dist_sha256=$(shasum -a 256 -b dist/bin/ghcp_darwin_amd64 | cut -f1 -d' ')
+dist_bin="$1"
+dist_sha256=$(shasum -a 256 -b "$dist_bin" | cut -f1 -d' ')
 cat <<EOF
 class Ghcp < Formula
   desc "Copy files to a repository using GitHub API"
