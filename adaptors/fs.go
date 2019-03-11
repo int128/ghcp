@@ -19,8 +19,8 @@ func NewFileSystem() adaptors.FileSystem {
 type FileSystem struct{}
 
 // FindFiles returns a list of files in the paths.
-func (fs *FileSystem) FindFiles(paths []string) ([]string, error) {
-	var files []string
+func (fs *FileSystem) FindFiles(paths []string) ([]adaptors.File, error) {
+	var files []adaptors.File
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -29,7 +29,10 @@ func (fs *FileSystem) FindFiles(paths []string) ([]string, error) {
 			if !info.Mode().IsRegular() {
 				return nil
 			}
-			files = append(files, path)
+			files = append(files, adaptors.File{
+				Path:       path,
+				Executable: info.Mode()&0100 != 0, // mask the executable bit of owner
+			})
 			return nil
 		}); err != nil {
 			return nil, errors.Wrapf(err, "error while finding files in %s", path)

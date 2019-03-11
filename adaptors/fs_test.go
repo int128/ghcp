@@ -1,4 +1,4 @@
-package adaptors_test
+package adaptors
 
 import (
 	"fmt"
@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/go-test/deep"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/interfaces"
 )
 
 func TestFileSystem_FindFiles(t *testing.T) {
-	fs := &adaptors.FileSystem{}
+	fs := &FileSystem{}
 	tempDir, err := ioutil.TempDir("", "FindFiles")
 	if err != nil {
 		t.Fatal(err)
@@ -32,7 +32,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 	if err := ioutil.WriteFile("dir2/b.jpg", []byte{}, 0644); err != nil {
 		t.Fatal(err)
 	}
-	if err := ioutil.WriteFile("dir2/c.jpg", []byte{}, 0644); err != nil {
+	if err := ioutil.WriteFile("dir2/c.jpg", []byte{}, 0755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -41,7 +41,11 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []string{"dir1/a.jpg", "dir2/b.jpg", "dir2/c.jpg"}
+		wants := []adaptors.File{
+			{Path: "dir1/a.jpg"},
+			{Path: "dir2/b.jpg"},
+			{Path: "dir2/c.jpg", Executable: true},
+		}
 		if diff := deep.Equal(wants, files); diff != nil {
 			t.Error(diff)
 		}
@@ -51,7 +55,10 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []string{"dir1/a.jpg", "dir2/c.jpg"}
+		wants := []adaptors.File{
+			{Path: "dir1/a.jpg"},
+			{Path: "dir2/c.jpg", Executable: true},
+		}
 		if diff := deep.Equal(wants, files); diff != nil {
 			t.Error(diff)
 		}
@@ -68,7 +75,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 }
 
 func TestFileSystem_ReadAsBase64EncodedContent(t *testing.T) {
-	fs := &adaptors.FileSystem{}
+	fs := &FileSystem{}
 	tempFile := makeTempFile(t, "hello\nworld")
 	defer os.RemoveAll(tempFile)
 	content, err := fs.ReadAsBase64EncodedContent(tempFile)

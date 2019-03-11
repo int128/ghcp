@@ -15,7 +15,10 @@ func newMockFileSystem(ctrl *gomock.Controller) adaptors.FileSystem {
 	fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 	fileSystem.EXPECT().
 		FindFiles([]string{"path"}).
-		Return([]string{"file1", "file2"}, nil)
+		Return([]adaptors.File{
+			{Path: "file1"},
+			{Path: "file2", Executable: true},
+		}, nil)
 	fileSystem.EXPECT().
 		ReadAsBase64EncodedContent("file1").
 		Return("base64content1", nil)
@@ -31,13 +34,13 @@ func gitHubCreateBlobTree(gitHub *mock_adaptors.MockGitHub, ctx context.Context,
 			Repository: repositoryID,
 			Content:    "base64content1",
 		}).
-		Return(git.BlobSHA("blobSHA"), nil)
+		Return(git.BlobSHA("blobSHA1"), nil)
 	gitHub.EXPECT().
 		CreateBlob(ctx, git.NewBlob{
 			Repository: repositoryID,
 			Content:    "base64content2",
 		}).
-		Return(git.BlobSHA("blobSHA"), nil)
+		Return(git.BlobSHA("blobSHA2"), nil)
 	gitHub.EXPECT().
 		CreateTree(ctx, git.NewTree{
 			Repository:  repositoryID,
@@ -45,10 +48,11 @@ func gitHubCreateBlobTree(gitHub *mock_adaptors.MockGitHub, ctx context.Context,
 			Files: []git.File{
 				{
 					Filename: "file1",
-					BlobSHA:  "blobSHA",
+					BlobSHA:  "blobSHA1",
 				}, {
-					Filename: "file2",
-					BlobSHA:  "blobSHA",
+					Filename:   "file2",
+					BlobSHA:    "blobSHA2",
+					Executable: true,
 				},
 			},
 		}).

@@ -20,8 +20,13 @@ type CmdOptions struct {
 }
 
 type FileSystem interface {
-	FindFiles(paths []string) ([]string, error)
+	FindFiles(paths []string) ([]File, error)
 	ReadAsBase64EncodedContent(filename string) (string, error)
+}
+
+type File struct {
+	Path       string
+	Executable bool
 }
 
 type Env interface {

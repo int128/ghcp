@@ -24,7 +24,7 @@ type CopyUseCase struct {
 }
 
 func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
-	filenames, err := u.FileSystem.FindFiles(in.Paths)
+	files, err := u.FileSystem.FindFiles(in.Paths)
 	if err != nil {
 		return errors.Wrapf(err, "error while finding files")
 	}
@@ -41,7 +41,7 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	if in.BranchName == "" {
 		// copy to the default branch
 		if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-			Filenames:       filenames,
+			Files:           files,
 			Repository:      out.Repository,
 			CommitMessage:   in.CommitMessage,
 			BranchName:      out.DefaultBranchName,
@@ -58,7 +58,7 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 		return errors.Errorf("branch %s does not exist", in.BranchName)
 	}
 	if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-		Filenames:       filenames,
+		Files:           files,
 		Repository:      out.Repository,
 		CommitMessage:   in.CommitMessage,
 		BranchName:      in.BranchName,
@@ -72,7 +72,7 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 }
 
 type copyToExistingBranchIn struct {
-	Filenames       []string
+	Files           []adaptors.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	BranchName      git.BranchName
@@ -82,25 +82,25 @@ type copyToExistingBranchIn struct {
 }
 
 func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistingBranchIn) error {
-	gitFiles := make([]git.File, len(in.Filenames))
-	for i, filename := range in.Filenames {
-		content, err := u.FileSystem.ReadAsBase64EncodedContent(filename)
+	gitFiles := make([]git.File, len(in.Files))
+	for i, file := range in.Files {
+		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
 		if err != nil {
-			return errors.Wrapf(err, "error while reading file %s", filename)
+			return errors.Wrapf(err, "error while reading file %s", file.Path)
 		}
 		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
 			Repository: in.Repository,
 			Content:    content,
 		})
 		if err != nil {
-			return errors.Wrapf(err, "error while creating a blob for %s", filename)
+			return errors.Wrapf(err, "error while creating a blob for %s", file.Path)
 		}
 		gitFiles[i] = git.File{
-			Filename: filename,
-			BlobSHA:  blobSHA,
-			//TODO: Executable
+			Filename:   file.Path,
+			BlobSHA:    blobSHA,
+			Executable: file.Executable,
 		}
-		u.Logger.Infof("Uploaded %s as blob %s", filename, blobSHA)
+		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
 	}
 
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
