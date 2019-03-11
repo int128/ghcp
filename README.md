@@ -1,4 +1,4 @@
-# ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
+# ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![codecov](https://codecov.io/gh/int128/ghcp/branch/master/graph/badge.svg)](https://codecov.io/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
 ghcp is a command to copy files to a repository on GitHub, like `git commit` and `git push`.
 It depends on GitHub API and works without Git commands.
@@ -6,11 +6,18 @@ It depends on GitHub API and works without Git commands.
 
 ## Getting Started
 
-Download [the latest release](https://github.com/int128/ghcp/releases) or install by brew tap:
+Install [the latest release](https://github.com/int128/ghcp/releases) as follows:
 
 ```sh
+# GitHub Releases
+curl -L -o /usr/local/bin/ghcp https://github.com/int128/ghcp/releases/download/${ghcp_version}/ghcp_linux_amd64
+
+# Homebrew
 brew tap int128/ghcp
 brew install ghcp
+
+# Go
+go get github.com/int128/ghcp
 ```
 
 To copy files in the directory `dist/` to the default branch of the repository `YOUR/REPO`:
@@ -44,6 +51,8 @@ Options:
       --token string       GitHub API token [$GITHUB_TOKEN]
 ```
 
+Author and comitter of a commit are set to the login user, that depends on the token.
+
 It does not create a new commit if the branch has same files.
 Therefore it prevents an empty commit.
 
@@ -51,23 +60,7 @@ It does not read the current Git config and Git state.
 You need to always set owner and name of a repository.
 
 
-## Recipes
-
-### Working with CI
-
-TODO
-
-Here is an example for CircleCI:
-
-```yaml
-version: 2
-jobs:
-  build:
-    steps:
-      - run: |
-          curl -L -o /tmp/ghcp https://github.com/int128/ghcp/releases/download/$GHCP_VERSION/ghcp_linux_amd64
-          /tmp/ghcp -u owner -r repo -m "message" index.html
-```
+## Use cases
 
 ### Release to GitHub Pages
 
