@@ -24,7 +24,7 @@ type CopyUseCase struct {
 }
 
 func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
-	filenames, err := u.FileSystem.FindFiles(in.Paths)
+	files, err := u.FileSystem.FindFiles(in.Paths)
 	if err != nil {
 		return errors.Wrapf(err, "error while finding files")
 	}
@@ -38,16 +38,37 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	}
 	u.Logger.Infof("Logged in as %s", out.CurrentUserName)
 
+	gitFiles := make([]git.File, len(files))
+	for i, file := range files {
+		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
+		if err != nil {
+			return errors.Wrapf(err, "error while reading file %s", file.Path)
+		}
+		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
+			Repository: in.Repository,
+			Content:    content,
+		})
+		if err != nil {
+			return errors.Wrapf(err, "error while creating a blob for %s", file.Path)
+		}
+		gitFile := git.File{
+			Filename:   file.Path,
+			BlobSHA:    blobSHA,
+			Executable: !in.NoFileMode && file.Executable,
+		}
+		gitFiles[i] = gitFile
+		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
+	}
+
 	if in.BranchName == "" {
 		// copy to the default branch
 		if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-			Filenames:       filenames,
+			CopyUseCaseIn:   in,
+			Files:           gitFiles,
 			Repository:      out.Repository,
-			CommitMessage:   in.CommitMessage,
 			BranchName:      out.DefaultBranchName,
 			ParentCommitSHA: out.DefaultBranchCommitSHA,
 			ParentTreeSHA:   out.DefaultBranchTreeSHA,
-			DryRun:          in.DryRun,
 		}); err != nil {
 			return errors.WithStack(err)
 		}
@@ -58,13 +79,12 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 		return errors.Errorf("branch %s does not exist", in.BranchName)
 	}
 	if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-		Filenames:       filenames,
+		CopyUseCaseIn:   in,
+		Files:           gitFiles,
 		Repository:      out.Repository,
-		CommitMessage:   in.CommitMessage,
 		BranchName:      in.BranchName,
 		ParentCommitSHA: out.BranchCommitSHA,
 		ParentTreeSHA:   out.BranchTreeSHA,
-		DryRun:          in.DryRun,
 	}); err != nil {
 		return errors.WithStack(err)
 	}
@@ -72,41 +92,20 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 }
 
 type copyToExistingBranchIn struct {
-	Filenames       []string
+	usecases.CopyUseCaseIn
+
+	Files           []git.File
 	Repository      git.RepositoryID
-	CommitMessage   git.CommitMessage
 	BranchName      git.BranchName
 	ParentCommitSHA git.CommitSHA
 	ParentTreeSHA   git.TreeSHA
-	DryRun          bool
 }
 
 func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistingBranchIn) error {
-	gitFiles := make([]git.File, len(in.Filenames))
-	for i, filename := range in.Filenames {
-		content, err := u.FileSystem.ReadAsBase64EncodedContent(filename)
-		if err != nil {
-			return errors.Wrapf(err, "error while reading file %s", filename)
-		}
-		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
-			Repository: in.Repository,
-			Content:    content,
-		})
-		if err != nil {
-			return errors.Wrapf(err, "error while creating a blob for %s", filename)
-		}
-		gitFiles[i] = git.File{
-			Filename: filename,
-			BlobSHA:  blobSHA,
-			//TODO: Executable
-		}
-		u.Logger.Infof("Uploaded %s as blob %s", filename, blobSHA)
-	}
-
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
 		Repository:  in.Repository,
 		BaseTreeSHA: in.ParentTreeSHA,
-		Files:       gitFiles,
+		Files:       in.Files,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "error while creating a tree")

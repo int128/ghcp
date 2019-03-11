@@ -71,9 +71,9 @@ func (m *MockFileSystem) EXPECT() *MockFileSystemMockRecorder {
 }
 
 // FindFiles mocks base method
-func (m *MockFileSystem) FindFiles(arg0 []string) ([]string, error) {
+func (m *MockFileSystem) FindFiles(arg0 []string) ([]interfaces.File, error) {
 	ret := m.ctrl.Call(m, "FindFiles", arg0)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([]interfaces.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

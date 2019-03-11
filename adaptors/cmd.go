@@ -65,6 +65,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	f.StringVarP(&o.Branch, "branch", "b", "", "Branch name (default: default branch of repository)")
 	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
+	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
 
@@ -114,6 +115,7 @@ func (c *Cmd) copy(ctx context.Context, o copyOptions) int {
 		CommitMessage: git.CommitMessage(o.CommitMessage),
 		BranchName:    git.BranchName(o.Branch),
 		Paths:         o.Paths,
+		NoFileMode:    o.NoFileMode,
 		DryRun:        o.DryRun,
 	}); err != nil {
 		c.Logger.Errorf("Could not copy files: %s", err)
@@ -128,6 +130,7 @@ type copyOptions struct {
 	CommitMessage   string
 	Branch          string // optional
 	Paths           []string
+	NoFileMode      bool
 	DryRun          bool
 }
 
