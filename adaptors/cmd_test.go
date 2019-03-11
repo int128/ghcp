@@ -87,6 +87,42 @@ func TestCmd_Run(t *testing.T) {
 		}
 	})
 
+	t.Run("--no-file-mode", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+				NoFileMode:    true,
+			})
+
+		cmd := Cmd{
+			CopyUseCase:      copyUseCase,
+			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+		}
+		args := []string{
+			cmdName,
+			"--token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"--no-file-mode",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+		}
+	})
+
 	t.Run("--dry-run", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

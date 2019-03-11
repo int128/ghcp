@@ -120,7 +120,7 @@ func TestCopyUseCase_Do(t *testing.T) {
 		}
 	})
 
-	t.Run("DefaultBranch/NothingToCommit", func(t *testing.T) {
+	t.Run("NothingToCommit", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -170,7 +170,91 @@ func TestCopyUseCase_Do(t *testing.T) {
 		}
 	})
 
-	t.Run("DefaultBranch/DryRun", func(t *testing.T) {
+	t.Run("NoFileMode", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		fileSystem := newMockFileSystem(ctrl)
+		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub.EXPECT().
+			QueryRepository(ctx, adaptors.QueryRepositoryIn{
+				Repository: repositoryID,
+			}).
+			Return(&adaptors.QueryRepositoryOut{
+				CurrentUserName:        "current",
+				Repository:             repositoryID,
+				DefaultBranchName:      "master",
+				DefaultBranchCommitSHA: "masterCommitSHA",
+				DefaultBranchTreeSHA:   "masterTreeSHA",
+			}, nil)
+		gitHub.EXPECT().
+			CreateBlob(ctx, git.NewBlob{
+				Repository: repositoryID,
+				Content:    "base64content1",
+			}).
+			Return(git.BlobSHA("blobSHA1"), nil)
+		gitHub.EXPECT().
+			CreateBlob(ctx, git.NewBlob{
+				Repository: repositoryID,
+				Content:    "base64content2",
+			}).
+			Return(git.BlobSHA("blobSHA2"), nil)
+		gitHub.EXPECT().
+			CreateTree(ctx, git.NewTree{
+				Repository:  repositoryID,
+				BaseTreeSHA: "masterTreeSHA",
+				Files: []git.File{
+					{
+						Filename: "file1",
+						BlobSHA:  "blobSHA1",
+					}, {
+						Filename: "file2",
+						BlobSHA:  "blobSHA2",
+					},
+				},
+			}).
+			Return(git.TreeSHA("treeSHA"), nil)
+		gitHub.EXPECT().
+			CreateCommit(ctx, git.NewCommit{
+				Repository:      repositoryID,
+				TreeSHA:         "treeSHA",
+				ParentCommitSHA: "masterCommitSHA",
+				Message:         "message",
+			}).
+			Return(git.CommitSHA("commitSHA"), nil)
+		gitHub.EXPECT().
+			QueryCommit(ctx, adaptors.QueryCommitIn{
+				Repository: repositoryID,
+				CommitSHA:  "commitSHA",
+			}).
+			Return(&adaptors.QueryCommitOut{
+				ChangedFiles: 1,
+			}, nil)
+		gitHub.EXPECT().
+			UpdateBranch(ctx, git.NewBranch{
+				Repository: repositoryID,
+				BranchName: "master",
+				CommitSHA:  "commitSHA",
+			}, false).
+			Return(nil)
+
+		useCase := CopyUseCase{
+			FileSystem: fileSystem,
+			Logger:     mock_adaptors.NewLogger(t),
+			GitHub:     gitHub,
+		}
+		err := useCase.Do(ctx, usecases.CopyUseCaseIn{
+			Repository:    repositoryID,
+			CommitMessage: "message",
+			Paths:         []string{"path"},
+			NoFileMode:    true,
+		})
+		if err != nil {
+			t.Errorf("Do returned error: %+v", err)
+		}
+	})
+
+	t.Run("DryRun", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -276,61 +360,6 @@ func TestCopyUseCase_Do(t *testing.T) {
 			BranchName:    "gh-pages",
 			CommitMessage: "message",
 			Paths:         []string{"path"},
-		})
-		if err != nil {
-			t.Errorf("Do returned error: %+v", err)
-		}
-	})
-
-	t.Run("GivenBranch/DryRun", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		fileSystem := newMockFileSystem(ctrl)
-		gitHub := mock_adaptors.NewMockGitHub(ctrl)
-		gitHub.EXPECT().
-			QueryRepository(ctx, adaptors.QueryRepositoryIn{
-				Repository: repositoryID,
-				BranchName: "gh-pages",
-			}).
-			Return(&adaptors.QueryRepositoryOut{
-				CurrentUserName:        "current",
-				Repository:             repositoryID,
-				DefaultBranchName:      "master",
-				DefaultBranchCommitSHA: "masterCommitSHA",
-				DefaultBranchTreeSHA:   "masterTreeSHA",
-				BranchCommitSHA:        "ghCommitSHA",
-				BranchTreeSHA:          "ghTreeSHA",
-			}, nil)
-		gitHubCreateBlobTree(gitHub, ctx, repositoryID, "ghTreeSHA")
-		gitHub.EXPECT().
-			CreateCommit(ctx, git.NewCommit{
-				Repository:      repositoryID,
-				TreeSHA:         "treeSHA",
-				ParentCommitSHA: "ghCommitSHA",
-				Message:         "message",
-			}).
-			Return(git.CommitSHA("commitSHA"), nil)
-		gitHub.EXPECT().
-			QueryCommit(ctx, adaptors.QueryCommitIn{
-				Repository: repositoryID,
-				CommitSHA:  "commitSHA",
-			}).
-			Return(&adaptors.QueryCommitOut{
-				ChangedFiles: 1,
-			}, nil)
-
-		useCase := CopyUseCase{
-			FileSystem: fileSystem,
-			Logger:     mock_adaptors.NewLogger(t),
-			GitHub:     gitHub,
-		}
-		err := useCase.Do(ctx, usecases.CopyUseCaseIn{
-			Repository:    repositoryID,
-			BranchName:    "gh-pages",
-			CommitMessage: "message",
-			Paths:         []string{"path"},
-			DryRun:        true,
 		})
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)

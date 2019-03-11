@@ -17,5 +17,6 @@ type CopyUseCaseIn struct {
 	CommitMessage git.CommitMessage
 	BranchName    git.BranchName // default branch if empty
 	Paths         []string
+	NoFileMode    bool
 	DryRun        bool
 }

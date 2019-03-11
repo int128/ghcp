@@ -38,6 +38,7 @@ Options:
   -C, --directory string   Change to directory before copy
       --dry-run            Upload files but do not update the branch actually
   -m, --message string     Commit message (mandatory)
+      --no-file-mode       Ignore executable bit of file and treat as 0644
   -u, --owner string       GitHub repository owner (mandatory)
   -r, --repo string        GitHub repository name (mandatory)
       --token string       GitHub API token [$GITHUB_TOKEN]
