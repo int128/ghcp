@@ -80,6 +80,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 
 	if o.Debug {
 		c.LoggerConfig.SetDebug(true)
+		c.Logger.Debugf("Debug enabled")
 	}
 	if o.Chdir != "" {
 		if err := c.Env.Chdir(o.Chdir); err != nil {
@@ -89,10 +90,11 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		c.Logger.Infof("Changed to directory %s", o.Chdir)
 	}
 	if o.GitHubToken == "" {
+		c.Logger.Debugf("Using token from environment variable %s", envGitHubToken)
 		o.GitHubToken = c.Env.Getenv(envGitHubToken)
 	}
 	if o.GitHubToken == "" {
-		c.Logger.Errorf("No GitHub API token. Set $%s or -token", envGitHubToken)
+		c.Logger.Errorf("No GitHub API token. Set environment variable %s or --token option", envGitHubToken)
 		return exitCodePreconditionError
 	}
 	c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
@@ -119,6 +121,7 @@ func (c *Cmd) copy(ctx context.Context, o copyOptions) int {
 		DryRun:        o.DryRun,
 	}); err != nil {
 		c.Logger.Errorf("Could not copy files: %s", err)
+		c.Logger.Debugf("Stacktrace:\n%+v", err)
 		return exitCodeCopyError
 	}
 	return exitCodeOK

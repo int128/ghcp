@@ -28,6 +28,9 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	if err != nil {
 		return errors.Wrapf(err, "error while finding files")
 	}
+	if len(files) == 0 {
+		return errors.Errorf("no file exists in %v", in.Paths)
+	}
 
 	out, err := u.GitHub.QueryRepository(ctx, adaptors.QueryRepositoryIn{
 		Repository: git.RepositoryID{Owner: in.Repository.Owner, Name: in.Repository.Name},
@@ -36,10 +39,54 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 	if err != nil {
 		return errors.Wrapf(err, "error while getting the repository")
 	}
-	u.Logger.Infof("Logged in as %s", out.CurrentUserName)
+	u.Logger.Infof("Author and committer: %s", out.CurrentUserName)
 
-	gitFiles := make([]git.File, len(files))
-	for i, file := range files {
+	if in.BranchName == "" {
+		// copy to the default branch
+		if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
+			CopyUseCaseIn:   in,
+			Files:           files,
+			Repository:      out.Repository,
+			BranchName:      out.DefaultBranchName,
+			ParentCommitSHA: out.DefaultBranchCommitSHA,
+			ParentTreeSHA:   out.DefaultBranchTreeSHA,
+		}); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
+	}
+
+	if out.BranchCommitSHA == "" || out.BranchTreeSHA == "" {
+		return errors.Errorf("branch %s does not exist", in.BranchName)
+	}
+	if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
+		CopyUseCaseIn:   in,
+		Files:           files,
+		Repository:      out.Repository,
+		BranchName:      in.BranchName,
+		ParentCommitSHA: out.BranchCommitSHA,
+		ParentTreeSHA:   out.BranchTreeSHA,
+	}); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+type copyToExistingBranchIn struct {
+	usecases.CopyUseCaseIn
+
+	Files           []adaptors.File
+	Repository      git.RepositoryID
+	BranchName      git.BranchName
+	ParentCommitSHA git.CommitSHA
+	ParentTreeSHA   git.TreeSHA
+}
+
+func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistingBranchIn) error {
+	u.Logger.Infof("Copying %d file(s) to %s branch", len(in.Files), in.BranchName)
+
+	files := make([]git.File, len(in.Files))
+	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
 		if err != nil {
 			return errors.Wrapf(err, "error while reading file %s", file.Path)
@@ -56,56 +103,14 @@ func (u *CopyUseCase) Do(ctx context.Context, in usecases.CopyUseCaseIn) error {
 			BlobSHA:    blobSHA,
 			Executable: !in.NoFileMode && file.Executable,
 		}
-		gitFiles[i] = gitFile
+		files[i] = gitFile
 		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
 	}
 
-	if in.BranchName == "" {
-		// copy to the default branch
-		if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-			CopyUseCaseIn:   in,
-			Files:           gitFiles,
-			Repository:      out.Repository,
-			BranchName:      out.DefaultBranchName,
-			ParentCommitSHA: out.DefaultBranchCommitSHA,
-			ParentTreeSHA:   out.DefaultBranchTreeSHA,
-		}); err != nil {
-			return errors.WithStack(err)
-		}
-		return nil
-	}
-
-	if out.BranchCommitSHA == "" || out.BranchTreeSHA == "" {
-		return errors.Errorf("branch %s does not exist", in.BranchName)
-	}
-	if err := u.copyToExistingBranch(ctx, copyToExistingBranchIn{
-		CopyUseCaseIn:   in,
-		Files:           gitFiles,
-		Repository:      out.Repository,
-		BranchName:      in.BranchName,
-		ParentCommitSHA: out.BranchCommitSHA,
-		ParentTreeSHA:   out.BranchTreeSHA,
-	}); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-type copyToExistingBranchIn struct {
-	usecases.CopyUseCaseIn
-
-	Files           []git.File
-	Repository      git.RepositoryID
-	BranchName      git.BranchName
-	ParentCommitSHA git.CommitSHA
-	ParentTreeSHA   git.TreeSHA
-}
-
-func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistingBranchIn) error {
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
 		Repository:  in.Repository,
 		BaseTreeSHA: in.ParentTreeSHA,
-		Files:       in.Files,
+		Files:       files,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "error while creating a tree")
@@ -132,7 +137,7 @@ func (u *CopyUseCase) copyToExistingBranch(ctx context.Context, in copyToExistin
 	}
 	u.Logger.Infof("Commit: %d changed file(s)", commit.ChangedFiles)
 	if commit.ChangedFiles == 0 {
-		u.Logger.Infof("Nothing to commit")
+		u.Logger.Warnf("Nothing to commit because %s branch has the same file(s)", in.BranchName)
 		return nil
 	}
 
