@@ -13,19 +13,19 @@ brew tap int128/ghcp
 brew install ghcp
 ```
 
-To copy the files in directory `dist/` to the default branch of the repository `int128/sandbox`:
+To copy files in the directory `dist/` to the default branch of the repository `YOUR/REPO`:
 
 ```sh
-ghcp -u int128 -r sandbox -m message dist/
+ghcp -u YOUR -r REPO -m MESSAGE dist/
 ```
 
-To copy the files in directory `dist/` to the branch `gh-pages` of the repository `int128/sandbox`:
+To copy files in the directory `dist/` to the branch `gh-pages` of the repository `YOUR/REPO`:
 
 ```sh
-ghcp -u int128 -r sandbox -b gh-pages -m message dist/
+ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE dist/
 ```
 
-You need to get your personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
+You need to get a personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
 
 ### Usage
 
@@ -46,7 +46,7 @@ Options:
 It does not create a new commit if the branch has same files.
 Therefore it prevents an empty commit.
 
-It does not respect the current Git config and Git state.
+It does not read the current Git config and Git state.
 You need to always set owner and name of a repository.
 
 
@@ -68,17 +68,26 @@ jobs:
           /tmp/ghcp -u owner -r repo -m "message" index.html
 ```
 
-### GitHub Pages
+### Release to GitHub Pages
 
-TODO
+You can release your site to [GitHub Pages](https://pages.github.com/).
 
-### Homebrew tap
+You need to create a branch `gh-pages` on the repository before running ghcp.
 
-You can release your formula to a tap repository.
+To copy files to the `gh-pages` branch:
+
+```sh
+ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE index.html
+```
+
+### Release to Homebrew tap
+
+You can release your Homebrew formula to a tap repository.
 
 You need to create a repository with prefix `homebrew-`, for example `homebrew-hello`.
 
-Generate a formula as like:
+You need to generate a formula.
+For example, the following script will generate `hello.rb`:
 
 ```sh
 cat > hello.rb <<EOF
@@ -100,28 +109,20 @@ end
 EOF
 ```
 
-You can release the formula to the tap repository.
+To copy the formula to the tap repository:
 
 ```sh
 ghcp -u YOUR -r homebrew-hello -m v1.0.0 hello.rb
 ```
 
-Now you can install the formula:
+Now we can install the formula by the following commands:
 
 ```sh
 brew tap YOUR/hello
 brew install hello
 ```
 
-ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self and CircleCI.
-See also [Makefile](Makefile) and [.circleci/config.yaml](.circleci/config.yaml).
-
-
-## Related works
-
-You can upload files to GitHub Releases by [`ghr`](https://github.com/tcnksm/ghr).
-
-You can generate change log from Git history by [`ghch`](https://github.com/Songmu/ghch).
+See also [Makefile](Makefile) because ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self.
 
 
 ## Contributions
