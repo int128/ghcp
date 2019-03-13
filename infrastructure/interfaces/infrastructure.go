@@ -21,9 +21,14 @@ type GitHubClient interface {
 }
 
 type GitHubClientInit interface {
-	Init(options GitHubClientInitOptions)
+	Init(options GitHubClientInitOptions) error
 }
 
 type GitHubClientInitOptions struct {
+	// A token for GitHub API.
 	Token string
+
+	// GitHub API v3 URL (for GitHub Enterprise).
+	// e.g. https://github.example.com/api/v3/
+	URLv3 string
 }

@@ -31,7 +31,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -66,7 +66,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -102,7 +102,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -138,7 +138,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -177,7 +177,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              mock_adaptors.NewMockEnv(ctrl),
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     loggerConfig,
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -210,7 +210,7 @@ func TestCmd_Run(t *testing.T) {
 				Paths:         []string{"file1", "file2"},
 			})
 
-		env := mock_adaptors.NewMockEnv(ctrl)
+		env := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
 		env.EXPECT().
 			Chdir("dir")
 
@@ -241,11 +241,6 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		env := mock_adaptors.NewMockEnv(ctrl)
-		env.EXPECT().
-			Getenv(envGitHubToken).
-			Return("YOUR_TOKEN")
-
 		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
 		copyUseCase.EXPECT().
 			Do(ctx, usecases.CopyUseCaseIn{
@@ -256,7 +251,7 @@ func TestCmd_Run(t *testing.T) {
 
 		cmd := Cmd{
 			CopyUseCase:      copyUseCase,
-			Env:              env,
+			Env:              newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -279,14 +274,9 @@ func TestCmd_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		env := mock_adaptors.NewMockEnv(ctrl)
-		env.EXPECT().
-			Getenv(envGitHubToken).
-			Return("")
-
 		cmd := Cmd{
 			CopyUseCase:      mock_usecases.NewMockCopyUseCase(ctrl),
-			Env:              env,
+			Env:              newEnv(ctrl, map[string]string{envGitHubToken: ""}),
 			Logger:           mock_adaptors.NewLogger(t),
 			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 			GitHubClientInit: mock_infrastructure.NewMockGitHubClientInit(ctrl),
@@ -302,6 +292,81 @@ func TestCmd_Run(t *testing.T) {
 		exitCode := cmd.Run(ctx, args)
 		if exitCode != exitCodePreconditionError {
 			t.Errorf("exitCode wants %d but %d", exitCodePreconditionError, exitCode)
+		}
+	})
+
+	t.Run("--api", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+			})
+
+		cmd := Cmd{
+			CopyUseCase:  copyUseCase,
+			Env:          newEnv(ctrl, map[string]string{}),
+			Logger:       mock_adaptors.NewLogger(t),
+			LoggerConfig: mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
+				Token: "YOUR_TOKEN",
+				URLv3: "https://github.example.com/api/v3/",
+			}),
+		}
+		args := []string{
+			cmdName,
+			"--token", "YOUR_TOKEN",
+			"--api", "https://github.example.com/api/v3/",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+		}
+	})
+
+	t.Run("env/GITHUB_API", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		copyUseCase := mock_usecases.NewMockCopyUseCase(ctrl)
+		copyUseCase.EXPECT().
+			Do(ctx, usecases.CopyUseCaseIn{
+				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
+				CommitMessage: "commit-message",
+				Paths:         []string{"file1", "file2"},
+			})
+
+		cmd := Cmd{
+			CopyUseCase:  copyUseCase,
+			Env:          newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
+			Logger:       mock_adaptors.NewLogger(t),
+			LoggerConfig: mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
+				Token: "YOUR_TOKEN",
+				URLv3: "https://github.example.com/api/v3/",
+			}),
+		}
+		args := []string{
+			cmdName,
+			"--token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 		}
 	})
 
@@ -347,7 +412,7 @@ func TestCmd_Run(t *testing.T) {
 				defer ctrl.Finish()
 				cmd := Cmd{
 					CopyUseCase:      mock_usecases.NewMockCopyUseCase(ctrl),
-					Env:              mock_adaptors.NewMockEnv(ctrl),
+					Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 					Logger:           mock_adaptors.NewLogger(t),
 					LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
 					GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
@@ -366,4 +431,12 @@ func newGitHubClientInit(ctrl *gomock.Controller, o infrastructure.GitHubClientI
 	clientInit.EXPECT().
 		Init(o)
 	return clientInit
+}
+
+func newEnv(ctrl *gomock.Controller, getenv map[string]string) *mock_adaptors.MockEnv {
+	env := mock_adaptors.NewMockEnv(ctrl)
+	for k, v := range getenv {
+		env.EXPECT().Getenv(k).Return(v)
+	}
+	return env
 }
