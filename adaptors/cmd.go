@@ -24,7 +24,10 @@ Usage: %s [options] [file or directory...]
 Options:
 %s`
 
-const envGitHubToken = "GITHUB_TOKEN"
+const (
+	envGitHubToken = "GITHUB_TOKEN"
+	envGitHubAPI   = "GITHUB_API"
+)
 
 const (
 	exitCodeOK                = 0
@@ -55,8 +58,9 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	}
 	var o struct {
 		copyOptions
-		Chdir       string
+		Chdir       string // optional
 		GitHubToken string
+		GitHubAPI   string // optional
 		Debug       bool
 	}
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
@@ -65,6 +69,7 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	f.StringVarP(&o.Branch, "branch", "b", "", "Branch name (default: default branch of repository)")
 	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
+	f.StringVar(&o.GitHubAPI, "api", "", fmt.Sprintf("GitHub API v3 URL (v4 will be inferred) [$%s]", envGitHubAPI))
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
@@ -90,16 +95,28 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		c.Logger.Infof("Changed to directory %s", o.Chdir)
 	}
 	if o.GitHubToken == "" {
-		c.Logger.Debugf("Using token from environment variable %s", envGitHubToken)
 		o.GitHubToken = c.Env.Getenv(envGitHubToken)
+		if o.GitHubToken != "" {
+			c.Logger.Debugf("Using token from environment variable $%s", envGitHubToken)
+		}
 	}
 	if o.GitHubToken == "" {
 		c.Logger.Errorf("No GitHub API token. Set environment variable %s or --token option", envGitHubToken)
 		return exitCodePreconditionError
 	}
-	c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
+	if o.GitHubAPI == "" {
+		o.GitHubAPI = c.Env.Getenv(envGitHubAPI)
+		if o.GitHubAPI != "" {
+			c.Logger.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
+		}
+	}
+	if err := c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
 		Token: o.GitHubToken,
-	})
+		URLv3: o.GitHubAPI,
+	}); err != nil {
+		c.Logger.Errorf("Could not connect to GitHub API: %s", err)
+		return exitCodePreconditionError
+	}
 
 	return c.copy(ctx, o.copyOptions)
 }

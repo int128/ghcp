@@ -40,6 +40,7 @@ You need to get a personal access token from [GitHub settings](https://github.co
 Usage: ghcp [options] [file or directory...]
 
 Options:
+      --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
   -b, --branch string      Branch name (default: default branch of repository)
       --debug              Show debug logs
   -C, --directory string   Change to directory before copy
@@ -117,6 +118,16 @@ brew install hello
 ```
 
 See also [Makefile](Makefile) because ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self.
+
+### GitHub Enterprise
+
+You can set a GitHub API v3 URL by `GITHUB_API` environment variable or `--api` option.
+
+```sh
+export GITHUB_API=https://github.example.com/api/v3/
+```
+
+GitHub API v4 URL will be automatically inferred from the v3 URL by resolving the relative path `../graphql`.
 
 
 ## Contributions

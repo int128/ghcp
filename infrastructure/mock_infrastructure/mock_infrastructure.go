@@ -141,8 +141,10 @@ func (m *MockGitHubClientInit) EXPECT() *MockGitHubClientInitMockRecorder {
 }
 
 // Init mocks base method
-func (m *MockGitHubClientInit) Init(arg0 interfaces.GitHubClientInitOptions) {
-	m.ctrl.Call(m, "Init", arg0)
+func (m *MockGitHubClientInit) Init(arg0 interfaces.GitHubClientInitOptions) error {
+	ret := m.ctrl.Call(m, "Init", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Init indicates an expected call of Init
