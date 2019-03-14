@@ -1,24 +1,55 @@
 // Package git provides models of Git objects.
 package git
 
-import "fmt"
-
 // RepositoryID represents a pointer to a repository.
 type RepositoryID struct {
 	Owner string
 	Name  string
 }
 
+// IsValid returns true if owner and name is not empty.
+func (id RepositoryID) IsValid() bool {
+	return id.Owner != "" && id.Name != ""
+}
+
+func (id RepositoryID) String() string {
+	if !id.IsValid() {
+		return ""
+	}
+	return id.Owner + "/" + id.Name
+}
+
 // BranchName represents name of a branch.
 type BranchName string
 
-// QualifiedName returns the qualified name that is "refs/heads/name".
-// If the BranchName is empty, it returns empty.
-func (b BranchName) QualifiedName() string {
+// QualifiedName returns RefQualifiedName.
+// If the BranchName is empty, it returns a zero value.
+func (b BranchName) QualifiedName() RefQualifiedName {
 	if b == "" {
+		return RefQualifiedName{}
+	}
+	return RefQualifiedName{"refs/heads/", string(b)}
+}
+
+// RefName represents name of a ref, that is a branch or a tag.
+// This may be simple name or qualified name.
+type RefName string
+
+// RefQualifiedName represents qualified name of a ref, e.g. refs/heads/master.
+type RefQualifiedName struct {
+	Prefix string
+	Name   string
+}
+
+func (r RefQualifiedName) IsValid() bool {
+	return r.Prefix != "" && r.Name != ""
+}
+
+func (r RefQualifiedName) String() string {
+	if !r.IsValid() {
 		return ""
 	}
-	return fmt.Sprintf("refs/heads/%s", b)
+	return r.Prefix + r.Name
 }
 
 // NewBranch represents a branch.

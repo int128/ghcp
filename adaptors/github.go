@@ -23,8 +23,8 @@ type GitHub struct {
 	Logger adaptors.Logger
 }
 
-// QueryRepository returns the repository.
-func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositoryIn) (*adaptors.QueryRepositoryOut, error) {
+// QueryForUpdateBranch returns the repository for updating the branch.
+func (c *GitHub) QueryForUpdateBranch(ctx context.Context, in adaptors.QueryForUpdateBranchIn) (*adaptors.QueryForUpdateBranchOut, error) {
 	var q struct {
 		Viewer struct {
 			Login string
@@ -62,14 +62,14 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 	v := map[string]interface{}{
 		"owner": githubv4.String(in.Repository.Owner),
 		"repo":  githubv4.String(in.Repository.Name),
-		"ref":   githubv4.String(in.BranchName.QualifiedName()),
+		"ref":   githubv4.String(in.BranchName.QualifiedName().String()),
 	}
 	c.Logger.Debugf("Querying the repository with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, errors.Wrapf(err, "GitHub API error")
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := adaptors.QueryRepositoryOut{
+	out := adaptors.QueryForUpdateBranchOut{
 		CurrentUserName:        q.Viewer.Login,
 		Repository:             git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
 		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
@@ -82,11 +82,87 @@ func (c *GitHub) QueryRepository(ctx context.Context, in adaptors.QueryRepositor
 	return &out, nil
 }
 
+// QueryForCreateBranch returns the repository for creating a branch.
+func (c *GitHub) QueryForCreateBranch(ctx context.Context, in adaptors.QueryForCreateBranchIn) (*adaptors.QueryForCreateBranchOut, error) {
+	var q struct {
+		Viewer struct {
+			Login string
+		}
+		Repository struct {
+			Name  string
+			Owner struct{ Login string }
+
+			// default branch
+			DefaultBranchRef struct {
+				Prefix string
+				Name   string
+				Target struct {
+					Commit struct {
+						Oid  string
+						Tree struct {
+							Oid string
+						}
+					} `graphql:"... on Commit"`
+				}
+			}
+
+			// parent ref (optional)
+			ParentRef struct {
+				Prefix string
+				Name   string
+				Target struct {
+					Commit struct {
+						Oid  string
+						Tree struct {
+							Oid string
+						}
+					} `graphql:"... on Commit"`
+				}
+			} `graphql:"parentRef: ref(qualifiedName: $parentRef)"`
+
+			// new branch
+			NewRef struct {
+				Id githubv4.ID
+			} `graphql:"newRef: ref(qualifiedName: $newRef)"`
+		} `graphql:"repository(owner: $owner, name: $repo)"`
+	}
+	v := map[string]interface{}{
+		"owner":     githubv4.String(in.Repository.Owner),
+		"repo":      githubv4.String(in.Repository.Name),
+		"parentRef": githubv4.String(in.ParentRef),
+		"newRef":    githubv4.String(in.NewBranchName.QualifiedName().String()),
+	}
+	c.Logger.Debugf("Querying the repository with %+v", v)
+	if err := c.Client.Query(ctx, &q, v); err != nil {
+		return nil, errors.Wrapf(err, "GitHub API error")
+	}
+	c.Logger.Debugf("Got the result: %+v", q)
+	out := adaptors.QueryForCreateBranchOut{
+		CurrentUserName: q.Viewer.Login,
+		Repository:      git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
+		DefaultBranchRefName: git.RefQualifiedName{
+			Prefix: q.Repository.DefaultBranchRef.Prefix,
+			Name:   q.Repository.DefaultBranchRef.Name,
+		},
+		DefaultBranchCommitSHA: git.CommitSHA(q.Repository.DefaultBranchRef.Target.Commit.Oid),
+		DefaultBranchTreeSHA:   git.TreeSHA(q.Repository.DefaultBranchRef.Target.Commit.Tree.Oid),
+		ParentRefName: git.RefQualifiedName{
+			Prefix: q.Repository.ParentRef.Prefix,
+			Name:   q.Repository.ParentRef.Name,
+		},
+		ParentRefCommitSHA: git.CommitSHA(q.Repository.ParentRef.Target.Commit.Oid),
+		ParentRefTreeSHA:   git.TreeSHA(q.Repository.ParentRef.Target.Commit.Tree.Oid),
+		NewBranchExists:    q.Repository.NewRef.Id != nil,
+	}
+	c.Logger.Debugf("Returning the repository: %+v", out)
+	return &out, nil
+}
+
 // CreateBranch creates a branch and returns nil or an error.
 func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 	c.Logger.Debugf("Creating a branch %+v", n)
 	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(n.BranchName.QualifiedName()),
+		Ref:    github.String(n.BranchName.QualifiedName().String()),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	})
 	if err != nil {
@@ -99,7 +175,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) error {
 	c.Logger.Debugf("Updating the branch %+v, force: %v", n, force)
 	_, _, err := c.Client.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(n.BranchName.QualifiedName()),
+		Ref:    github.String(n.BranchName.QualifiedName().String()),
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	}, force)
 	if err != nil {

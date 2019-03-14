@@ -20,19 +20,33 @@ brew install ghcp
 go get github.com/int128/ghcp
 ```
 
-To copy files in the directory `dist/` to the default branch of the repository `YOUR/REPO`:
+You need to get a personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
+
+### Examples
+
+To update the default branch of repository `YOUR/REPO` with files in directory `dist/`:
 
 ```sh
 ghcp -u YOUR -r REPO -m MESSAGE dist/
 ```
 
-To copy files in the directory `dist/` to the branch `gh-pages` of the repository `YOUR/REPO`:
+To update branch `gh-pages` of repository `YOUR/REPO` with files in directory `dist/`:
 
 ```sh
 ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE dist/
 ```
 
-You need to get a personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
+To create a new branch `topic` from the default branch on repository `YOUR/REPO` with files in directory `dist/`:
+
+```sh
+ghcp -u YOUR -r REPO -B topic -m MESSAGE dist/
+```
+
+To create a new branch `topic` from branch `develop` on repository `YOUR/REPO` with files in directory `dist/`:
+
+```sh
+ghcp -u YOUR -r REPO -B topic --parent develop -m MESSAGE dist/
+```
 
 ### Usage
 
@@ -40,16 +54,18 @@ You need to get a personal access token from [GitHub settings](https://github.co
 Usage: ghcp [options] [file or directory...]
 
 Options:
-      --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
-  -b, --branch string      Branch name (default: default branch of repository)
-      --debug              Show debug logs
-  -C, --directory string   Change to directory before copy
-      --dry-run            Upload files but do not update the branch actually
-  -m, --message string     Commit message (mandatory)
-      --no-file-mode       Ignore executable bit of file and treat as 0644
-  -u, --owner string       GitHub repository owner (mandatory)
-  -r, --repo string        GitHub repository name (mandatory)
-      --token string       GitHub API token [$GITHUB_TOKEN]
+      --api string          GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
+  -b, --branch string       Update the branch (default: default branch of repository)
+      --debug               Show debug logs
+  -C, --directory string    Change to directory before copy
+      --dry-run             Upload files but do not update the branch actually
+  -m, --message string      Commit message (mandatory)
+  -B, --new-branch string   Create a branch
+      --no-file-mode        Ignore executable bit of file and treat as 0644
+  -u, --owner string        GitHub repository owner (mandatory)
+      --parent string       Parent branch or tag (default: default branch of repository)
+  -r, --repo string         GitHub repository name (mandatory)
+      --token string        GitHub API token [$GITHUB_TOKEN]
 ```
 
 Author and comitter of a commit are set to the login user, that depends on the token.

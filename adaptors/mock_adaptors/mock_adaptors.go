@@ -263,17 +263,30 @@ func (mr *MockGitHubMockRecorder) QueryCommit(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryCommit", reflect.TypeOf((*MockGitHub)(nil).QueryCommit), arg0, arg1)
 }
 
-// QueryRepository mocks base method
-func (m *MockGitHub) QueryRepository(arg0 context.Context, arg1 interfaces.QueryRepositoryIn) (*interfaces.QueryRepositoryOut, error) {
-	ret := m.ctrl.Call(m, "QueryRepository", arg0, arg1)
-	ret0, _ := ret[0].(*interfaces.QueryRepositoryOut)
+// QueryForCreateBranch mocks base method
+func (m *MockGitHub) QueryForCreateBranch(arg0 context.Context, arg1 interfaces.QueryForCreateBranchIn) (*interfaces.QueryForCreateBranchOut, error) {
+	ret := m.ctrl.Call(m, "QueryForCreateBranch", arg0, arg1)
+	ret0, _ := ret[0].(*interfaces.QueryForCreateBranchOut)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryRepository indicates an expected call of QueryRepository
-func (mr *MockGitHubMockRecorder) QueryRepository(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRepository", reflect.TypeOf((*MockGitHub)(nil).QueryRepository), arg0, arg1)
+// QueryForCreateBranch indicates an expected call of QueryForCreateBranch
+func (mr *MockGitHubMockRecorder) QueryForCreateBranch(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCreateBranch", reflect.TypeOf((*MockGitHub)(nil).QueryForCreateBranch), arg0, arg1)
+}
+
+// QueryForUpdateBranch mocks base method
+func (m *MockGitHub) QueryForUpdateBranch(arg0 context.Context, arg1 interfaces.QueryForUpdateBranchIn) (*interfaces.QueryForUpdateBranchOut, error) {
+	ret := m.ctrl.Call(m, "QueryForUpdateBranch", arg0, arg1)
+	ret0, _ := ret[0].(*interfaces.QueryForUpdateBranchOut)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryForUpdateBranch indicates an expected call of QueryForUpdateBranch
+func (mr *MockGitHubMockRecorder) QueryForUpdateBranch(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForUpdateBranch", reflect.TypeOf((*MockGitHub)(nil).QueryForUpdateBranch), arg0, arg1)
 }
 
 // UpdateBranch mocks base method

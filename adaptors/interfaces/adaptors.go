@@ -46,7 +46,8 @@ type LoggerConfig interface {
 }
 
 type GitHub interface {
-	QueryRepository(ctx context.Context, in QueryRepositoryIn) (*QueryRepositoryOut, error)
+	QueryForUpdateBranch(ctx context.Context, in QueryForUpdateBranchIn) (*QueryForUpdateBranchOut, error)
+	QueryForCreateBranch(ctx context.Context, in QueryForCreateBranchIn) (*QueryForCreateBranchOut, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
@@ -55,12 +56,12 @@ type GitHub interface {
 	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
 }
 
-type QueryRepositoryIn struct {
+type QueryForUpdateBranchIn struct {
 	Repository git.RepositoryID
 	BranchName git.BranchName // optional
 }
 
-type QueryRepositoryOut struct {
+type QueryForUpdateBranchOut struct {
 	CurrentUserName        string
 	Repository             git.RepositoryID
 	DefaultBranchName      git.BranchName
@@ -68,6 +69,24 @@ type QueryRepositoryOut struct {
 	DefaultBranchTreeSHA   git.TreeSHA
 	BranchCommitSHA        git.CommitSHA // empty if the branch does not exist
 	BranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
+}
+
+type QueryForCreateBranchIn struct {
+	Repository    git.RepositoryID
+	ParentRef     git.RefName // optional
+	NewBranchName git.BranchName
+}
+
+type QueryForCreateBranchOut struct {
+	CurrentUserName        string
+	Repository             git.RepositoryID
+	DefaultBranchRefName   git.RefQualifiedName
+	DefaultBranchCommitSHA git.CommitSHA
+	DefaultBranchTreeSHA   git.TreeSHA
+	ParentRefName          git.RefQualifiedName // empty if the parent ref does not exist
+	ParentRefCommitSHA     git.CommitSHA        // empty if the parent ref does not exist
+	ParentRefTreeSHA       git.TreeSHA          // empty if the parent ref does not exist
+	NewBranchExists        bool
 }
 
 type QueryCommitIn struct {

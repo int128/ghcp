@@ -10,7 +10,9 @@ import (
 )
 
 var dependencies = []interface{}{
-	usecases.NewCopyUseCase,
+	usecases.NewUpdateBranch,
+	usecases.NewCreateBranch,
+	usecases.NewCommit,
 
 	adaptors.NewCmd,
 	adaptors.NewFileSystem,
