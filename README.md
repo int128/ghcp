@@ -135,6 +135,42 @@ brew install hello
 
 See also [Makefile](Makefile) because ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self.
 
+### Bump version string
+
+You can change version string in files such as README or build script.
+
+For example,
+
+```sh
+# substitute version string in files
+sed -i -e "s/version '[0-9.]*'/version '$TAG'/g" README.md build.gradle
+
+# commit the changes to a new branch
+ghcp -u YOUR -r REPO -B bump-v1.1.0 -m v1.1.0 README.md build.gradle
+```
+
+### Working with CI
+
+You can use ghcp on CI services such as CircleCI and Travis CI.
+
+Here is an example for CircleCI:
+
+```yaml
+version: 2
+jobs:
+  release:
+    steps:
+      - run: |
+          mkdir -p $HOME/bin
+          curl -L -o $HOME/bin/ghcp https://github.com/int128/ghcp/releases/download/${ghcp_version}/ghcp_linux_amd64
+          chmod +x $HOME/bin/ghcp
+          echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
+      - checkout
+      # release the Homebrew formula
+      - run: |
+          ghcp -u "$CIRCLE_PROJECT_USERNAME" -r "homebrew-$CIRCLE_PROJECT_REPONAME" -m "$CIRCLE_TAG" hello.rb
+```
+
 ### GitHub Enterprise
 
 You can set a GitHub API v3 URL by `GITHUB_API` environment variable or `--api` option.
@@ -150,3 +186,5 @@ GitHub API v4 URL will be automatically inferred from the v3 URL by resolving th
 
 This is an open source software.
 Feel free to open issues and pull requests.
+
+Author: [Hidetake Iwata](https://github.com/int128)
