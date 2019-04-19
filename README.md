@@ -10,14 +10,11 @@ Install [the latest release](https://github.com/int128/ghcp/releases) as follows
 
 ```sh
 # GitHub Releases
-curl -L -o /usr/local/bin/ghcp https://github.com/int128/ghcp/releases/download/${ghcp_version}/ghcp_linux_amd64
+curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.3.0/ghcp_linux_amd64
 
 # Homebrew
 brew tap int128/ghcp
 brew install ghcp
-
-# Go
-go get github.com/int128/ghcp
 ```
 
 You need to get a personal access token from [GitHub settings](https://github.com/settings/tokens) and set it by `GITHUB_TOKEN` environment variable or `--token` option.
@@ -151,8 +148,6 @@ ghcp -u YOUR -r REPO -B bump-v1.1.0 -m v1.1.0 README.md build.gradle
 
 ### Working with CI
 
-You can use ghcp on CI services such as CircleCI and Travis CI.
-
 Here is an example for CircleCI:
 
 ```yaml
@@ -161,10 +156,11 @@ jobs:
   release:
     steps:
       - run: |
-          mkdir -p $HOME/bin
-          curl -L -o $HOME/bin/ghcp https://github.com/int128/ghcp/releases/download/${ghcp_version}/ghcp_linux_amd64
-          chmod +x $HOME/bin/ghcp
+          mkdir -p ~/bin
           echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
+      - run: |
+          curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.3.0/ghcp_linux_amd64
+          chmod +x ~/bin/ghcp
       - checkout
       # release the Homebrew formula
       - run: |
