@@ -94,10 +94,11 @@ func TestCmd_Run(t *testing.T) {
 		createBranch := mock_usecases.NewMockCreateBranch(ctrl)
 		createBranch.EXPECT().
 			Do(ctx, usecases.CreateBranchIn{
-				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
-				NewBranchName: "topic",
-				CommitMessage: "commit-message",
-				Paths:         []string{"file1", "file2"},
+				Repository:        git.RepositoryID{Owner: "owner", Name: "repo"},
+				NewBranchName:     "topic",
+				ParentOfNewBranch: usecases.ParentOfNewBranch{FromDefaultBranch: true},
+				CommitMessage:     "commit-message",
+				Paths:             []string{"file1", "file2"},
 			})
 
 		cmd := Cmd{
@@ -130,11 +131,11 @@ func TestCmd_Run(t *testing.T) {
 		createBranch := mock_usecases.NewMockCreateBranch(ctrl)
 		createBranch.EXPECT().
 			Do(ctx, usecases.CreateBranchIn{
-				Repository:    git.RepositoryID{Owner: "owner", Name: "repo"},
-				NewBranchName: "topic",
-				ParentRef:     "develop",
-				CommitMessage: "commit-message",
-				Paths:         []string{"file1", "file2"},
+				Repository:        git.RepositoryID{Owner: "owner", Name: "repo"},
+				NewBranchName:     "topic",
+				ParentOfNewBranch: usecases.ParentOfNewBranch{FromRef: "develop"},
+				CommitMessage:     "commit-message",
+				Paths:             []string{"file1", "file2"},
 			})
 
 		cmd := Cmd{
@@ -152,6 +153,44 @@ func TestCmd_Run(t *testing.T) {
 			"-m", "commit-message",
 			"-B", "topic",
 			"--parent", "develop",
+			"file1",
+			"file2",
+		}
+		exitCode := cmd.Run(ctx, args)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+		}
+	})
+
+	t.Run("--no-parent", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		createBranch := mock_usecases.NewMockCreateBranch(ctrl)
+		createBranch.EXPECT().
+			Do(ctx, usecases.CreateBranchIn{
+				Repository:        git.RepositoryID{Owner: "owner", Name: "repo"},
+				NewBranchName:     "topic",
+				ParentOfNewBranch: usecases.ParentOfNewBranch{NoParent: true},
+				CommitMessage:     "commit-message",
+				Paths:             []string{"file1", "file2"},
+			})
+
+		cmd := Cmd{
+			CreateBranch:     createBranch,
+			Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Logger:           mock_adaptors.NewLogger(t),
+			LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+			GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+		}
+		args := []string{
+			cmdName,
+			"--token", "YOUR_TOKEN",
+			"-u", "owner",
+			"-r", "repo",
+			"-m", "commit-message",
+			"-B", "topic",
+			"--no-parent",
 			"file1",
 			"file2",
 		}
@@ -209,6 +248,35 @@ func TestCmd_Run(t *testing.T) {
 				"-m", "commit-message",
 				"-b", "topic",
 				"--parent", "develop",
+				"file1",
+				"file2",
+			}
+			exitCode := cmd.Run(ctx, args)
+			if exitCode != exitCodePreconditionError {
+				t.Errorf("exitCode wants %d but %d", exitCodePreconditionError, exitCode)
+			}
+		})
+
+		t.Run("--parent and --no-parent", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			cmd := Cmd{
+				CreateBranch:     mock_usecases.NewMockCreateBranch(ctrl),
+				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				Logger:           mock_adaptors.NewLogger(t),
+				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			}
+			args := []string{
+				cmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
+				"-b", "topic",
+				"--parent", "develop",
+				"--no-parent",
 				"file1",
 				"file2",
 			}

@@ -215,9 +215,13 @@ func (c *GitHub) QueryCommit(ctx context.Context, in adaptors.QueryCommitIn) (*a
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
 	c.Logger.Debugf("Creating a commit %+v", n)
+	var parents []github.Commit
+	if n.ParentCommitSHA != "" {
+		parents = append(parents, github.Commit{SHA: github.String(string(n.ParentCommitSHA))})
+	}
 	commit, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
 		Message: github.String(string(n.Message)),
-		Parents: []github.Commit{{SHA: github.String(string(n.ParentCommitSHA))}},
+		Parents: parents,
 		Tree:    &github.Tree{SHA: github.String(string(n.TreeSHA))},
 	})
 	if err != nil {
