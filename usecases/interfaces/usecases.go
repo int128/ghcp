@@ -27,13 +27,21 @@ type CreateBranch interface {
 }
 
 type CreateBranchIn struct {
-	Repository    git.RepositoryID
-	NewBranchName git.BranchName
-	ParentRef     git.RefName // default branch if empty
-	CommitMessage git.CommitMessage
-	Paths         []string
-	NoFileMode    bool
-	DryRun        bool
+	Repository        git.RepositoryID
+	NewBranchName     git.BranchName
+	ParentOfNewBranch ParentOfNewBranch
+	CommitMessage     git.CommitMessage
+	Paths             []string
+	NoFileMode        bool
+	DryRun            bool
+}
+
+// ParentOfNewBranch represents a parent of a branch to create.
+// Exact one of the members must be valid.
+type ParentOfNewBranch struct {
+	NoParent          bool
+	FromDefaultBranch bool
+	FromRef           git.RefName
 }
 
 type Commit interface {
@@ -44,8 +52,8 @@ type CommitIn struct {
 	Files           []adaptors.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
-	ParentCommitSHA git.CommitSHA
-	ParentTreeSHA   git.TreeSHA
+	ParentCommitSHA git.CommitSHA // no parent if empty
+	ParentTreeSHA   git.TreeSHA   // no parent if empty
 	NoFileMode      bool
 }
 

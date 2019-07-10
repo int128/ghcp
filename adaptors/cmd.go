@@ -55,16 +55,14 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	f.Usage = func() {
 		c.Logger.Infof(usage, args[0], f.FlagUsages())
 	}
-	var o struct {
-		envOptions
-		useCaseOptions
-	}
+	var o cmdOptions
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
 	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.StringVarP(&o.UpdateBranch, "branch", "b", "", "Update the branch (default: default branch of repository)")
 	f.StringVarP(&o.NewBranch, "new-branch", "B", "", "Create a branch")
-	f.StringVar(&o.ParentRef, "parent", "", "Parent branch or tag (default: default branch of repository)")
+	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch or tag (default: default branch of repository)")
+	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
 	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.StringVar(&o.GitHubAPI, "api", "", fmt.Sprintf("GitHub API v3 URL (v4 will be inferred) [$%s]", envGitHubAPI))
@@ -121,30 +119,48 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		return exitCodePreconditionError
 	}
 	if o.NewBranch != "" {
-		if err := c.CreateBranch.Do(ctx, usecases.CreateBranchIn{
-			Repository: git.RepositoryID{
-				Owner: o.RepositoryOwner,
-				Name:  o.RepositoryName,
-			},
-			NewBranchName: git.BranchName(o.NewBranch),
-			ParentRef:     git.RefName(o.ParentRef),
-			CommitMessage: git.CommitMessage(o.CommitMessage),
-			Paths:         o.Paths,
-			NoFileMode:    o.NoFileMode,
-			DryRun:        o.DryRun,
-		}); err != nil {
-			c.Logger.Errorf("Could not copy files: %s", err)
-			c.Logger.Debugf("Stacktrace:\n%+v", err)
-			return exitCodeUseCaseError
-		}
-		return exitCodeOK
+		return c.runCreateBranch(ctx, o)
+	}
+	return c.runUpdateBranch(ctx, o)
+}
+
+func (c *Cmd) runCreateBranch(ctx context.Context, o cmdOptions) int {
+	if o.ParentRef != "" && o.NoParent {
+		c.Logger.Errorf("Do not set both --parent and --no-parent")
+		return exitCodePreconditionError
 	}
 
+	in := usecases.CreateBranchIn{
+		Repository: git.RepositoryID{
+			Owner: o.RepositoryOwner,
+			Name:  o.RepositoryName,
+		},
+		NewBranchName: git.BranchName(o.NewBranch),
+		ParentOfNewBranch: usecases.ParentOfNewBranch{
+			NoParent:          o.NoParent,
+			FromDefaultBranch: o.ParentRef == "" && !o.NoParent,
+			FromRef:           git.RefName(o.ParentRef),
+		},
+		CommitMessage: git.CommitMessage(o.CommitMessage),
+		Paths:         o.Paths,
+		NoFileMode:    o.NoFileMode,
+		DryRun:        o.DryRun,
+	}
+	if err := c.CreateBranch.Do(ctx, in); err != nil {
+		c.Logger.Errorf("Could not copy files: %s", err)
+		c.Logger.Debugf("Stacktrace:\n%+v", err)
+		return exitCodeUseCaseError
+	}
+	return exitCodeOK
+}
+
+func (c *Cmd) runUpdateBranch(ctx context.Context, o cmdOptions) int {
 	if o.ParentRef != "" {
 		c.Logger.Errorf("Do not set --parent on updating the branch")
 		return exitCodePreconditionError
 	}
-	if err := c.UpdateBranch.Do(ctx, usecases.UpdateBranchIn{
+
+	in := usecases.UpdateBranchIn{
 		Repository: git.RepositoryID{
 			Owner: o.RepositoryOwner,
 			Name:  o.RepositoryName,
@@ -154,12 +170,18 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 		Paths:         o.Paths,
 		NoFileMode:    o.NoFileMode,
 		DryRun:        o.DryRun,
-	}); err != nil {
+	}
+	if err := c.UpdateBranch.Do(ctx, in); err != nil {
 		c.Logger.Errorf("Could not copy files: %s", err)
 		c.Logger.Debugf("Stacktrace:\n%+v", err)
 		return exitCodeUseCaseError
 	}
 	return exitCodeOK
+}
+
+type cmdOptions struct {
+	envOptions
+	useCaseOptions
 }
 
 type envOptions struct {
@@ -176,6 +198,7 @@ type useCaseOptions struct {
 	UpdateBranch    string
 	NewBranch       string
 	ParentRef       string
+	NoParent        bool
 	Paths           []string
 	NoFileMode      bool
 	DryRun          bool

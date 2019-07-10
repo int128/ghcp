@@ -59,8 +59,9 @@ Options:
   -m, --message string      Commit message (mandatory)
   -B, --new-branch string   Create a branch
       --no-file-mode        Ignore executable bit of file and treat as 0644
+      --no-parent           Create a commit without a parent
   -u, --owner string        GitHub repository owner (mandatory)
-      --parent string       Parent branch or tag (default: default branch of repository)
+      --parent string       Create a commit from the parent branch or tag (default: default branch of repository)
   -r, --repo string         GitHub repository name (mandatory)
       --token string        GitHub API token [$GITHUB_TOKEN]
 ```
@@ -86,6 +87,12 @@ To copy files to the `gh-pages` branch:
 
 ```sh
 ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE index.html
+```
+
+If you want to discard history of the past commits:
+
+```sh
+ghcp -u YOUR -r REPO -b gh-pages --no-parent -m MESSAGE index.html
 ```
 
 ### Release to Homebrew tap

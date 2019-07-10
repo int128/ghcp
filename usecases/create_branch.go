@@ -47,7 +47,7 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 
 	out, err := u.GitHub.QueryForCreateBranch(ctx, adaptors.QueryForCreateBranchIn{
 		Repository:    in.Repository,
-		ParentRef:     in.ParentRef,
+		ParentRef:     in.ParentOfNewBranch.FromRef,
 		NewBranchName: in.NewBranchName,
 	})
 	if err != nil {
@@ -58,8 +58,7 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 	}
 	u.Logger.Infof("Author and committer: %s", out.CurrentUserName)
 
-	if in.ParentRef == "" {
-		// create a commit from the default branch
+	if in.ParentOfNewBranch.FromDefaultBranch {
 		if err := u.doInternal(ctx, createBranchInternalIn{
 			CommitIn: usecases.CommitIn{
 				Files:           files,
@@ -77,27 +76,43 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 		}
 		return nil
 	}
-
-	// create a commit from the given branch
-	if !out.ParentRefName.IsValid() {
-		return errors.Errorf("parent ref %s does not exist", in.ParentRef)
+	if in.ParentOfNewBranch.FromRef != "" {
+		if !out.ParentRefName.IsValid() {
+			return errors.Errorf("parent ref %s does not exist", in.ParentOfNewBranch.FromRef)
+		}
+		if err := u.doInternal(ctx, createBranchInternalIn{
+			CommitIn: usecases.CommitIn{
+				Files:           files,
+				Repository:      out.Repository,
+				CommitMessage:   in.CommitMessage,
+				ParentCommitSHA: out.ParentRefCommitSHA,
+				ParentTreeSHA:   out.ParentRefTreeSHA,
+				NoFileMode:      in.NoFileMode,
+			},
+			ParentRefName: out.ParentRefName,
+			NewBranchName: in.NewBranchName,
+			DryRun:        in.DryRun,
+		}); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
 	}
-	if err := u.doInternal(ctx, createBranchInternalIn{
-		CommitIn: usecases.CommitIn{
-			Files:           files,
-			Repository:      out.Repository,
-			CommitMessage:   in.CommitMessage,
-			ParentCommitSHA: out.ParentRefCommitSHA,
-			ParentTreeSHA:   out.ParentRefTreeSHA,
-			NoFileMode:      in.NoFileMode,
-		},
-		ParentRefName: out.ParentRefName,
-		NewBranchName: in.NewBranchName,
-		DryRun:        in.DryRun,
-	}); err != nil {
-		return errors.WithStack(err)
+	if in.ParentOfNewBranch.NoParent {
+		if err := u.doInternal(ctx, createBranchInternalIn{
+			CommitIn: usecases.CommitIn{
+				Files:         files,
+				Repository:    out.Repository,
+				CommitMessage: in.CommitMessage,
+				NoFileMode:    in.NoFileMode,
+			},
+			NewBranchName: in.NewBranchName,
+			DryRun:        in.DryRun,
+		}); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
 	}
-	return nil
+	return errors.New("you must set one of ParentOfNewBranch")
 }
 
 type createBranchInternalIn struct {
