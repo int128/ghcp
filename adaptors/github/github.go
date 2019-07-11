@@ -4,21 +4,21 @@ import (
 	"context"
 
 	"github.com/google/go-github/v24/github"
+	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
-	"go.uber.org/dig"
 )
 
-func New(i GitHub) adaptors.GitHub {
-	return &i
-}
+var Set = wire.NewSet(
+	wire.Struct(new(GitHub), "*"),
+	wire.Bind(new(adaptors.GitHub), new(*GitHub)),
+)
 
 // GitHub provides GitHub API access.
 type GitHub struct {
-	dig.In
 	Client infrastructure.GitHubClient
 	Logger adaptors.Logger
 }

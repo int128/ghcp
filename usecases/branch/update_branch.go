@@ -7,16 +7,10 @@ import (
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
-	"go.uber.org/dig"
 )
-
-func NewUpdateBranch(i UpdateBranch) usecases.UpdateBranch {
-	return &i
-}
 
 // UpdateBranch copies files to the default/given branch on the repository.
 type UpdateBranch struct {
-	dig.In
 	Commit     usecases.Commit
 	FileSystem adaptors.FileSystem
 	Logger     adaptors.Logger

@@ -7,16 +7,10 @@ import (
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
-	"go.uber.org/dig"
 )
-
-func NewCreateBranch(i CreateBranch) usecases.CreateBranch {
-	return &i
-}
 
 // CreateBranch creates a new branch based on the default/given branch of the repository.
 type CreateBranch struct {
-	dig.In
 	Commit     usecases.Commit
 	FileSystem adaptors.FileSystem
 	Logger     adaptors.Logger

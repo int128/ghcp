@@ -11,10 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewFileSystem() adaptors.FileSystem {
-	return &FileSystem{}
-}
-
 // FileSystem provides manipulation of file system.
 type FileSystem struct{}
 

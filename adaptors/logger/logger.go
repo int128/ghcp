@@ -3,17 +3,18 @@ package logger
 import (
 	"log"
 
+	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
 )
 
-// NewLogger returns a Logger and LoggerConfig.
-// By default debug logs are not shown but you can change it by LoggerConfig.
-func NewLogger() (adaptors.Logger, adaptors.LoggerConfig) {
-	var l Logger
-	return &l, &l
-}
+var Set = wire.NewSet(
+	wire.Struct(new(Logger)),
+	wire.Bind(new(adaptors.Logger), new(*Logger)),
+	wire.Bind(new(adaptors.LoggerConfig), new(*Logger)),
+)
 
 // Logger provides logging using Go standard package.
+// By default debug logs are not shown but you can change it by LoggerConfig.
 type Logger struct {
 	debug bool
 }

@@ -4,12 +4,17 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/int128/ghcp/usecases"
 	"github.com/spf13/pflag"
-	"go.uber.org/dig"
+)
+
+var Set = wire.NewSet(
+	wire.Struct(new(Cmd), "*"),
+	wire.Bind(new(adaptors.Cmd), new(*Cmd)),
 )
 
 const usage = `Help:
@@ -34,13 +39,8 @@ const (
 	exitCodeUseCaseError      = 20
 )
 
-func NewCmd(i Cmd) adaptors.Cmd {
-	return &i
-}
-
 // Cmd interacts with command line interface.
 type Cmd struct {
-	dig.In
 	UpdateBranch     usecases.UpdateBranch
 	CreateBranch     usecases.CreateBranch
 	Env              adaptors.Env
