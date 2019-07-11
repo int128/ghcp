@@ -1,3 +1,4 @@
+// Package adaptors bridges between external interfaces and use cases.
 package adaptors
 
 import (
@@ -6,7 +7,7 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_adaptors -destination ../mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors/interfaces Cmd,FileSystem,Env,LoggerConfig,GitHub
+//go:generate mockgen -destination mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors Cmd,FileSystem,Env,LoggerConfig,GitHub
 
 type Cmd interface {
 	Run(ctx context.Context, args []string) int

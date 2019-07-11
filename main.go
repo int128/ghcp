@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/di"
 )
 

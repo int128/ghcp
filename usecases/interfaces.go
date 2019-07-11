@@ -1,13 +1,14 @@
+// Package usecases provides use cases of this application.
 package usecases
 
 import (
 	"context"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	adaptors2 "github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_usecases -destination ../mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases/interfaces UpdateBranch,CreateBranch,Commit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases UpdateBranch,CreateBranch,Commit
 
 type UpdateBranch interface {
 	Do(ctx context.Context, in UpdateBranchIn) error
@@ -49,7 +50,7 @@ type Commit interface {
 }
 
 type CommitIn struct {
-	Files           []adaptors.File
+	Files           []adaptors2.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	ParentCommitSHA git.CommitSHA // no parent if empty

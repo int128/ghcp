@@ -1,30 +1,30 @@
-package infrastructure
+package github
 
 import (
 	"net/http"
 	"net/url"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/infrastructure/interfaces"
+	"github.com/int128/ghcp/infrastructure"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
-// NewGitHubClient returns a GitHubClient and GitHubClientInit.
+// NewClient returns a Client and GitHubClientInit.
 // Caller must call GitHubClientInit.Init() before an API invocation.
-func NewGitHubClient() (infrastructure.GitHubClient, infrastructure.GitHubClientInit) {
-	var c GitHubClient
+func NewClient() (infrastructure.GitHubClient, infrastructure.GitHubClientInit) {
+	var c Client
 	return &c, &c
 }
 
-type GitHubClient struct {
+type Client struct {
 	*githubv4.Client
 	*github.GitService
 }
 
 // Init initializes this client with the options.
-func (c *GitHubClient) Init(o infrastructure.GitHubClientInitOptions) error {
+func (c *Client) Init(o infrastructure.GitHubClientInitOptions) error {
 	v4, v3, err := c.newClients(o)
 	if err != nil {
 		return errors.Wrapf(err, "error while initializing GitHub client")
@@ -34,7 +34,7 @@ func (c *GitHubClient) Init(o infrastructure.GitHubClientInitOptions) error {
 	return nil
 }
 
-func (c *GitHubClient) newClients(o infrastructure.GitHubClientInitOptions) (*githubv4.Client, *github.Client, error) {
+func (c *Client) newClients(o infrastructure.GitHubClientInitOptions) (*githubv4.Client, *github.Client, error) {
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Base:   http.DefaultTransport,

@@ -1,9 +1,9 @@
-package adaptors
+package env
 
 import (
 	"os"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 )
 
 func NewEnv() adaptors.Env {

@@ -1,16 +1,17 @@
-package usecases
+// Package commit provides an internal use-case for creating a commit.
+package commit
 
 import (
 	"context"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases/interfaces"
+	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 )
 
-func NewCommit(i Commit) usecases.Commit {
+func New(i Commit) usecases.Commit {
 	return &i
 }
 

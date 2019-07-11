@@ -1,9 +1,9 @@
-package adaptors
+package logger
 
 import (
 	"log"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 )
 
 // NewLogger returns a Logger and LoggerConfig.

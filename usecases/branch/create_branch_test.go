@@ -1,14 +1,14 @@
-package usecases
+package branch
 
 import (
 	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/adaptors/mock_adaptors"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases/interfaces"
+	"github.com/int128/ghcp/usecases"
 	"github.com/int128/ghcp/usecases/mock_usecases"
 )
 

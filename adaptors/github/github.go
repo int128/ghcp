@@ -1,18 +1,18 @@
-package adaptors
+package github
 
 import (
 	"context"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/infrastructure/interfaces"
+	"github.com/int128/ghcp/infrastructure"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
 	"go.uber.org/dig"
 )
 
-func NewGitHub(i GitHub) adaptors.GitHub {
+func New(i GitHub) adaptors.GitHub {
 	return &i
 }
 

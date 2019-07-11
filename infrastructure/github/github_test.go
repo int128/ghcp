@@ -1,4 +1,4 @@
-package infrastructure
+package github
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/infrastructure/interfaces"
+	"github.com/int128/ghcp/infrastructure"
 )
 
 func TestNewGitHubClient(t *testing.T) {
@@ -40,7 +40,7 @@ func TestNewGitHubClient(t *testing.T) {
 		Token: "YOUR_TOKEN",
 		URLv3: s.URL + "/api/v3/",
 	}
-	c, init := NewGitHubClient()
+	c, init := NewClient()
 	if err := init.Init(o); err != nil {
 		t.Fatalf("Init returned error: %s", err)
 	}

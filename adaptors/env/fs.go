@@ -1,4 +1,4 @@
-package adaptors
+package env
 
 import (
 	"encoding/base64"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/pkg/errors"
 )
 
