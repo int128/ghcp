@@ -1,4 +1,4 @@
-package usecases
+package commit
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/adaptors/mock_adaptors"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases/interfaces"
+	"github.com/int128/ghcp/usecases"
 )
 
 func TestCommit_Do(t *testing.T) {

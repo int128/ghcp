@@ -7,15 +7,16 @@ import (
 	githubAdaptor "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases"
+	"github.com/int128/ghcp/usecases/branch"
+	"github.com/int128/ghcp/usecases/commit"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 )
 
 var dependencies = []interface{}{
-	usecases.NewUpdateBranch,
-	usecases.NewCreateBranch,
-	usecases.NewCommit,
+	branch.NewUpdateBranch,
+	branch.NewCreateBranch,
+	commit.New,
 
 	cmd.NewCmd,
 	env.NewFileSystem,

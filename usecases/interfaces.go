@@ -1,3 +1,4 @@
+// Package usecases provides use cases of this application.
 package usecases
 
 import (
@@ -7,7 +8,7 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -package mock_usecases -destination ../mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases/interfaces UpdateBranch,CreateBranch,Commit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases UpdateBranch,CreateBranch,Commit
 
 type UpdateBranch interface {
 	Do(ctx context.Context, in UpdateBranchIn) error

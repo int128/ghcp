@@ -7,7 +7,7 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
-	"github.com/int128/ghcp/usecases/interfaces"
+	"github.com/int128/ghcp/usecases"
 	"github.com/spf13/pflag"
 	"go.uber.org/dig"
 )
