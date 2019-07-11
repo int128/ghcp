@@ -6,8 +6,8 @@ OSARCH := darwin/amd64 linux/amd64 windows/amd64
 all: $(TARGET)
 
 check:
-	go vet
-	go test -v ./...
+	golangci-lint run
+	go test -v -race -cover -coverprofile=coverage.out ./...
 
 $(TARGET): check
 	go build
@@ -19,7 +19,7 @@ dist/bin: check
 	gox --osarch "$(OSARCH)" -output 'dist/bin/{{.Dir}}_{{.OS}}_{{.Arch}}'
 
 release_bin: dist/bin
-	ghr -u $(CIRCLE_PROJECT_USERNAME) -r $(CIRCLE_PROJECT_REPONAME) -b "$$(ghch -F markdown --latest)" $(CIRCLE_TAG) dist/bin
+	ghr -u $(CIRCLE_PROJECT_USERNAME) -r $(CIRCLE_PROJECT_REPONAME) $(CIRCLE_TAG) dist/bin
 
 dist/$(TARGET).rb: dist/bin
 	./homebrew.sh dist/bin/$(TARGET)_darwin_amd64 > dist/$(TARGET).rb
@@ -32,4 +32,5 @@ release: release_bin release_homebrew
 clean:
 	-rm $(TARGET)
 	-rm -r dist
+	-rm coverage.out
 	-rm $$(go env GOPATH)/bin/ghcp
