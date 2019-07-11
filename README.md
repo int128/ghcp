@@ -19,16 +19,19 @@ brew install ghcp
 
 You need to get a personal access token from the [settings](https://github.com/settings/tokens) and set it to the `GITHUB_TOKEN` environment variable or `--token` option.
 
+Let's see the following use cases.
 
-### Release to GitHub Pages
 
-You can commit files to the `gh-pages` branch.
+### Release assets to GitHub Pages
+
+You can commit files to the `gh-pages` branch as follows:
 
 ```sh
 ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE index.html index.css
 ```
 
-You can commit files without parents, i.e. discarding history of the past commits.
+You can commit files without parents by `--no-parent` option.
+This is useful if you do not need past commits history.
 
 ```sh
 ghcp -u YOUR -r REPO -b gh-pages --no-parent -m MESSAGE index.html index.css
@@ -38,19 +41,18 @@ ghcp -u YOUR -r REPO -b gh-pages --no-parent -m MESSAGE index.html index.css
 
 You can release a Homebrew formula to a tap repository.
 
-Create a repository with the prefix `homebrew-`, e.g. `homebrew-hello`.
+You need to create a repository with the prefix `homebrew-`, e.g. `homebrew-hello`.
 
-Create a formula.
-For example, the following script will generate a file `hello.rb`:
+Then create a formula file like:
 
-```sh
-cat > hello.rb <<EOF
+```rb
+# hello.rb
 class Hello < Formula
   desc "Your awesome application"
   homepage "https://github.com/YOUR/hello"
   url "https://github.com/YOUR/hello/releases/download/v1.0.0/hello_darwin_amd64"
   version "v1.0.0"
-  sha256 "$(shasum -a 256 -b hello | cut -f1 -d' ')"
+  sha256 "SHA256_SUM"
 
   def install
     bin.install "hello_darwin_amd64" => "hello"
@@ -60,7 +62,6 @@ class Hello < Formula
     system "#{bin}/hello -h"
   end
 end
-EOF
 ```
 
 Commit the formula to the repository.
@@ -76,11 +77,13 @@ brew tap YOUR/hello
 brew install hello
 ```
 
-See also [Makefile](Makefile) because ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp self.
+See also [Makefile](Makefile).
+ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp.
 
 ### Bump version string
 
 You can change version string in files such as README or build script.
+For example,
 
 ```sh
 # substitute version string in files
@@ -91,7 +94,7 @@ ghcp -u YOUR -r REPO -B bump-v1.1.0 -m v1.1.0 README.md build.gradle
 ```
 
 
-### Usage
+## Usage
 
 ```
 Usage: ghcp [options] [file or directory...]
@@ -113,37 +116,35 @@ Options:
 ```
 
 Author and comitter of a commit are set to the login user, that depends on the token.
-
-It does not create a new commit if the branch has same files.
-Therefore it prevents an empty commit.
-
-It does not read the current Git config and Git state.
-You need to always set owner and name of a repository.
+ghcp does not create a new commit if the branch has same files, that prevents an empty commit.
+ghcp does not read the current Git config and Git state and you need to always set owner and name of a repository.
 
 ### Examples
 
-To update the default branch of repository `YOUR/REPO` with files in directory `dist/`:
+The following examples show how to commit files to the repository `https://github.com/YOUR/REPO.git`.
+
+To commit files and update the default branch:
 
 ```sh
-ghcp -u YOUR -r REPO -m MESSAGE dist/
+ghcp -u YOUR -r REPO -m MESSAGE FILES...
 ```
 
-To update branch `gh-pages` of repository `YOUR/REPO` with files in directory `dist/`:
+To commit files and update the branch `gh-pages`:
 
 ```sh
-ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE dist/
+ghcp -u YOUR -r REPO -b gh-pages -m MESSAGE FILES...
 ```
 
-To create a new branch `topic` from the default branch on repository `YOUR/REPO` with files in directory `dist/`:
+To commit files and create a new branch `topic` based on the default branch:
 
 ```sh
-ghcp -u YOUR -r REPO -B topic -m MESSAGE dist/
+ghcp -u YOUR -r REPO -B topic -m MESSAGE FILES...
 ```
 
-To create a new branch `topic` from branch `develop` on repository `YOUR/REPO` with files in directory `dist/`:
+To commit files and create a new branch `topic` based on the branch `develop`:
 
 ```sh
-ghcp -u YOUR -r REPO -B topic --parent develop -m MESSAGE dist/
+ghcp -u YOUR -r REPO -B topic --parent develop -m MESSAGE FILES...
 ```
 
 ### Working with CI
