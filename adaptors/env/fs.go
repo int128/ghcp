@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/int128/ghcp/adaptors"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 // FileSystem provides manipulation of file system.
@@ -20,7 +20,7 @@ func (fs *FileSystem) FindFiles(paths []string) ([]adaptors.File, error) {
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return errors.WithStack(err)
+				return xerrors.Errorf("error while walk: %w", err)
 			}
 			if !info.Mode().IsRegular() {
 				return nil
@@ -31,7 +31,7 @@ func (fs *FileSystem) FindFiles(paths []string) ([]adaptors.File, error) {
 			})
 			return nil
 		}); err != nil {
-			return nil, errors.Wrapf(err, "error while finding files in %s", path)
+			return nil, xerrors.Errorf("error while finding files in %s: %w", path, err)
 		}
 	}
 	return files, nil
@@ -41,13 +41,13 @@ func (fs *FileSystem) FindFiles(paths []string) ([]adaptors.File, error) {
 func (fs *FileSystem) ReadAsBase64EncodedContent(filename string) (string, error) {
 	r, err := os.Open(filename)
 	if err != nil {
-		return "", errors.Wrapf(err, "error while opening file %s", filename)
+		return "", xerrors.Errorf("error while opening file %s: %w", filename, err)
 	}
 	defer r.Close()
 	var s strings.Builder
 	e := base64.NewEncoder(base64.StdEncoding, &s)
 	if _, err := io.Copy(e, r); err != nil {
-		return "", errors.Wrapf(err, "error while encoding file %s", filename)
+		return "", xerrors.Errorf("error while encoding file %s: %w", filename, err)
 	}
 	e.Close()
 	return s.String(), nil

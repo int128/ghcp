@@ -6,7 +6,7 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 // UpdateBranch copies files to the default/given branch on the repository.
@@ -19,21 +19,21 @@ type UpdateBranch struct {
 
 func (u *UpdateBranch) Do(ctx context.Context, in usecases.UpdateBranchIn) error {
 	if !in.Repository.IsValid() {
-		return errors.New("you must set GitHub repository")
+		return xerrors.New("you must set GitHub repository")
 	}
 	if in.CommitMessage == "" {
-		return errors.New("you must set commit message")
+		return xerrors.New("you must set commit message")
 	}
 	if len(in.Paths) == 0 {
-		return errors.New("you must set one or more paths")
+		return xerrors.New("you must set one or more paths")
 	}
 
 	files, err := u.FileSystem.FindFiles(in.Paths)
 	if err != nil {
-		return errors.Wrapf(err, "error while finding files")
+		return xerrors.Errorf("error while finding files: %w", err)
 	}
 	if len(files) == 0 {
-		return errors.New("no file exists in given paths")
+		return xerrors.New("no file exists in given paths")
 	}
 
 	out, err := u.GitHub.QueryForUpdateBranch(ctx, adaptors.QueryForUpdateBranchIn{
@@ -41,7 +41,7 @@ func (u *UpdateBranch) Do(ctx context.Context, in usecases.UpdateBranchIn) error
 		BranchName: in.BranchName,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "error while getting the repository")
+		return xerrors.Errorf("error while getting the repository: %w", err)
 	}
 	u.Logger.Infof("Author and committer: %s", out.CurrentUserName)
 
@@ -59,14 +59,14 @@ func (u *UpdateBranch) Do(ctx context.Context, in usecases.UpdateBranchIn) error
 			BranchName: out.DefaultBranchName,
 			DryRun:     in.DryRun,
 		}); err != nil {
-			return errors.WithStack(err)
+			return xerrors.Errorf("error while updating the default branch: %w", err)
 		}
 		return nil
 	}
 
 	// copy to the given branch
 	if out.BranchCommitSHA == "" || out.BranchTreeSHA == "" {
-		return errors.Errorf("branch %s does not exist", in.BranchName)
+		return xerrors.Errorf("branch %s does not exist", in.BranchName)
 	}
 	if err := u.doInternal(ctx, updateBranchInternalIn{
 		CommitIn: usecases.CommitIn{
@@ -80,7 +80,7 @@ func (u *UpdateBranch) Do(ctx context.Context, in usecases.UpdateBranchIn) error
 		BranchName: in.BranchName,
 		DryRun:     in.DryRun,
 	}); err != nil {
-		return errors.WithStack(err)
+		return xerrors.Errorf("error while updating %s branch: %w", in.BranchName, err)
 	}
 	return nil
 }
@@ -97,7 +97,7 @@ func (u *UpdateBranch) doInternal(ctx context.Context, in updateBranchInternalIn
 
 	commit, err := u.Commit.Do(ctx, in.CommitIn)
 	if err != nil {
-		return errors.WithStack(err)
+		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Commit: %d changed file(s)", commit.ChangedFiles)
 	if commit.ChangedFiles == 0 {
@@ -114,7 +114,7 @@ func (u *UpdateBranch) doInternal(ctx context.Context, in updateBranchInternalIn
 		BranchName: in.BranchName,
 		CommitSHA:  commit.CommitSHA,
 	}, false); err != nil {
-		return errors.Wrapf(err, "error while updating %s branch", in.BranchName)
+		return xerrors.Errorf("error while updating %s branch: %w", in.BranchName, err)
 	}
 	u.Logger.Infof("Updated %s branch of %s", in.BranchName, in.Repository)
 
