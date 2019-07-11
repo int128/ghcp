@@ -2,7 +2,10 @@
 package di
 
 import (
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/cmd"
+	"github.com/int128/ghcp/adaptors/env"
+	"github.com/int128/ghcp/adaptors/github"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
@@ -14,11 +17,11 @@ var dependencies = []interface{}{
 	usecases.NewCreateBranch,
 	usecases.NewCommit,
 
-	adaptors.NewCmd,
-	adaptors.NewFileSystem,
-	adaptors.NewEnv,
-	adaptors.NewLogger,
-	adaptors.NewGitHub,
+	cmd.NewCmd,
+	env.NewFileSystem,
+	env.NewEnv,
+	logger.NewLogger,
+	github.NewGitHub,
 
 	infrastructure.NewGitHubClient,
 }

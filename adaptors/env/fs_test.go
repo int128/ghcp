@@ -1,4 +1,4 @@
-package adaptors
+package env
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/go-test/deep"
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 )
 
 func TestFileSystem_FindFiles(t *testing.T) {

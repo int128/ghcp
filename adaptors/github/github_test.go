@@ -1,4 +1,4 @@
-package adaptors
+package github
 
 import (
 	"context"

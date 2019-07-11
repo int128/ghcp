@@ -3,10 +3,10 @@ package mock_adaptors
 import (
 	"testing"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	adaptors2 "github.com/int128/ghcp/adaptors"
 )
 
-func NewLogger(t *testing.T) adaptors.Logger {
+func NewLogger(t *testing.T) adaptors2.Logger {
 	return &testLogger{t}
 }
 

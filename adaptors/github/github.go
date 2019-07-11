@@ -1,10 +1,10 @@
-package adaptors
+package github
 
 import (
 	"context"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure/interfaces"
 	"github.com/pkg/errors"

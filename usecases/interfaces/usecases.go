@@ -3,7 +3,7 @@ package usecases
 import (
 	"context"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	adaptors2 "github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 )
 
@@ -49,7 +49,7 @@ type Commit interface {
 }
 
 type CommitIn struct {
-	Files           []adaptors.File
+	Files           []adaptors2.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	ParentCommitSHA git.CommitSHA // no parent if empty

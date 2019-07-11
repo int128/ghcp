@@ -3,7 +3,7 @@ package usecases
 import (
 	"context"
 
-	"github.com/int128/ghcp/adaptors/interfaces"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases/interfaces"
 	"github.com/pkg/errors"
