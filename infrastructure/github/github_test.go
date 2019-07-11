@@ -40,8 +40,8 @@ func TestNewGitHubClient(t *testing.T) {
 		Token: "YOUR_TOKEN",
 		URLv3: s.URL + "/api/v3/",
 	}
-	c, init := NewClient()
-	if err := init.Init(o); err != nil {
+	var c Client
+	if err := c.Init(o); err != nil {
 		t.Fatalf("Init returned error: %s", err)
 	}
 

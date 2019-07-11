@@ -4,20 +4,20 @@ package commit
 import (
 	"context"
 
+	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
-	"go.uber.org/dig"
 )
 
-func New(i Commit) usecases.Commit {
-	return &i
-}
+var Set = wire.NewSet(
+	wire.Struct(new(Commit), "*"),
+	wire.Bind(new(usecases.Commit), new(*Commit)),
+)
 
 // Commit creates blob(s), a tree and a commit.
 type Commit struct {
-	dig.In
 	FileSystem adaptors.FileSystem
 	Logger     adaptors.Logger
 	GitHub     adaptors.GitHub

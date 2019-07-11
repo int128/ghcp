@@ -5,19 +5,21 @@ import (
 	"net/url"
 
 	"github.com/google/go-github/v24/github"
+	"github.com/google/wire"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
-// NewClient returns a Client and GitHubClientInit.
-// Caller must call GitHubClientInit.Init() before an API invocation.
-func NewClient() (infrastructure.GitHubClient, infrastructure.GitHubClientInit) {
-	var c Client
-	return &c, &c
-}
+var Set = wire.NewSet(
+	wire.Struct(new(Client)),
+	wire.Bind(new(infrastructure.GitHubClient), new(*Client)),
+	wire.Bind(new(infrastructure.GitHubClientInit), new(*Client)),
+)
 
+// Client provides GitHub access.
+// Caller must call Init() before an API invocation.
 type Client struct {
 	*githubv4.Client
 	*github.GitService
