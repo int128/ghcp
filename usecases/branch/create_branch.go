@@ -6,7 +6,7 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 // CreateBranch creates a new branch based on the default/given branch of the repository.
@@ -19,24 +19,24 @@ type CreateBranch struct {
 
 func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error {
 	if !in.Repository.IsValid() {
-		return errors.New("you must set GitHub repository")
+		return xerrors.New("you must set GitHub repository")
 	}
 	if in.NewBranchName == "" {
-		return errors.New("you must set new branch name")
+		return xerrors.New("you must set new branch name")
 	}
 	if in.CommitMessage == "" {
-		return errors.New("you must set commit message")
+		return xerrors.New("you must set commit message")
 	}
 	if len(in.Paths) == 0 {
-		return errors.New("you must set one or more paths")
+		return xerrors.New("you must set one or more paths")
 	}
 
 	files, err := u.FileSystem.FindFiles(in.Paths)
 	if err != nil {
-		return errors.Wrapf(err, "error while finding files")
+		return xerrors.Errorf("error while finding files: %w", err)
 	}
 	if len(files) == 0 {
-		return errors.Errorf("no file exists in %v", in.Paths)
+		return xerrors.Errorf("no file exists in %v", in.Paths)
 	}
 
 	out, err := u.GitHub.QueryForCreateBranch(ctx, adaptors.QueryForCreateBranchIn{
@@ -45,10 +45,10 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 		NewBranchName: in.NewBranchName,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "error while getting the repository")
+		return xerrors.Errorf("error while getting the repository: %w", err)
 	}
 	if out.NewBranchExists {
-		return errors.Errorf("branch %s already exists", in.NewBranchName)
+		return xerrors.Errorf("branch %s already exists", in.NewBranchName)
 	}
 	u.Logger.Infof("Author and committer: %s", out.CurrentUserName)
 
@@ -66,13 +66,13 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 			NewBranchName: in.NewBranchName,
 			DryRun:        in.DryRun,
 		}); err != nil {
-			return errors.WithStack(err)
+			return xerrors.Errorf("error while creating a branch: %w", err)
 		}
 		return nil
 	}
 	if in.ParentOfNewBranch.FromRef != "" {
 		if !out.ParentRefName.IsValid() {
-			return errors.Errorf("parent ref %s does not exist", in.ParentOfNewBranch.FromRef)
+			return xerrors.Errorf("parent ref %s does not exist", in.ParentOfNewBranch.FromRef)
 		}
 		if err := u.doInternal(ctx, createBranchInternalIn{
 			CommitIn: usecases.CommitIn{
@@ -87,7 +87,7 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 			NewBranchName: in.NewBranchName,
 			DryRun:        in.DryRun,
 		}); err != nil {
-			return errors.WithStack(err)
+			return xerrors.Errorf("error while creating a branch: %w", err)
 		}
 		return nil
 	}
@@ -102,11 +102,11 @@ func (u *CreateBranch) Do(ctx context.Context, in usecases.CreateBranchIn) error
 			NewBranchName: in.NewBranchName,
 			DryRun:        in.DryRun,
 		}); err != nil {
-			return errors.WithStack(err)
+			return xerrors.Errorf("error while creating a branch: %w", err)
 		}
 		return nil
 	}
-	return errors.New("you must set one of ParentOfNewBranch")
+	return xerrors.New("you must set one of ParentOfNewBranch")
 }
 
 type createBranchInternalIn struct {
@@ -122,7 +122,7 @@ func (u *CreateBranch) doInternal(ctx context.Context, in createBranchInternalIn
 
 	commit, err := u.Commit.Do(ctx, in.CommitIn)
 	if err != nil {
-		return errors.WithStack(err)
+		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Commit: %d changed file(s)", commit.ChangedFiles)
 	if commit.ChangedFiles == 0 {
@@ -139,7 +139,7 @@ func (u *CreateBranch) doInternal(ctx context.Context, in createBranchInternalIn
 		BranchName: in.NewBranchName,
 		CommitSHA:  commit.CommitSHA,
 	}); err != nil {
-		return errors.Wrapf(err, "error while creating %s branch", in.NewBranchName)
+		return xerrors.Errorf("error while creating %s branch: %w", in.NewBranchName, err)
 	}
 	u.Logger.Infof("Created %s branch on %s", in.NewBranchName, in.Repository)
 

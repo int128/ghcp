@@ -8,7 +8,7 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/usecases"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -28,14 +28,14 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.Commit
 	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
 		if err != nil {
-			return nil, errors.Wrapf(err, "error while reading file %s", file.Path)
+			return nil, xerrors.Errorf("error while reading file %s: %w", file.Path, err)
 		}
 		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
 			Repository: in.Repository,
 			Content:    content,
 		})
 		if err != nil {
-			return nil, errors.Wrapf(err, "error while creating a blob for %s", file.Path)
+			return nil, xerrors.Errorf("error while creating a blob for %s: %w", file.Path, err)
 		}
 		gitFile := git.File{
 			Filename:   file.Path,
@@ -52,7 +52,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.Commit
 		Files:       files,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while creating a tree")
+		return nil, xerrors.Errorf("error while creating a tree: %w", err)
 	}
 	u.Logger.Infof("Created tree %s", treeSHA)
 
@@ -63,7 +63,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.Commit
 		TreeSHA:         treeSHA,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while creating a commit")
+		return nil, xerrors.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
@@ -72,7 +72,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.Commit
 		CommitSHA:  commitSHA,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "error while getting the commit %s", commitSHA)
+		return nil, xerrors.Errorf("error while getting the commit %s: %w", commitSHA, err)
 	}
 
 	return &usecases.CommitOut{

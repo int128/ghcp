@@ -8,8 +8,8 @@ import (
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
-	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
+	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -66,7 +66,7 @@ func (c *GitHub) QueryForUpdateBranch(ctx context.Context, in adaptors.QueryForU
 	}
 	c.Logger.Debugf("Querying the repository with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, errors.Wrapf(err, "GitHub API error")
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	out := adaptors.QueryForUpdateBranchOut{
@@ -134,7 +134,7 @@ func (c *GitHub) QueryForCreateBranch(ctx context.Context, in adaptors.QueryForC
 	}
 	c.Logger.Debugf("Querying the repository with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, errors.Wrapf(err, "GitHub API error")
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	out := adaptors.QueryForCreateBranchOut{
@@ -166,7 +166,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	})
 	if err != nil {
-		return errors.Wrapf(err, "GitHub API error")
+		return xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return nil
 }
@@ -179,7 +179,7 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) 
 		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
 	}, force)
 	if err != nil {
-		return errors.Wrapf(err, "GitHub API error")
+		return xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return nil
 }
@@ -202,7 +202,7 @@ func (c *GitHub) QueryCommit(ctx context.Context, in adaptors.QueryCommitIn) (*a
 	}
 	c.Logger.Debugf("Querying the commit with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, errors.Wrapf(err, "GitHub API error")
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	out := adaptors.QueryCommitOut{
@@ -225,7 +225,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 		Tree:    &github.Tree{SHA: github.String(string(n.TreeSHA))},
 	})
 	if err != nil {
-		return "", errors.Wrapf(err, "GitHub API error")
+		return "", xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return git.CommitSHA(commit.GetSHA()), nil
 }
@@ -244,7 +244,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 	}
 	tree, _, err := c.Client.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
 	if err != nil {
-		return "", errors.Wrapf(err, "GitHub API error")
+		return "", xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return git.TreeSHA(tree.GetSHA()), nil
 }
@@ -257,7 +257,7 @@ func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, er
 		Content:  github.String(n.Content),
 	})
 	if err != nil {
-		return "", errors.Wrapf(err, "GitHub API error")
+		return "", xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return git.BlobSHA(blob.GetSHA()), nil
 }
