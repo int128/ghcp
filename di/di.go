@@ -4,9 +4,9 @@ package di
 import (
 	"github.com/int128/ghcp/adaptors/cmd"
 	"github.com/int128/ghcp/adaptors/env"
-	"github.com/int128/ghcp/adaptors/github"
+	githubAdaptor "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
-	"github.com/int128/ghcp/infrastructure"
+	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
@@ -21,9 +21,9 @@ var dependencies = []interface{}{
 	env.NewFileSystem,
 	env.NewEnv,
 	logger.NewLogger,
-	github.NewGitHub,
+	githubAdaptor.New,
 
-	infrastructure.NewGitHubClient,
+	githubInfrastructure.NewClient,
 }
 
 func Invoke(runner interface{}) error {

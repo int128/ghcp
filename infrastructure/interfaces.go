@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-github/v24/github"
 )
 
-//go:generate mockgen -package mock_infrastructure -destination ../mock_infrastructure/mock_infrastructure.go github.com/int128/ghcp/infrastructure/interfaces GitHubClient,GitHubClientInit
+//go:generate mockgen -destination mock_infrastructure/mock_infrastructure.go github.com/int128/ghcp/infrastructure GitHubClient,GitHubClientInit
 
 type GitHubClient interface {
 	// v4 API
