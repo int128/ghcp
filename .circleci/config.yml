@@ -4,12 +4,18 @@ jobs:
     docker:
       - image: circleci/golang:1.11.2
     steps:
-      - run: go get golang.org/x/lint/golint
+      - run: |
+          mkdir -p ~/bin
+          echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
+      - run: |
+          curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b ~/bin v1.17.1
       - run: go get github.com/mitchellh/gox
       - run: go get github.com/tcnksm/ghr
-      - run: go get github.com/Songmu/ghch/cmd/ghch
       - checkout
-      - run: make
+      # fetch packages to prevent the golangci-lint error
+      - run: go vet
+      - run: make check
+      - run: bash <(curl -s https://codecov.io/bash)
       - run: |
           if [ "$CIRCLE_TAG" ]; then
             make release
@@ -20,6 +26,7 @@ workflows:
   all:
     jobs:
       - build:
+          context: open-source
           filters:
             tags:
               only: /.*/
