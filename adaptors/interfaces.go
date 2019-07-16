@@ -47,8 +47,7 @@ type LoggerConfig interface {
 }
 
 type GitHub interface {
-	QueryForUpdateBranch(ctx context.Context, in QueryForUpdateBranchIn) (*QueryForUpdateBranchOut, error)
-	QueryForCreateBranch(ctx context.Context, in QueryForCreateBranchIn) (*QueryForCreateBranchOut, error)
+	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
@@ -57,37 +56,23 @@ type GitHub interface {
 	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
 }
 
-type QueryForUpdateBranchIn struct {
+type QueryForCommitToBranchIn struct {
 	Repository git.RepositoryID
 	BranchName git.BranchName // optional
+	ParentRef  git.RefName    // optional
 }
 
-type QueryForUpdateBranchOut struct {
+type QueryForCommitToBranchOut struct {
 	CurrentUserName        string
 	Repository             git.RepositoryID
 	DefaultBranchName      git.BranchName
 	DefaultBranchCommitSHA git.CommitSHA
 	DefaultBranchTreeSHA   git.TreeSHA
-	BranchCommitSHA        git.CommitSHA // empty if the branch does not exist
-	BranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
-}
-
-type QueryForCreateBranchIn struct {
-	Repository    git.RepositoryID
-	ParentRef     git.RefName // optional
-	NewBranchName git.BranchName
-}
-
-type QueryForCreateBranchOut struct {
-	CurrentUserName        string
-	Repository             git.RepositoryID
-	DefaultBranchRefName   git.RefQualifiedName
-	DefaultBranchCommitSHA git.CommitSHA
-	DefaultBranchTreeSHA   git.TreeSHA
+	BranchCommitSHA        git.CommitSHA        // empty if the branch does not exist
+	BranchTreeSHA          git.TreeSHA          // empty if the branch does not exist
 	ParentRefName          git.RefQualifiedName // empty if the parent ref does not exist
 	ParentRefCommitSHA     git.CommitSHA        // empty if the parent ref does not exist
 	ParentRefTreeSHA       git.TreeSHA          // empty if the parent ref does not exist
-	NewBranchExists        bool
 }
 
 type QueryCommitIn struct {

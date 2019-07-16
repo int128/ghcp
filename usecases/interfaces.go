@@ -4,45 +4,32 @@ package usecases
 import (
 	"context"
 
-	adaptors2 "github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases UpdateBranch,CreateBranch,Commit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases CommitToBranch,Commit
 
-type UpdateBranch interface {
-	Do(ctx context.Context, in UpdateBranchIn) error
+type CommitToBranch interface {
+	Do(ctx context.Context, in CommitToBranchIn) error
 }
 
-type UpdateBranchIn struct {
-	Repository    git.RepositoryID
-	BranchName    git.BranchName // default branch if empty
-	CommitMessage git.CommitMessage
-	Paths         []string
-	NoFileMode    bool
-	DryRun        bool
+type CommitToBranchIn struct {
+	Repository     git.RepositoryID
+	BranchName     git.BranchName // default branch if empty
+	ParentOfBranch ParentOfBranch
+	CommitMessage  git.CommitMessage
+	Paths          []string
+	NoFileMode     bool
+	DryRun         bool
 }
 
-type CreateBranch interface {
-	Do(ctx context.Context, in CreateBranchIn) error
-}
-
-type CreateBranchIn struct {
-	Repository        git.RepositoryID
-	NewBranchName     git.BranchName
-	ParentOfNewBranch ParentOfNewBranch
-	CommitMessage     git.CommitMessage
-	Paths             []string
-	NoFileMode        bool
-	DryRun            bool
-}
-
-// ParentOfNewBranch represents a parent of a branch to create.
+// ParentOfBranch represents a parent ref of the branch to create or update.
 // Exact one of the members must be valid.
-type ParentOfNewBranch struct {
-	NoParent          bool
-	FromDefaultBranch bool
-	FromRef           git.RefName
+type ParentOfBranch struct {
+	NoParent    bool        // push a branch without any parent
+	FastForward bool        // push the branch by fast-forward
+	FromRef     git.RefName // push a branch based on the ref
 }
 
 type Commit interface {
@@ -50,7 +37,7 @@ type Commit interface {
 }
 
 type CommitIn struct {
-	Files           []adaptors2.File
+	Files           []adaptors.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	ParentCommitSHA git.CommitSHA // no parent if empty
