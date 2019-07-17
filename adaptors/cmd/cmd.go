@@ -3,13 +3,15 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/int128/ghcp/usecases"
-	"github.com/spf13/pflag"
+	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -17,26 +19,15 @@ var Set = wire.NewSet(
 	wire.Bind(new(adaptors.Cmd), new(*Cmd)),
 )
 
-const usage = `Help:
-
-Usage: %s [options] [file or directory...]
-
-  ghcp copies files to a GitHub repository.
-  It depends on GitHub API and works without git commands.
-
-Options:
-%s`
-
 const (
 	envGitHubToken = "GITHUB_TOKEN"
 	envGitHubAPI   = "GITHUB_API"
-)
 
-const (
-	exitCodeOK                = 0
-	exitCodeGenericError      = 10
-	exitCodePreconditionError = 11
-	exitCodeUseCaseError      = 20
+	exitCodeOK    = 0
+	exitCodeError = 1
+
+	createBranchCmdName = "commit-new-branch"
+	updateBranchCmdName = "commit"
 )
 
 // Cmd interacts with command line interface.
@@ -49,157 +40,176 @@ type Cmd struct {
 	GitHubClientInit infrastructure.GitHubClientInit
 }
 
-// Run parses the arguments and executes the use case.
+// Run parses the arguments and executes the use-case.
 func (c *Cmd) Run(ctx context.Context, args []string) int {
-	f := pflag.NewFlagSet(args[0], pflag.ContinueOnError)
-	f.Usage = func() {
-		c.Logger.Infof(usage, args[0], f.FlagUsages())
-	}
-	var o cmdOptions
-	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
-	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
-	f.StringVarP(&o.UpdateBranch, "branch", "b", "", "Update the branch (default: default branch of repository)")
-	f.StringVarP(&o.NewBranch, "new-branch", "B", "", "Create a branch")
-	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch or tag (default: default branch of repository)")
-	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
-	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before copy")
-	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
-	f.StringVar(&o.GitHubAPI, "api", "", fmt.Sprintf("GitHub API v3 URL (v4 will be inferred) [$%s]", envGitHubAPI))
-	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
-	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
-	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
+	rootCmd := newRootCmd(filepath.Base(args[0]), c)
+	createBranchCmd := newCreateBranchCmd(ctx, c)
+	rootCmd.AddCommand(createBranchCmd)
+	updateBranchCmd := newUpdateBranchCmd(ctx, c)
+	rootCmd.AddCommand(updateBranchCmd)
 
-	if err := f.Parse(args[1:]); err != nil {
-		if err == pflag.ErrHelp {
-			return exitCodeGenericError
-		}
-		c.Logger.Errorf("Invalid arguments: %s", err)
-		return exitCodeGenericError
-	}
-	o.Paths = f.Args()
-
-	if o.Debug {
-		c.LoggerConfig.SetDebug(true)
-		c.Logger.Debugf("Debug enabled")
-	}
-	if o.Chdir != "" {
-		if err := c.Env.Chdir(o.Chdir); err != nil {
-			c.Logger.Errorf("Could not change to directory %s: %s", o.Chdir, err)
-			return exitCodePreconditionError
-		}
-		c.Logger.Infof("Changed to directory %s", o.Chdir)
-	}
-	if o.GitHubToken == "" {
-		o.GitHubToken = c.Env.Getenv(envGitHubToken)
-		if o.GitHubToken != "" {
-			c.Logger.Debugf("Using token from environment variable $%s", envGitHubToken)
-		}
-	}
-	if o.GitHubToken == "" {
-		c.Logger.Errorf("No GitHub API token. Set environment variable %s or --token option", envGitHubToken)
-		return exitCodePreconditionError
-	}
-	if o.GitHubAPI == "" {
-		o.GitHubAPI = c.Env.Getenv(envGitHubAPI)
-		if o.GitHubAPI != "" {
-			c.Logger.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
-		}
-	}
-	if err := c.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
-		Token: o.GitHubToken,
-		URLv3: o.GitHubAPI,
-	}); err != nil {
-		c.Logger.Errorf("Could not connect to GitHub API: %s", err)
-		return exitCodePreconditionError
-	}
-
-	if o.UpdateBranch != "" && o.NewBranch != "" {
-		c.Logger.Errorf("Do not set both --branch and --new-branch")
-		return exitCodePreconditionError
-	}
-	if o.NewBranch != "" {
-		return c.runCreateBranch(ctx, o)
-	}
-	return c.runUpdateBranch(ctx, o)
-}
-
-func (c *Cmd) runCreateBranch(ctx context.Context, o cmdOptions) int {
-	if o.ParentRef != "" && o.NoParent {
-		c.Logger.Errorf("Do not set both --parent and --no-parent")
-		return exitCodePreconditionError
-	}
-
-	in := usecases.CreateBranchIn{
-		Repository: git.RepositoryID{
-			Owner: o.RepositoryOwner,
-			Name:  o.RepositoryName,
-		},
-		NewBranchName: git.BranchName(o.NewBranch),
-		ParentOfNewBranch: usecases.ParentOfNewBranch{
-			NoParent:          o.NoParent,
-			FromDefaultBranch: o.ParentRef == "" && !o.NoParent,
-			FromRef:           git.RefName(o.ParentRef),
-		},
-		CommitMessage: git.CommitMessage(o.CommitMessage),
-		Paths:         o.Paths,
-		NoFileMode:    o.NoFileMode,
-		DryRun:        o.DryRun,
-	}
-	if err := c.CreateBranch.Do(ctx, in); err != nil {
-		c.Logger.Errorf("Could not copy files: %s", err)
-		c.Logger.Debugf("Stacktrace:\n%+v", err)
-		return exitCodeUseCaseError
+	rootCmd.SetArgs(args[1:])
+	if err := rootCmd.Execute(); err != nil {
+		return exitCodeError
 	}
 	return exitCodeOK
 }
 
-func (c *Cmd) runUpdateBranch(ctx context.Context, o cmdOptions) int {
-	if o.ParentRef != "" {
-		c.Logger.Errorf("Do not set --parent on updating the branch")
-		return exitCodePreconditionError
-	}
-
-	in := usecases.UpdateBranchIn{
-		Repository: git.RepositoryID{
-			Owner: o.RepositoryOwner,
-			Name:  o.RepositoryName,
-		},
-		BranchName:    git.BranchName(o.UpdateBranch),
-		CommitMessage: git.CommitMessage(o.CommitMessage),
-		Paths:         o.Paths,
-		NoFileMode:    o.NoFileMode,
-		DryRun:        o.DryRun,
-	}
-	if err := c.UpdateBranch.Do(ctx, in); err != nil {
-		c.Logger.Errorf("Could not copy files: %s", err)
-		c.Logger.Debugf("Stacktrace:\n%+v", err)
-		return exitCodeUseCaseError
-	}
-	return exitCodeOK
-}
-
-type cmdOptions struct {
-	envOptions
-	useCaseOptions
-}
-
-type envOptions struct {
+type globalOptions struct {
 	Chdir       string
 	GitHubToken string
 	GitHubAPI   string // optional
 	Debug       bool
 }
 
-type useCaseOptions struct {
+func newRootCmd(name string, cmd *Cmd) *cobra.Command {
+	var o globalOptions
+	c := &cobra.Command{
+		Use:          name,
+		Short:        "A command to commit files to a GitHub repository",
+		SilenceUsage: true,
+		PersistentPreRunE: func(*cobra.Command, []string) error {
+			if o.Debug {
+				cmd.LoggerConfig.SetDebug(true)
+				cmd.Logger.Debugf("Debug enabled")
+			}
+			if o.Chdir != "" {
+				if err := cmd.Env.Chdir(o.Chdir); err != nil {
+					return xerrors.Errorf("could not change to directory %s: %w", o.Chdir, err)
+				}
+				cmd.Logger.Infof("Changed to directory %s", o.Chdir)
+			}
+			if o.GitHubToken == "" {
+				o.GitHubToken = cmd.Env.Getenv(envGitHubToken)
+				if o.GitHubToken != "" {
+					cmd.Logger.Debugf("Using token from environment variable $%s", envGitHubToken)
+				}
+			}
+			if o.GitHubToken == "" {
+				return xerrors.Errorf("no GitHub API token. Set environment variable %s or --token option", envGitHubToken)
+			}
+			if o.GitHubAPI == "" {
+				o.GitHubAPI = cmd.Env.Getenv(envGitHubAPI)
+				if o.GitHubAPI != "" {
+					cmd.Logger.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
+				}
+			}
+			if err := cmd.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
+				Token: o.GitHubToken,
+				URLv3: o.GitHubAPI,
+			}); err != nil {
+				return xerrors.Errorf("could not connect to GitHub API: %w", err)
+			}
+			return nil
+		},
+	}
+	f := c.PersistentFlags()
+	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before operation")
+	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
+	f.StringVar(&o.GitHubAPI, "api", "", fmt.Sprintf("GitHub API v3 URL (v4 will be inferred) [$%s]", envGitHubAPI))
+	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
+	return c
+}
+
+type createBranchOptions struct {
 	RepositoryOwner string
 	RepositoryName  string
 	CommitMessage   string
-	UpdateBranch    string
-	NewBranch       string
+	BranchName      string
 	ParentRef       string
 	NoParent        bool
-	Paths           []string
+	NoFileMode      bool
+	DryRun          bool
+}
+
+func newCreateBranchCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
+	var o createBranchOptions
+	c := &cobra.Command{
+		Use:   createBranchCmdName,
+		Short: "Commit files to a new branch",
+		Long:  "This command creates a commit with the files and creates a new branch pointing to the commit.",
+		Args: func(*cobra.Command, []string) error {
+			if o.ParentRef != "" && o.NoParent {
+				return xerrors.Errorf("do not set both --parent and --no-parent")
+			}
+			return nil
+		},
+		RunE: func(_ *cobra.Command, args []string) error {
+			in := usecases.CreateBranchIn{
+				Repository: git.RepositoryID{
+					Owner: o.RepositoryOwner,
+					Name:  o.RepositoryName,
+				},
+				NewBranchName: git.BranchName(o.BranchName),
+				ParentOfNewBranch: usecases.ParentOfNewBranch{
+					NoParent:          o.NoParent,
+					FromDefaultBranch: o.ParentRef == "" && !o.NoParent,
+					FromRef:           git.RefName(o.ParentRef),
+				},
+				CommitMessage: git.CommitMessage(o.CommitMessage),
+				Paths:         args,
+				NoFileMode:    o.NoFileMode,
+				DryRun:        o.DryRun,
+			}
+			if err := cmd.CreateBranch.Do(ctx, in); err != nil {
+				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
+				return xerrors.Errorf("could not commit the files: %s", err)
+			}
+			return nil
+		},
+	}
+	f := c.Flags()
+	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
+	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
+	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
+	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of a branch to create (mandatory)")
+	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch or tag (default: the default branch)")
+	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
+	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
+	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	return c
+}
+
+func newUpdateBranchCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
+	var o updateBranchOptions
+	c := &cobra.Command{
+		Use:   updateBranchCmdName,
+		Short: "Commit files to the existing branch",
+		Long:  "This command creates a commit with the files and updates the branch to point to the commit by fast-forward.",
+		RunE: func(_ *cobra.Command, args []string) error {
+			in := usecases.UpdateBranchIn{
+				Repository: git.RepositoryID{
+					Owner: o.RepositoryOwner,
+					Name:  o.RepositoryName,
+				},
+				BranchName:    git.BranchName(o.BranchName),
+				CommitMessage: git.CommitMessage(o.CommitMessage),
+				Paths:         args,
+				NoFileMode:    o.NoFileMode,
+				DryRun:        o.DryRun,
+			}
+			if err := cmd.UpdateBranch.Do(ctx, in); err != nil {
+				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
+				return xerrors.Errorf("could not copy files: %s", err)
+			}
+			return nil
+		},
+	}
+	f := c.Flags()
+	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
+	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
+	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
+	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to update (default: the default branch)")
+	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
+	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	return c
+}
+
+type updateBranchOptions struct {
+	RepositoryOwner string
+	RepositoryName  string
+	CommitMessage   string
+	BranchName      string
 	NoFileMode      bool
 	DryRun          bool
 }
