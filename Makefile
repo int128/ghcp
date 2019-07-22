@@ -25,7 +25,7 @@ dist/$(TARGET).rb: dist/bin
 	./homebrew.sh dist/bin/$(TARGET)_darwin_amd64 > dist/$(TARGET).rb
 
 release_homebrew: dist/$(TARGET).rb install
-	ghcp -u $(CIRCLE_PROJECT_USERNAME) -r homebrew-$(CIRCLE_PROJECT_REPONAME) -m $(CIRCLE_TAG) -C dist/ $(TARGET).rb
+	ghcp commit -u $(CIRCLE_PROJECT_USERNAME) -r homebrew-$(CIRCLE_PROJECT_REPONAME) -m $(CIRCLE_TAG) -C dist/ $(TARGET).rb
 
 release: release_bin release_homebrew
 
