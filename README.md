@@ -10,7 +10,8 @@ Install the latest release from [here](https://github.com/int128/ghcp/releases) 
 
 ```sh
 # GitHub Releases
-curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.3.0/ghcp_linux_amd64
+curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.4.0/ghcp_linux_amd64
+chmod +x ~/bin/ghcp
 
 # Homebrew
 brew tap int128/ghcp
@@ -162,7 +163,7 @@ ghcp performs a commit operation as follows:
 - An author and committer of a commit are set to the login user depending on the token.
 - It does not create a new commit if the branch has same files, that prevents an empty commit.
 - It does not read the current Git config (`.gitconfig`) and Git state (`.git`) and you need to always set owner and name of a repository.
-- It excludes `.git` directory.
+- It excludes `.git` directories.
 
 
 ### Working with CI
