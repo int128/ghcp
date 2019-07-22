@@ -74,6 +74,7 @@ brew install hello
 See also [Makefile](Makefile).
 ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp.
 
+
 ### Example: Bump version string
 
 You can change version string in files such as README or build script.
@@ -83,8 +84,8 @@ For example,
 # substitute version string in files
 sed -i -e "s/version '[0-9.]*'/version '$TAG'/g" README.md build.gradle
 
-# commit the changes to a new branch
-ghcp commit-new-branch -u OWNER -r REPO -b bump-v1.1.0 -m v1.1.0 README.md build.gradle
+# commit the changes to a branch
+ghcp commit -u OWNER -r REPO -b bump-v1.1.0 -m v1.1.0 README.md build.gradle
 ```
 
 
@@ -95,9 +96,8 @@ Usage:
   ghcp [command]
 
 Available Commands:
-  commit            Commit files to the existing branch
-  commit-new-branch Commit files to a new branch
-  help              Help about any command
+  commit      Commit files to the branch
+  help        Help about any command
 
 Flags:
       --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
@@ -109,59 +109,55 @@ Flags:
 
 ```
 Usage:
-  ghcp commit [flags]
+  ghcp commit [flags] FILES...
 
 Flags:
-  -b, --branch string    Name of the branch to update (default: the default branch)
+  -b, --branch string    Name of the branch to create or update (default: the default branch of repository)
       --dry-run          Upload files but do not update the branch actually
   -h, --help             help for commit
   -m, --message string   Commit message (mandatory)
       --no-file-mode     Ignore executable bit of file and treat as 0644
-  -u, --owner string     GitHub repository owner (mandatory)
-  -r, --repo string      GitHub repository name (mandatory)
-```
-
-```
-Usage:
-  ghcp commit-new-branch [flags]
-
-Flags:
-  -b, --branch string    Name of a branch to create (mandatory)
-      --dry-run          Upload files but do not update the branch actually
-  -h, --help             help for commit-new-branch
-  -m, --message string   Commit message (mandatory)
-      --no-file-mode     Ignore executable bit of file and treat as 0644
       --no-parent        Create a commit without a parent
   -u, --owner string     GitHub repository owner (mandatory)
-      --parent string    Create a commit from the parent branch or tag (default: the default branch)
+      --parent string    Create a commit from the parent branch/tag (default: fast-forward)
   -r, --repo string      GitHub repository name (mandatory)
 ```
 
-To commit the files to the default branch:
+
+### Behaviors
+
+To commit files to the default branch:
 
 ```sh
 ghcp commit -u OWNER -r REPO -m MESSAGE FILES...
 ```
 
-To commit the files to the branch:
+To commit files to the branch:
 
 ```sh
 ghcp commit -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
 ```
 
-To commit the files to a new branch from the default branch:
+If the branch does not exist, ghcp creates a branch from the default branch.
+It the branch exists, ghcp updates the branch by fast-forward.
+
+To commit files to a new branch from the parent branch:
 
 ```sh
-ghcp commit-new-branch -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
+ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
 ```
 
-To commit the files to a new branch from the parent branch:
+If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
+
+To commit files to a new branch without any parent:
 
 ```sh
-ghcp commit-new-branch -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
+ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
 ```
 
-Author and comitter of a commit are set to the login user, that depends on the token.
+If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
+
+An author and committer of a commit are set to the login user depending on the token.
 ghcp does not create a new commit if the branch has same files, that prevents an empty commit.
 ghcp does not read the current Git config and Git state and you need to always set owner and name of a repository.
 

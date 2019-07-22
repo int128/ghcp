@@ -23,8 +23,8 @@ type GitHub struct {
 	Logger adaptors.Logger
 }
 
-// QueryForUpdateBranch returns the repository for updating the branch.
-func (c *GitHub) QueryForUpdateBranch(ctx context.Context, in adaptors.QueryForUpdateBranchIn) (*adaptors.QueryForUpdateBranchOut, error) {
+// QueryForCommitToBranch returns the repository for updating the branch.
+func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryForCommitToBranchIn) (*adaptors.QueryForCommitToBranchOut, error) {
 	var q struct {
 		Viewer struct {
 			Login string
@@ -57,54 +57,6 @@ func (c *GitHub) QueryForUpdateBranch(ctx context.Context, in adaptors.QueryForU
 					} `graphql:"... on Commit"`
 				}
 			} `graphql:"ref(qualifiedName: $ref)"`
-		} `graphql:"repository(owner: $owner, name: $repo)"`
-	}
-	v := map[string]interface{}{
-		"owner": githubv4.String(in.Repository.Owner),
-		"repo":  githubv4.String(in.Repository.Name),
-		"ref":   githubv4.String(in.BranchName.QualifiedName().String()),
-	}
-	c.Logger.Debugf("Querying the repository with %+v", v)
-	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
-	}
-	c.Logger.Debugf("Got the result: %+v", q)
-	out := adaptors.QueryForUpdateBranchOut{
-		CurrentUserName:        q.Viewer.Login,
-		Repository:             git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
-		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
-		DefaultBranchCommitSHA: git.CommitSHA(q.Repository.DefaultBranchRef.Target.Commit.Oid),
-		DefaultBranchTreeSHA:   git.TreeSHA(q.Repository.DefaultBranchRef.Target.Commit.Tree.Oid),
-		BranchCommitSHA:        git.CommitSHA(q.Repository.Ref.Target.Commit.Oid),
-		BranchTreeSHA:          git.TreeSHA(q.Repository.Ref.Target.Commit.Tree.Oid),
-	}
-	c.Logger.Debugf("Returning the repository: %+v", out)
-	return &out, nil
-}
-
-// QueryForCreateBranch returns the repository for creating a branch.
-func (c *GitHub) QueryForCreateBranch(ctx context.Context, in adaptors.QueryForCreateBranchIn) (*adaptors.QueryForCreateBranchOut, error) {
-	var q struct {
-		Viewer struct {
-			Login string
-		}
-		Repository struct {
-			Name  string
-			Owner struct{ Login string }
-
-			// default branch
-			DefaultBranchRef struct {
-				Prefix string
-				Name   string
-				Target struct {
-					Commit struct {
-						Oid  string
-						Tree struct {
-							Oid string
-						}
-					} `graphql:"... on Commit"`
-				}
-			}
 
 			// parent ref (optional)
 			ParentRef struct {
@@ -119,40 +71,33 @@ func (c *GitHub) QueryForCreateBranch(ctx context.Context, in adaptors.QueryForC
 					} `graphql:"... on Commit"`
 				}
 			} `graphql:"parentRef: ref(qualifiedName: $parentRef)"`
-
-			// new branch
-			NewRef struct {
-				Id githubv4.ID
-			} `graphql:"newRef: ref(qualifiedName: $newRef)"`
 		} `graphql:"repository(owner: $owner, name: $repo)"`
 	}
 	v := map[string]interface{}{
 		"owner":     githubv4.String(in.Repository.Owner),
 		"repo":      githubv4.String(in.Repository.Name),
+		"ref":       githubv4.String(in.BranchName.QualifiedName().String()),
 		"parentRef": githubv4.String(in.ParentRef),
-		"newRef":    githubv4.String(in.NewBranchName.QualifiedName().String()),
 	}
 	c.Logger.Debugf("Querying the repository with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := adaptors.QueryForCreateBranchOut{
-		CurrentUserName: q.Viewer.Login,
-		Repository:      git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
-		DefaultBranchRefName: git.RefQualifiedName{
-			Prefix: q.Repository.DefaultBranchRef.Prefix,
-			Name:   q.Repository.DefaultBranchRef.Name,
-		},
+	out := adaptors.QueryForCommitToBranchOut{
+		CurrentUserName:        q.Viewer.Login,
+		Repository:             git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
+		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
 		DefaultBranchCommitSHA: git.CommitSHA(q.Repository.DefaultBranchRef.Target.Commit.Oid),
 		DefaultBranchTreeSHA:   git.TreeSHA(q.Repository.DefaultBranchRef.Target.Commit.Tree.Oid),
+		BranchCommitSHA:        git.CommitSHA(q.Repository.Ref.Target.Commit.Oid),
+		BranchTreeSHA:          git.TreeSHA(q.Repository.Ref.Target.Commit.Tree.Oid),
 		ParentRefName: git.RefQualifiedName{
 			Prefix: q.Repository.ParentRef.Prefix,
 			Name:   q.Repository.ParentRef.Name,
 		},
 		ParentRefCommitSHA: git.CommitSHA(q.Repository.ParentRef.Target.Commit.Oid),
 		ParentRefTreeSHA:   git.TreeSHA(q.Repository.ParentRef.Target.Commit.Tree.Oid),
-		NewBranchExists:    q.Repository.NewRef.Id != nil,
 	}
 	c.Logger.Debugf("Returning the repository: %+v", out)
 	return &out, nil

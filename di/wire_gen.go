@@ -31,13 +31,7 @@ func NewCmd() adaptors.Cmd {
 		Logger:     loggerLogger,
 		GitHub:     gitHub,
 	}
-	updateBranch := &branch.UpdateBranch{
-		Commit:     commitCommit,
-		FileSystem: fileSystem,
-		Logger:     loggerLogger,
-		GitHub:     gitHub,
-	}
-	createBranch := &branch.CreateBranch{
+	commitToBranch := &branch.CommitToBranch{
 		Commit:     commitCommit,
 		FileSystem: fileSystem,
 		Logger:     loggerLogger,
@@ -45,8 +39,7 @@ func NewCmd() adaptors.Cmd {
 	}
 	envEnv := &env.Env{}
 	cmdCmd := &cmd.Cmd{
-		UpdateBranch:     updateBranch,
-		CreateBranch:     createBranch,
+		CommitToBranch:   commitToBranch,
 		Env:              envEnv,
 		Logger:           loggerLogger,
 		LoggerConfig:     loggerLogger,
