@@ -157,9 +157,12 @@ ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
 
 If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
 
-An author and committer of a commit are set to the login user depending on the token.
-ghcp does not create a new commit if the branch has same files, that prevents an empty commit.
-ghcp does not read the current Git config and Git state and you need to always set owner and name of a repository.
+ghcp performs a commit operation as follows:
+
+- An author and committer of a commit are set to the login user depending on the token.
+- It does not create a new commit if the branch has same files, that prevents an empty commit.
+- It does not read the current Git config (`.gitconfig`) and Git state (`.git`) and you need to always set owner and name of a repository.
+- It excludes `.git` directory.
 
 
 ### Working with CI

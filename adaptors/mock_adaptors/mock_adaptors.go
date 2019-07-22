@@ -71,16 +71,16 @@ func (m *MockFileSystem) EXPECT() *MockFileSystemMockRecorder {
 }
 
 // FindFiles mocks base method
-func (m *MockFileSystem) FindFiles(arg0 []string) ([]adaptors.File, error) {
-	ret := m.ctrl.Call(m, "FindFiles", arg0)
+func (m *MockFileSystem) FindFiles(arg0 []string, arg1 adaptors.FindFilesFilter) ([]adaptors.File, error) {
+	ret := m.ctrl.Call(m, "FindFiles", arg0, arg1)
 	ret0, _ := ret[0].([]adaptors.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindFiles indicates an expected call of FindFiles
-func (mr *MockFileSystemMockRecorder) FindFiles(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindFiles", reflect.TypeOf((*MockFileSystem)(nil).FindFiles), arg0)
+func (mr *MockFileSystemMockRecorder) FindFiles(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindFiles", reflect.TypeOf((*MockFileSystem)(nil).FindFiles), arg0, arg1)
 }
 
 // ReadAsBase64EncodedContent mocks base method

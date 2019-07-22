@@ -15,20 +15,29 @@ import (
 type FileSystem struct{}
 
 // FindFiles returns a list of files in the paths.
-func (fs *FileSystem) FindFiles(paths []string) ([]adaptors.File, error) {
+func (fs *FileSystem) FindFiles(paths []string, filter adaptors.FindFilesFilter) ([]adaptors.File, error) {
 	var files []adaptors.File
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return xerrors.Errorf("error while walk: %w", err)
 			}
-			if !info.Mode().IsRegular() {
+			if info.Mode().IsDir() {
+				if filter.SkipDir(path) {
+					return filepath.SkipDir
+				}
 				return nil
 			}
-			files = append(files, adaptors.File{
-				Path:       path,
-				Executable: info.Mode()&0100 != 0, // mask the executable bit of owner
-			})
+			if info.Mode().IsRegular() {
+				if filter.ExcludeFile(path) {
+					return nil
+				}
+				files = append(files, adaptors.File{
+					Path:       path,
+					Executable: info.Mode()&0100 != 0, // mask the executable bit of owner
+				})
+				return nil
+			}
 			return nil
 		}); err != nil {
 			return nil, xerrors.Errorf("error while finding files in %s: %w", path, err)
