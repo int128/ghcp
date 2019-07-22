@@ -3,6 +3,7 @@ package branch
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
@@ -35,7 +36,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		return xerrors.New("you must set one or more paths")
 	}
 
-	files, err := u.FileSystem.FindFiles(in.Paths)
+	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{Logger: u.Logger})
 	if err != nil {
 		return xerrors.Errorf("could not find files: %w", err)
 	}
@@ -217,6 +218,23 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 	}
 
 	return xerrors.New("exact one of ParentOfBranch members must be valid")
+}
+
+type pathFilter struct {
+	Logger adaptors.Logger
+}
+
+func (f *pathFilter) SkipDir(path string) bool {
+	base := filepath.Base(path)
+	if base == ".git" {
+		f.Logger.Debugf("Exclude .git directory: %s", path)
+		return true
+	}
+	return false
+}
+
+func (f *pathFilter) ExcludeFile(path string) bool {
+	return false
 }
 
 type createBranchIn struct {

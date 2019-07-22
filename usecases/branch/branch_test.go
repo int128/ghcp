@@ -15,6 +15,7 @@ import (
 func TestCommitToBranch_Do(t *testing.T) {
 	ctx := context.TODO()
 	repositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
+	thePathFilter := gomock.AssignableToTypeOf(&pathFilter{})
 	theFiles := []adaptors.File{
 		{Path: "file1"},
 		{Path: "file2", Executable: true},
@@ -43,7 +44,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -107,7 +108,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -172,7 +173,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -237,7 +238,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -299,7 +300,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -365,7 +366,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -431,7 +432,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -499,7 +500,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -569,7 +570,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
-				fileSystem.EXPECT().FindFiles([]string{"path"}).Return(theFiles, nil)
+				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
 				commitUseCase := mock_usecases.NewMockCommit(ctrl)
 				commitUseCase.EXPECT().
@@ -647,5 +648,34 @@ func TestCommitToBranch_Do(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			run(t, c)
 		})
+	}
+}
+
+func Test_pathFilter_SkipDir(t *testing.T) {
+	for _, c := range []struct {
+		path string
+		skip bool
+	}{
+		{path: "."},
+		{path: "foo"},
+		{path: ".git", skip: true},
+		{path: "foo/bar"},
+		{path: "foo/.git", skip: true},
+	} {
+		t.Run(c.path, func(t *testing.T) {
+			f := &pathFilter{Logger: mock_adaptors.NewLogger(t)}
+			skip := f.SkipDir(c.path)
+			if skip != c.skip {
+				t.Errorf("skip wants %v but %v", c.skip, skip)
+			}
+		})
+	}
+}
+
+func Test_pathFilter_ExcludeFile(t *testing.T) {
+	f := &pathFilter{Logger: mock_adaptors.NewLogger(t)}
+	exclude := f.ExcludeFile("foo")
+	if exclude {
+		t.Errorf("exclude wants %v but %v", false, exclude)
 	}
 }

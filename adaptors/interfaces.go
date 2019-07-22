@@ -21,8 +21,14 @@ type CmdOptions struct {
 }
 
 type FileSystem interface {
-	FindFiles(paths []string) ([]File, error)
+	FindFiles(paths []string, filter FindFilesFilter) ([]File, error)
 	ReadAsBase64EncodedContent(filename string) (string, error)
+}
+
+// FindFilesFilter is an interface to filter directories and files.
+type FindFilesFilter interface {
+	SkipDir(path string) bool     // If true, it skips entering the directory
+	ExcludeFile(path string) bool // If true, it excludes the file from the result
 }
 
 type File struct {
