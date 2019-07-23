@@ -11,8 +11,8 @@ import (
 	githubAdaptor "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases/branch"
 	"github.com/int128/ghcp/usecases/btc"
+	"github.com/int128/ghcp/usecases/commit"
 )
 
 func NewCmd() adaptors.Cmd {
@@ -25,7 +25,7 @@ func NewCmd() adaptors.Cmd {
 		githubInfrastructure.Set,
 
 		btc.Set,
-		branch.Set,
+		commit.Set,
 	)
 	return nil
 }

@@ -12,8 +12,8 @@ import (
 	github2 "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases/branch"
 	"github.com/int128/ghcp/usecases/btc"
+	"github.com/int128/ghcp/usecases/commit"
 )
 
 // Injectors from di.go:
@@ -31,7 +31,7 @@ func NewCmd() adaptors.Cmd {
 		Logger:     loggerLogger,
 		GitHub:     gitHub,
 	}
-	commitToBranch := &branch.CommitToBranch{
+	commitCommit := &commit.Commit{
 		CreateBlobTreeCommit: createBlobTreeCommit,
 		FileSystem:           fileSystem,
 		Logger:               loggerLogger,
@@ -39,7 +39,7 @@ func NewCmd() adaptors.Cmd {
 	}
 	envEnv := &env.Env{}
 	cmdCmd := &cmd.Cmd{
-		CommitToBranch:   commitToBranch,
+		Commit:           commitCommit,
 		Env:              envEnv,
 		Logger:           loggerLogger,
 		LoggerConfig:     loggerLogger,

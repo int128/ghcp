@@ -8,13 +8,13 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases CommitToBranch,CreateBlobTreeCommit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases Commit,CreateBlobTreeCommit
 
-type CommitToBranch interface {
-	Do(ctx context.Context, in CommitToBranchIn) error
+type Commit interface {
+	Do(ctx context.Context, in CommitIn) error
 }
 
-type CommitToBranchIn struct {
+type CommitIn struct {
 	Repository     git.RepositoryID
 	BranchName     git.BranchName // default branch if empty
 	ParentOfBranch ParentOfBranch

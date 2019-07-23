@@ -21,16 +21,16 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("BasicOptions", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -55,9 +55,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--branch", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					BranchName:     "gh-pages",
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
@@ -65,7 +65,7 @@ func TestCmd_Run(t *testing.T) {
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -91,9 +91,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--parent", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
@@ -101,7 +101,7 @@ func TestCmd_Run(t *testing.T) {
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -128,9 +128,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--no-parent", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
@@ -138,7 +138,7 @@ func TestCmd_Run(t *testing.T) {
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -166,7 +166,7 @@ func TestCmd_Run(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			cmd := Cmd{
-				CommitToBranch:   mock_usecases.NewMockCommitToBranch(ctrl),
+				Commit:           mock_usecases.NewMockCommit(ctrl),
 				Env:              mock_adaptors.NewMockEnv(ctrl),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -194,9 +194,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--no-file-mode", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
@@ -204,7 +204,7 @@ func TestCmd_Run(t *testing.T) {
 					NoFileMode:     true,
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -230,9 +230,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--dry-run", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
@@ -240,7 +240,7 @@ func TestCmd_Run(t *testing.T) {
 					DryRun:         true,
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -269,9 +269,9 @@ func TestCmd_Run(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
@@ -281,7 +281,7 @@ func TestCmd_Run(t *testing.T) {
 			loggerConfig.EXPECT().
 				SetDebug(true)
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     loggerConfig,
@@ -308,9 +308,9 @@ func TestCmd_Run(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
@@ -320,7 +320,7 @@ func TestCmd_Run(t *testing.T) {
 			env.EXPECT().
 				Chdir("dir")
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              env,
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -346,16 +346,16 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("env/GITHUB_TOKEN", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch:   commitToBranch,
+				Commit:           commitUseCase,
 				Env:              newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -380,7 +380,7 @@ func TestCmd_Run(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			cmd := Cmd{
-				CommitToBranch:   mock_usecases.NewMockCommitToBranch(ctrl),
+				Commit:           mock_usecases.NewMockCommit(ctrl),
 				Env:              newEnv(ctrl, map[string]string{envGitHubToken: ""}),
 				Logger:           mock_adaptors.NewLogger(t),
 				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
@@ -404,19 +404,19 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--api", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch: commitToBranch,
-				Env:            newEnv(ctrl, map[string]string{}),
-				Logger:         mock_adaptors.NewLogger(t),
-				LoggerConfig:   mock_adaptors.NewMockLoggerConfig(ctrl),
+				Commit:       commitUseCase,
+				Env:          newEnv(ctrl, map[string]string{}),
+				Logger:       mock_adaptors.NewLogger(t),
+				LoggerConfig: mock_adaptors.NewMockLoggerConfig(ctrl),
 				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
 					Token: "YOUR_TOKEN",
 					URLv3: "https://github.example.com/api/v3/",
@@ -442,19 +442,19 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("env/GITHUB_API", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitToBranch := mock_usecases.NewMockCommitToBranch(ctrl)
-			commitToBranch.EXPECT().
-				Do(ctx, usecases.CommitToBranchIn{
+			commitUseCase := mock_usecases.NewMockCommit(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitIn{
 					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "commit-message",
 					Paths:          []string{"file1", "file2"},
 				})
 			cmd := Cmd{
-				CommitToBranch: commitToBranch,
-				Env:            newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
-				Logger:         mock_adaptors.NewLogger(t),
-				LoggerConfig:   mock_adaptors.NewMockLoggerConfig(ctrl),
+				Commit:       commitUseCase,
+				Env:          newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
+				Logger:       mock_adaptors.NewLogger(t),
+				LoggerConfig: mock_adaptors.NewMockLoggerConfig(ctrl),
 				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
 					Token: "YOUR_TOKEN",
 					URLv3: "https://github.example.com/api/v3/",

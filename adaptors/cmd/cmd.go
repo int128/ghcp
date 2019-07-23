@@ -31,7 +31,7 @@ const (
 
 // Cmd interacts with command line interface.
 type Cmd struct {
-	CommitToBranch   usecases.CommitToBranch
+	Commit           usecases.Commit
 	Env              adaptors.Env
 	Logger           adaptors.Logger
 	LoggerConfig     adaptors.LoggerConfig
@@ -151,7 +151,7 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			in := usecases.CommitToBranchIn{
+			in := usecases.CommitIn{
 				Repository: git.RepositoryID{
 					Owner: o.RepositoryOwner,
 					Name:  o.RepositoryName,
@@ -167,7 +167,7 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 				NoFileMode:    o.NoFileMode,
 				DryRun:        o.DryRun,
 			}
-			if err := cmd.CommitToBranch.Do(ctx, in); err != nil {
+			if err := cmd.Commit.Do(ctx, in); err != nil {
 				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
 				return xerrors.Errorf("could not commit the files: %s", err)
 			}

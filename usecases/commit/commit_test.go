@@ -1,4 +1,4 @@
-package branch
+package commit
 
 import (
 	"context"
@@ -33,7 +33,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("CreateBranchIfItDoesNotExist", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
@@ -83,7 +83,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -97,7 +97,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
@@ -149,7 +149,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -163,7 +163,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateDefaultBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
 					CommitMessage:  "message",
@@ -211,7 +211,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -227,7 +227,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("CreateBranchIfItDoesNotExist", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
@@ -275,7 +275,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -289,7 +289,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
@@ -341,7 +341,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -355,7 +355,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateDefaultBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
@@ -405,7 +405,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -421,7 +421,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("CreateBranchIfItDoesNotExist", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
@@ -475,7 +475,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -489,7 +489,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
@@ -545,7 +545,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),
@@ -559,7 +559,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			t.Run("UpdateDefaultBranch", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
-				in := usecases.CommitToBranchIn{
+				in := usecases.CommitIn{
 					Repository:     repositoryID,
 					BranchName:     "topic",
 					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
@@ -615,7 +615,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Return(nil).
 					Times(c.branchOperationTimes)
 
-				useCase := CommitToBranch{
+				useCase := Commit{
 					CreateBlobTreeCommit: createBlobTreeCommit,
 					FileSystem:           fileSystem,
 					Logger:               mock_adaptors.NewLogger(t),

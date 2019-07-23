@@ -1,5 +1,5 @@
 // Package branch provides use-cases for creating or updating a branch.
-package branch
+package commit
 
 import (
 	"context"
@@ -13,19 +13,19 @@ import (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(CommitToBranch), "*"),
-	wire.Bind(new(usecases.CommitToBranch), new(*CommitToBranch)),
+	wire.Struct(new(Commit), "*"),
+	wire.Bind(new(usecases.Commit), new(*Commit)),
 )
 
-// CommitToBranch commits files to the default/given branch on the repository.
-type CommitToBranch struct {
+// Commit commits files to the default/given branch on the repository.
+type Commit struct {
 	CreateBlobTreeCommit usecases.CreateBlobTreeCommit
 	FileSystem           adaptors.FileSystem
 	Logger               adaptors.Logger
 	GitHub               adaptors.GitHub
 }
 
-func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) error {
+func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 	if !in.Repository.IsValid() {
 		return xerrors.New("you must set GitHub repository")
 	}
@@ -244,7 +244,7 @@ type createBranchIn struct {
 	DryRun        bool
 }
 
-func (u *CommitToBranch) createBranch(ctx context.Context, in createBranchIn) error {
+func (u *Commit) createBranch(ctx context.Context, in createBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
 	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
 	if err != nil {
@@ -280,7 +280,7 @@ type updateBranchIn struct {
 	ForceUpdate bool
 }
 
-func (u *CommitToBranch) updateBranch(ctx context.Context, in updateBranchIn) error {
+func (u *Commit) updateBranch(ctx context.Context, in updateBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
 	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
 	if err != nil {
