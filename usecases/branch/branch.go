@@ -19,10 +19,10 @@ var Set = wire.NewSet(
 
 // CommitToBranch commits files to the default/given branch on the repository.
 type CommitToBranch struct {
-	Commit     usecases.Commit
-	FileSystem adaptors.FileSystem
-	Logger     adaptors.Logger
-	GitHub     adaptors.GitHub
+	CreateBlobTreeCommit usecases.CreateBlobTreeCommit
+	FileSystem           adaptors.FileSystem
+	Logger               adaptors.Logger
+	GitHub               adaptors.GitHub
 }
 
 func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) error {
@@ -58,7 +58,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		if in.BranchName == "" {
 			u.Logger.Debugf("Updating the default branch by fast-forward")
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:           files,
 					Repository:      out.Repository,
 					CommitMessage:   in.CommitMessage,
@@ -76,7 +76,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		if out.BranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) based on the default branch", in.BranchName)
 			if err := u.createBranch(ctx, createBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:           files,
 					Repository:      out.Repository,
 					CommitMessage:   in.CommitMessage,
@@ -93,7 +93,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		}
 		u.Logger.Debugf("Updating the branch (%s) by fast-forward", in.BranchName)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CommitIn: usecases.CommitIn{
+			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 				Files:           files,
 				Repository:      out.Repository,
 				CommitMessage:   in.CommitMessage,
@@ -114,7 +114,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 			//TODO: this requires force update
 			u.Logger.Debugf("Updating the default branch to a commit without any parent")
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:         files,
 					Repository:    out.Repository,
 					CommitMessage: in.CommitMessage,
@@ -130,7 +130,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		if out.BranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) without any parent", in.BranchName)
 			if err := u.createBranch(ctx, createBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:         files,
 					Repository:    out.Repository,
 					CommitMessage: in.CommitMessage,
@@ -146,7 +146,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		//TODO: this may require force update
 		u.Logger.Debugf("Updating the branch (%s) to a commit without any parent", in.BranchName)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CommitIn: usecases.CommitIn{
+			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 				Files:         files,
 				Repository:    out.Repository,
 				CommitMessage: in.CommitMessage,
@@ -165,7 +165,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 			//TODO: this requires force update
 			u.Logger.Debugf("Updating the default branch to a commit based on the parent ref (%s)", in.ParentOfBranch.FromRef)
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:           files,
 					Repository:      out.Repository,
 					CommitMessage:   in.CommitMessage,
@@ -183,7 +183,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		if out.BranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) with a commit based on the parent ref (%s)", in.BranchName, in.ParentOfBranch.FromRef)
 			if err := u.createBranch(ctx, createBranchIn{
-				CommitIn: usecases.CommitIn{
+				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 					Files:           files,
 					Repository:      out.Repository,
 					CommitMessage:   in.CommitMessage,
@@ -201,7 +201,7 @@ func (u *CommitToBranch) Do(ctx context.Context, in usecases.CommitToBranchIn) e
 		//TODO: this requires force update
 		u.Logger.Debugf("Updating the branch (%s) to a commit based on the parent ref (%s)", in.BranchName, in.ParentOfBranch.FromRef)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CommitIn: usecases.CommitIn{
+			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
 				Files:           files,
 				Repository:      out.Repository,
 				CommitMessage:   in.CommitMessage,
@@ -238,7 +238,7 @@ func (f *pathFilter) ExcludeFile(path string) bool {
 }
 
 type createBranchIn struct {
-	usecases.CommitIn
+	usecases.CreateBlobTreeCommitIn
 
 	NewBranchName git.BranchName
 	DryRun        bool
@@ -246,7 +246,7 @@ type createBranchIn struct {
 
 func (u *CommitToBranch) createBranch(ctx context.Context, in createBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.Commit.Do(ctx, in.CommitIn)
+	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
@@ -273,7 +273,7 @@ func (u *CommitToBranch) createBranch(ctx context.Context, in createBranchIn) er
 }
 
 type updateBranchIn struct {
-	usecases.CommitIn
+	usecases.CreateBlobTreeCommitIn
 
 	BranchName  git.BranchName
 	DryRun      bool
@@ -282,7 +282,7 @@ type updateBranchIn struct {
 
 func (u *CommitToBranch) updateBranch(ctx context.Context, in updateBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.Commit.Do(ctx, in.CommitIn)
+	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}

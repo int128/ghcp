@@ -1,4 +1,4 @@
-package commit
+package btc
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/int128/ghcp/usecases"
 )
 
-func TestCommit_Do(t *testing.T) {
+func TestCreateBlobTreeCommit_Do(t *testing.T) {
 	ctx := context.TODO()
 	repositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
 
@@ -74,12 +74,12 @@ func TestCommit_Do(t *testing.T) {
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := Commit{
+		useCase := CreateBlobTreeCommit{
 			FileSystem: fileSystem,
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		out, err := useCase.Do(ctx, usecases.CommitIn{
+		out, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
 			Files: []adaptors.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
@@ -92,7 +92,7 @@ func TestCommit_Do(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Do returned error: %+v", err)
 		}
-		want := &usecases.CommitOut{
+		want := &usecases.CreateBlobTreeCommitOut{
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}
@@ -159,12 +159,12 @@ func TestCommit_Do(t *testing.T) {
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := Commit{
+		useCase := CreateBlobTreeCommit{
 			FileSystem: fileSystem,
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		out, err := useCase.Do(ctx, usecases.CommitIn{
+		out, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
 			Files: []adaptors.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
@@ -178,7 +178,7 @@ func TestCommit_Do(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Do returned error: %+v", err)
 		}
-		want := &usecases.CommitOut{
+		want := &usecases.CreateBlobTreeCommitOut{
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}

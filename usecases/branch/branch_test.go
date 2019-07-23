@@ -46,9 +46,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -56,7 +56,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "masterTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -84,10 +84,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -110,9 +110,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -120,7 +120,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "topicTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -150,10 +150,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -175,9 +175,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -185,7 +185,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "masterTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -212,10 +212,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -240,15 +240,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:         theFiles,
 						Repository:    repositoryID,
 						CommitMessage: "message",
 						NoFileMode:    c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -276,10 +276,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -302,9 +302,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -312,7 +312,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "topicTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -342,10 +342,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -368,15 +368,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:         theFiles,
 						Repository:    repositoryID,
 						CommitMessage: "message",
 						NoFileMode:    c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -406,10 +406,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -434,9 +434,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -444,7 +444,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentCommitSHA: "developCommitSHA",
 						ParentTreeSHA:   "developTreeSHA",
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -476,10 +476,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -502,9 +502,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -512,7 +512,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "developTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -546,10 +546,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)
@@ -572,9 +572,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
 				fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 
-				commitUseCase := mock_usecases.NewMockCommit(ctrl)
-				commitUseCase.EXPECT().
-					Do(ctx, usecases.CommitIn{
+				createBlobTreeCommit := mock_usecases.NewMockCreateBlobTreeCommit(ctrl)
+				createBlobTreeCommit.EXPECT().
+					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
 						Repository:      repositoryID,
 						CommitMessage:   "message",
@@ -582,7 +582,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentTreeSHA:   "developTreeSHA",
 						NoFileMode:      c.noFileMode,
 					}).
-					Return(&usecases.CommitOut{
+					Return(&usecases.CreateBlobTreeCommitOut{
 						CommitSHA:    "commitSHA",
 						ChangedFiles: c.changedFiles,
 					}, nil)
@@ -616,10 +616,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 					Times(c.branchOperationTimes)
 
 				useCase := CommitToBranch{
-					Commit:     commitUseCase,
-					FileSystem: fileSystem,
-					Logger:     mock_adaptors.NewLogger(t),
-					GitHub:     gitHub,
+					CreateBlobTreeCommit: createBlobTreeCommit,
+					FileSystem:           fileSystem,
+					Logger:               mock_adaptors.NewLogger(t),
+					GitHub:               gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
 					t.Errorf("err wants nil but %+v", err)

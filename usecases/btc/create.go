@@ -1,5 +1,5 @@
-// Package commit provides an internal use-case for creating a commit.
-package commit
+// Package btc provides the internal use-case for a set of blob, tree and commit.
+package btc
 
 import (
 	"context"
@@ -12,18 +12,18 @@ import (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(Commit), "*"),
-	wire.Bind(new(usecases.Commit), new(*Commit)),
+	wire.Struct(new(CreateBlobTreeCommit), "*"),
+	wire.Bind(new(usecases.CreateBlobTreeCommit), new(*CreateBlobTreeCommit)),
 )
 
-// Commit creates blob(s), a tree and a commit.
-type Commit struct {
+// CreateBlobTreeCommit creates blob(s), a tree and a commit.
+type CreateBlobTreeCommit struct {
 	FileSystem adaptors.FileSystem
 	Logger     adaptors.Logger
 	GitHub     adaptors.GitHub
 }
 
-func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.CommitOut, error) {
+func (u *CreateBlobTreeCommit) Do(ctx context.Context, in usecases.CreateBlobTreeCommitIn) (*usecases.CreateBlobTreeCommitOut, error) {
 	files := make([]git.File, len(in.Files))
 	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
@@ -75,7 +75,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) (*usecases.Commit
 		return nil, xerrors.Errorf("error while getting the commit %s: %w", commitSHA, err)
 	}
 
-	return &usecases.CommitOut{
+	return &usecases.CreateBlobTreeCommitOut{
 		CommitSHA:    commitSHA,
 		ChangedFiles: commit.ChangedFiles,
 	}, nil
