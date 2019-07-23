@@ -8,13 +8,13 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases CommitToBranch,Commit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases Commit,CreateBlobTreeCommit
 
-type CommitToBranch interface {
-	Do(ctx context.Context, in CommitToBranchIn) error
+type Commit interface {
+	Do(ctx context.Context, in CommitIn) error
 }
 
-type CommitToBranchIn struct {
+type CommitIn struct {
 	Repository     git.RepositoryID
 	BranchName     git.BranchName // default branch if empty
 	ParentOfBranch ParentOfBranch
@@ -32,11 +32,11 @@ type ParentOfBranch struct {
 	FromRef     git.RefName // push a branch based on the ref
 }
 
-type Commit interface {
-	Do(ctx context.Context, in CommitIn) (*CommitOut, error)
+type CreateBlobTreeCommit interface {
+	Do(ctx context.Context, in CreateBlobTreeCommitIn) (*CreateBlobTreeCommitOut, error)
 }
 
-type CommitIn struct {
+type CreateBlobTreeCommitIn struct {
 	Files           []adaptors.File
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
@@ -45,7 +45,7 @@ type CommitIn struct {
 	NoFileMode      bool
 }
 
-type CommitOut struct {
+type CreateBlobTreeCommitOut struct {
 	CommitSHA    git.CommitSHA
 	ChangedFiles int
 }

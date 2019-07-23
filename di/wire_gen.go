@@ -12,7 +12,7 @@ import (
 	github2 "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases/branch"
+	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
 )
 
@@ -26,20 +26,20 @@ func NewCmd() adaptors.Cmd {
 		Client: client,
 		Logger: loggerLogger,
 	}
-	commitCommit := &commit.Commit{
+	createBlobTreeCommit := &btc.CreateBlobTreeCommit{
 		FileSystem: fileSystem,
 		Logger:     loggerLogger,
 		GitHub:     gitHub,
 	}
-	commitToBranch := &branch.CommitToBranch{
-		Commit:     commitCommit,
-		FileSystem: fileSystem,
-		Logger:     loggerLogger,
-		GitHub:     gitHub,
+	commitCommit := &commit.Commit{
+		CreateBlobTreeCommit: createBlobTreeCommit,
+		FileSystem:           fileSystem,
+		Logger:               loggerLogger,
+		GitHub:               gitHub,
 	}
 	envEnv := &env.Env{}
 	cmdCmd := &cmd.Cmd{
-		CommitToBranch:   commitToBranch,
+		Commit:           commitCommit,
 		Env:              envEnv,
 		Logger:           loggerLogger,
 		LoggerConfig:     loggerLogger,
