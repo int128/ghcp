@@ -90,6 +90,20 @@ ghcp commit -u OWNER -r REPO -b bump-v1.1.0 -m v1.1.0 README.md build.gradle
 ```
 
 
+### Example: Commit for pull request
+
+You can fork a repository and commit files to the forked repository.
+
+The following example will fork the upstream repository `UPSTREAM/REPO` and
+commit files to the branch `topic` of your repository `YOUR/REPO`.
+
+```sh
+ghcp fork-commit -u UPSTREAM -r REPO -b topic -m 'Add foo' foo.txt
+```
+
+This is useful for preparing a commit for a pull request.
+
+
 ## Usage
 
 ```
@@ -98,6 +112,7 @@ Usage:
 
 Available Commands:
   commit      Commit files to the branch
+  fork-commit Fork the repository and commit files to a branch
   help        Help about any command
 
 Flags:
@@ -124,8 +139,23 @@ Flags:
   -r, --repo string      GitHub repository name (mandatory)
 ```
 
+```
+Usage:
+  ghcp fork-commit [flags] FILES...
 
-### Behaviors
+Flags:
+  -b, --branch string    Name of the branch to create (mandatory)
+      --dry-run          Upload files but do not update the branch actually
+  -h, --help             help for fork-commit
+  -m, --message string   Commit message (mandatory)
+      --no-file-mode     Ignore executable bit of file and treat as 0644
+  -u, --owner string     Upstream repository owner (mandatory)
+      --parent string    Upstream branch name (default: the default branch of the upstream repository)
+  -r, --repo string      Upstream repository name (mandatory)
+```
+
+
+### Behavior of `commit`
 
 To commit files to the default branch:
 
@@ -164,6 +194,27 @@ ghcp performs a commit operation as follows:
 - It does not create a new commit if the branch has same files, that prevents an empty commit.
 - It does not read the current Git config (`.gitconfig`) and Git state (`.git`) and you need to always set owner and name of a repository.
 - It excludes `.git` directories.
+
+
+### Behavior of `fork-commit`
+
+To fork the repository and commit files to a branch:
+
+```sh
+ghcp fork-commit -u UPSTREAM -r REPO -b BRANCH -m MESSAGE FILES...
+```
+
+If the branch does not exist, ghcp creates a branch from the default branch of the upstream repository.
+It the branch exists, ghcp updates the branch by fast-forward.
+
+To fork the repository and commit files to a branch from the branch of the upstream:
+
+```sh
+ghcp fork-commit -u UPSTREAM -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
+```
+
+If the branch does not exist, ghcp creates a branch from the branch of the upstream repository.
+If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
 
 
 ### Working with CI

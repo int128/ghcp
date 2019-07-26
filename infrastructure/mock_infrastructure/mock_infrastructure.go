@@ -63,6 +63,20 @@ func (mr *MockGitHubClientMockRecorder) CreateCommit(arg0, arg1, arg2, arg3 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommit", reflect.TypeOf((*MockGitHubClient)(nil).CreateCommit), arg0, arg1, arg2, arg3)
 }
 
+// CreateFork mocks base method
+func (m *MockGitHubClient) CreateFork(arg0 context.Context, arg1, arg2 string, arg3 *github.RepositoryCreateForkOptions) (*github.Repository, *github.Response, error) {
+	ret := m.ctrl.Call(m, "CreateFork", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*github.Repository)
+	ret1, _ := ret[1].(*github.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// CreateFork indicates an expected call of CreateFork
+func (mr *MockGitHubClientMockRecorder) CreateFork(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockGitHubClient)(nil).CreateFork), arg0, arg1, arg2, arg3)
+}
+
 // CreateRef mocks base method
 func (m *MockGitHubClient) CreateRef(arg0 context.Context, arg1, arg2 string, arg3 *github.Reference) (*github.Reference, *github.Response, error) {
 	ret := m.ctrl.Call(m, "CreateRef", arg0, arg1, arg2, arg3)

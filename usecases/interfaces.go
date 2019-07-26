@@ -8,7 +8,7 @@ import (
 	"github.com/int128/ghcp/git"
 )
 
-//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases Commit,CreateBlobTreeCommit
+//go:generate mockgen -destination mock_usecases/mock_usecases.go github.com/int128/ghcp/usecases Commit,CommitToFork,CreateBlobTreeCommit
 
 type Commit interface {
 	Do(ctx context.Context, in CommitIn) error
@@ -31,6 +31,20 @@ type ParentBranch struct {
 	NoParent    bool        // push a branch without any parent
 	FastForward bool        // push the branch by fast-forward
 	FromRef     git.RefName // push a branch based on the ref
+}
+
+type CommitToFork interface {
+	Do(ctx context.Context, in CommitToForkIn) error
+}
+
+type CommitToForkIn struct {
+	ParentRepository git.RepositoryID
+	ParentBranchName git.BranchName // if empty, the default branch of the parent repository
+	TargetBranchName git.BranchName
+	CommitMessage    git.CommitMessage
+	Paths            []string
+	NoFileMode       bool
+	DryRun           bool
 }
 
 type CreateBlobTreeCommit interface {

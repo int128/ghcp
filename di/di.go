@@ -13,6 +13,7 @@ import (
 	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/usecases/fork"
 )
 
 func NewCmd() adaptors.Cmd {
@@ -26,6 +27,7 @@ func NewCmd() adaptors.Cmd {
 
 		btc.Set,
 		commit.Set,
+		fork.Set,
 	)
 	return nil
 }

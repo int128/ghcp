@@ -270,6 +270,80 @@ func TestCmd_Run(t *testing.T) {
 		})
 	})
 
+	t.Run("CommitToFork", func(t *testing.T) {
+		t.Run("BasicOptions", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commitUseCase := mock_usecases.NewMockCommitToFork(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitToForkIn{
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+				})
+			cmd := Cmd{
+				CommitToFork:     commitUseCase,
+				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				Logger:           mock_adaptors.NewLogger(t),
+				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			}
+			args := []string{
+				cmdName,
+				commitToForkCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-b", "topic",
+				"-m", "commit-message",
+				"file1",
+				"file2",
+			}
+			exitCode := cmd.Run(ctx, args)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+
+		t.Run("--parent", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commitUseCase := mock_usecases.NewMockCommitToFork(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitToForkIn{
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranchName: "develop",
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+				})
+			cmd := Cmd{
+				CommitToFork:     commitUseCase,
+				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				Logger:           mock_adaptors.NewLogger(t),
+				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			}
+			args := []string{
+				cmdName,
+				commitToForkCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
+				"-b", "topic",
+				"--parent", "develop",
+				"file1",
+				"file2",
+			}
+			exitCode := cmd.Run(ctx, args)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+	})
+
 	t.Run("GlobalOptions", func(t *testing.T) {
 		t.Run("--debug", func(t *testing.T) {
 			ctrl := gomock.NewController(t)

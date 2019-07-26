@@ -53,6 +53,7 @@ type LoggerConfig interface {
 }
 
 type GitHub interface {
+	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
 	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
