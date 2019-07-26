@@ -23,6 +23,7 @@ var Set = wire.NewSet(
 type Client struct {
 	*githubv4.Client
 	*github.GitService
+	*github.RepositoriesService
 }
 
 // Init initializes this client with the options.
@@ -33,6 +34,7 @@ func (c *Client) Init(o infrastructure.GitHubClientInitOptions) error {
 	}
 	c.Client = v4
 	c.GitService = v3.Git
+	c.RepositoriesService = v3.Repositories
 	return nil
 }
 

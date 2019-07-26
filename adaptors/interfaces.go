@@ -53,6 +53,7 @@ type LoggerConfig interface {
 }
 
 type GitHub interface {
+	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
 	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
@@ -63,22 +64,22 @@ type GitHub interface {
 }
 
 type QueryForCommitToBranchIn struct {
-	Repository git.RepositoryID
-	BranchName git.BranchName // optional
-	ParentRef  git.RefName    // optional
+	ParentRepository git.RepositoryID
+	ParentRef        git.RefName // optional
+	TargetRepository git.RepositoryID
+	TargetBranchName git.BranchName // optional
 }
 
 type QueryForCommitToBranchOut struct {
-	CurrentUserName        string
-	Repository             git.RepositoryID
-	DefaultBranchName      git.BranchName
-	DefaultBranchCommitSHA git.CommitSHA
-	DefaultBranchTreeSHA   git.TreeSHA
-	BranchCommitSHA        git.CommitSHA        // empty if the branch does not exist
-	BranchTreeSHA          git.TreeSHA          // empty if the branch does not exist
-	ParentRefName          git.RefQualifiedName // empty if the parent ref does not exist
-	ParentRefCommitSHA     git.CommitSHA        // empty if the parent ref does not exist
-	ParentRefTreeSHA       git.TreeSHA          // empty if the parent ref does not exist
+	CurrentUserName              string
+	ParentDefaultBranchCommitSHA git.CommitSHA
+	ParentDefaultBranchTreeSHA   git.TreeSHA
+	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
+	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
+	TargetRepository             git.RepositoryID
+	TargetDefaultBranchName      git.BranchName
+	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
+	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
 }
 
 type QueryCommitIn struct {

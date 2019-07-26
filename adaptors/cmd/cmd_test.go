@@ -24,10 +24,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -58,11 +59,12 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					BranchName:     "gh-pages",
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TargetBranchName: "gh-pages",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -94,11 +96,12 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FromRef: "develop"},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -131,11 +134,12 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{NoParent: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -197,11 +201,12 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
-					NoFileMode:     true,
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+					NoFileMode:       true,
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -233,11 +238,12 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
-					DryRun:         true,
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+					DryRun:           true,
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -264,6 +270,80 @@ func TestCmd_Run(t *testing.T) {
 		})
 	})
 
+	t.Run("CommitToFork", func(t *testing.T) {
+		t.Run("BasicOptions", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commitUseCase := mock_usecases.NewMockCommitToFork(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitToForkIn{
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+				})
+			cmd := Cmd{
+				CommitToFork:     commitUseCase,
+				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				Logger:           mock_adaptors.NewLogger(t),
+				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			}
+			args := []string{
+				cmdName,
+				commitToForkCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-b", "topic",
+				"-m", "commit-message",
+				"file1",
+				"file2",
+			}
+			exitCode := cmd.Run(ctx, args)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+
+		t.Run("--parent", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commitUseCase := mock_usecases.NewMockCommitToFork(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, usecases.CommitToForkIn{
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranchName: "develop",
+					TargetBranchName: "topic",
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
+				})
+			cmd := Cmd{
+				CommitToFork:     commitUseCase,
+				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				Logger:           mock_adaptors.NewLogger(t),
+				LoggerConfig:     mock_adaptors.NewMockLoggerConfig(ctrl),
+				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			}
+			args := []string{
+				cmdName,
+				commitToForkCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
+				"-b", "topic",
+				"--parent", "develop",
+				"file1",
+				"file2",
+			}
+			exitCode := cmd.Run(ctx, args)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+	})
+
 	t.Run("GlobalOptions", func(t *testing.T) {
 		t.Run("--debug", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
@@ -272,10 +352,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			loggerConfig := mock_adaptors.NewMockLoggerConfig(ctrl)
 			loggerConfig.EXPECT().
@@ -311,10 +392,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			env := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
 			env.EXPECT().
@@ -349,10 +431,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:           commitUseCase,
@@ -407,10 +490,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:       commitUseCase,
@@ -445,10 +529,11 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_usecases.NewMockCommit(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, usecases.CommitIn{
-					Repository:     git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "commit-message",
-					Paths:          []string{"file1", "file2"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitMessage:    "commit-message",
+					Paths:            []string{"file1", "file2"},
 				})
 			cmd := Cmd{
 				Commit:       commitUseCase,

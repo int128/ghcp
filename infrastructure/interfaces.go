@@ -13,6 +13,7 @@ type GitHubClient interface {
 	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
 
 	// v3 API
+	CreateFork(ctx context.Context, owner, repo string, opt *github.RepositoryCreateForkOptions) (*github.Repository, *github.Response, error)
 	CreateRef(ctx context.Context, owner string, repo string, ref *github.Reference) (*github.Reference, *github.Response, error)
 	UpdateRef(ctx context.Context, owner string, repo string, ref *github.Reference, force bool) (*github.Reference, *github.Response, error)
 	CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit) (*github.Commit, *github.Response, error)

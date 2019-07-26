@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors"
@@ -26,12 +27,15 @@ const (
 	exitCodeOK    = 0
 	exitCodeError = 1
 
-	commitCmdName = "commit"
+	commitCmdName       = "commit"
+	commitToForkCmdName = "fork-commit"
 )
 
 // Cmd interacts with command line interface.
 type Cmd struct {
-	Commit           usecases.Commit
+	Commit       usecases.Commit
+	CommitToFork usecases.CommitToFork
+
 	Env              adaptors.Env
 	Logger           adaptors.Logger
 	LoggerConfig     adaptors.LoggerConfig
@@ -43,6 +47,8 @@ func (c *Cmd) Run(ctx context.Context, args []string) int {
 	rootCmd := newRootCmd(filepath.Base(args[0]), c)
 	commitCmd := newCommitCmd(ctx, c)
 	rootCmd.AddCommand(commitCmd)
+	forkCommitCmd := newCommitToForkCmd(ctx, c)
+	rootCmd.AddCommand(forkCommitCmd)
 
 	rootCmd.SetArgs(args[1:])
 	if err := rootCmd.Execute(); err != nil {
@@ -152,20 +158,24 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			in := usecases.CommitIn{
-				Repository: git.RepositoryID{
+				ParentRepository: git.RepositoryID{
 					Owner: o.RepositoryOwner,
 					Name:  o.RepositoryName,
 				},
-				BranchName: git.BranchName(o.BranchName),
-				ParentOfBranch: usecases.ParentOfBranch{
+				ParentBranch: usecases.ParentBranch{
 					FastForward: o.ParentRef == "" && !o.NoParent,
 					NoParent:    o.NoParent,
 					FromRef:     git.RefName(o.ParentRef),
 				},
-				CommitMessage: git.CommitMessage(o.CommitMessage),
-				Paths:         args,
-				NoFileMode:    o.NoFileMode,
-				DryRun:        o.DryRun,
+				TargetRepository: git.RepositoryID{
+					Owner: o.RepositoryOwner,
+					Name:  o.RepositoryName,
+				},
+				TargetBranchName: git.BranchName(o.BranchName),
+				CommitMessage:    git.CommitMessage(o.CommitMessage),
+				Paths:            args,
+				NoFileMode:       o.NoFileMode,
+				DryRun:           o.DryRun,
 			}
 			if err := cmd.Commit.Do(ctx, in); err != nil {
 				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
@@ -181,6 +191,69 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
 	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
 	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
+	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
+	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	return c
+}
+
+type commitToForkOptions struct {
+	UpstreamRepositoryOwner string
+	UpstreamRepositoryName  string
+	UpstreamBranchName      string
+	TargetBranchName        string
+	CommitMessage           string
+	NoFileMode              bool
+	DryRun                  bool
+}
+
+func newCommitToForkCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
+	var o commitToForkOptions
+	c := &cobra.Command{
+		Use:   fmt.Sprintf("%s [flags] FILES...", commitToForkCmdName),
+		Short: "Fork the repository and commit files to a branch",
+		Long:  `This forks the repository and commits the files to a new branch.`,
+		Args: func(*cobra.Command, []string) error {
+			var errs []string
+			if o.UpstreamRepositoryOwner == "" {
+				errs = append(errs, "--owner is missing")
+			}
+			if o.UpstreamRepositoryName == "" {
+				errs = append(errs, "--repo is missing")
+			}
+			if o.TargetBranchName == "" {
+				errs = append(errs, "--branch is missing")
+			}
+			if len(errs) > 0 {
+				return xerrors.New(strings.Join(errs, ", "))
+			}
+			return nil
+		},
+		RunE: func(_ *cobra.Command, args []string) error {
+			in := usecases.CommitToForkIn{
+				ParentRepository: git.RepositoryID{
+					Owner: o.UpstreamRepositoryOwner,
+					Name:  o.UpstreamRepositoryName,
+				},
+				ParentBranchName: git.BranchName(o.UpstreamBranchName),
+				TargetBranchName: git.BranchName(o.TargetBranchName),
+				CommitMessage:    git.CommitMessage(o.CommitMessage),
+				Paths:            args,
+				NoFileMode:       o.NoFileMode,
+				DryRun:           o.DryRun,
+			}
+			if err := cmd.CommitToFork.Do(ctx, in); err != nil {
+				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
+				return xerrors.Errorf("could not commit the files: %s", err)
+			}
+			return nil
+		},
+	}
+	f := c.Flags()
+	f.StringVarP(&o.UpstreamRepositoryOwner, "owner", "u", "", "Upstream repository owner (mandatory)")
+	f.StringVarP(&o.UpstreamRepositoryName, "repo", "r", "", "Upstream repository name (mandatory)")
+	f.StringVar(&o.UpstreamBranchName, "parent", "", "Upstream branch name (default: the default branch of the upstream repository)")
+	f.StringVarP(&o.TargetBranchName, "branch", "b", "", "Name of the branch to create (mandatory)")
+	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
 	return c

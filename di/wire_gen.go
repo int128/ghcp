@@ -14,6 +14,7 @@ import (
 	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/usecases/fork"
 )
 
 // Injectors from di.go:
@@ -37,9 +38,15 @@ func NewCmd() adaptors.Cmd {
 		Logger:               loggerLogger,
 		GitHub:               gitHub,
 	}
+	commitToFork := &fork.CommitToFork{
+		Commit: commitCommit,
+		Logger: loggerLogger,
+		GitHub: gitHub,
+	}
 	envEnv := &env.Env{}
 	cmdCmd := &cmd.Cmd{
 		Commit:           commitCommit,
+		CommitToFork:     commitToFork,
 		Env:              envEnv,
 		Logger:           loggerLogger,
 		LoggerConfig:     loggerLogger,

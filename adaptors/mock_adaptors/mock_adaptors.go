@@ -237,6 +237,19 @@ func (mr *MockGitHubMockRecorder) CreateCommit(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommit", reflect.TypeOf((*MockGitHub)(nil).CreateCommit), arg0, arg1)
 }
 
+// CreateFork mocks base method
+func (m *MockGitHub) CreateFork(arg0 context.Context, arg1 git.RepositoryID) (*git.RepositoryID, error) {
+	ret := m.ctrl.Call(m, "CreateFork", arg0, arg1)
+	ret0, _ := ret[0].(*git.RepositoryID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateFork indicates an expected call of CreateFork
+func (mr *MockGitHubMockRecorder) CreateFork(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockGitHub)(nil).CreateFork), arg0, arg1)
+}
+
 // CreateTree mocks base method
 func (m *MockGitHub) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.TreeSHA, error) {
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1)
