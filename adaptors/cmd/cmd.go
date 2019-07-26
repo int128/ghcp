@@ -152,20 +152,24 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			in := usecases.CommitIn{
-				Repository: git.RepositoryID{
+				ParentRepository: git.RepositoryID{
 					Owner: o.RepositoryOwner,
 					Name:  o.RepositoryName,
 				},
-				BranchName: git.BranchName(o.BranchName),
-				ParentOfBranch: usecases.ParentOfBranch{
+				ParentBranch: usecases.ParentBranch{
 					FastForward: o.ParentRef == "" && !o.NoParent,
 					NoParent:    o.NoParent,
 					FromRef:     git.RefName(o.ParentRef),
 				},
-				CommitMessage: git.CommitMessage(o.CommitMessage),
-				Paths:         args,
-				NoFileMode:    o.NoFileMode,
-				DryRun:        o.DryRun,
+				TargetRepository: git.RepositoryID{
+					Owner: o.RepositoryOwner,
+					Name:  o.RepositoryName,
+				},
+				TargetBranchName: git.BranchName(o.BranchName),
+				CommitMessage:    git.CommitMessage(o.CommitMessage),
+				Paths:            args,
+				NoFileMode:       o.NoFileMode,
+				DryRun:           o.DryRun,
 			}
 			if err := cmd.Commit.Do(ctx, in); err != nil {
 				cmd.Logger.Debugf("Stacktrace:\n%+v", err)

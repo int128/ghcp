@@ -15,18 +15,19 @@ type Commit interface {
 }
 
 type CommitIn struct {
-	Repository     git.RepositoryID
-	BranchName     git.BranchName // default branch if empty
-	ParentOfBranch ParentOfBranch
-	CommitMessage  git.CommitMessage
-	Paths          []string
-	NoFileMode     bool
-	DryRun         bool
+	ParentRepository git.RepositoryID
+	ParentBranch     ParentBranch
+	TargetRepository git.RepositoryID
+	TargetBranchName git.BranchName // default branch if empty
+	CommitMessage    git.CommitMessage
+	Paths            []string
+	NoFileMode       bool
+	DryRun           bool
 }
 
-// ParentOfBranch represents a parent ref of the branch to create or update.
+// ParentBranch represents a parent ref of the branch to create or update.
 // Exact one of the members must be valid.
-type ParentOfBranch struct {
+type ParentBranch struct {
 	NoParent    bool        // push a branch without any parent
 	FastForward bool        // push the branch by fast-forward
 	FromRef     git.RefName // push a branch based on the ref

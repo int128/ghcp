@@ -14,7 +14,8 @@ import (
 
 func TestCommitToBranch_Do(t *testing.T) {
 	ctx := context.TODO()
-	repositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
+	parentRepositoryID := git.RepositoryID{Owner: "upstream", Name: "repo"}
+	targetRepositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
 	thePathFilter := gomock.AssignableToTypeOf(&pathFilter{})
 	theFiles := []adaptors.File{
 		{Path: "file1"},
@@ -34,13 +35,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -50,7 +52,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "masterCommitSHA",
 						ParentTreeSHA:   "masterTreeSHA",
@@ -64,19 +66,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					CreateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}).
@@ -98,13 +101,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -114,7 +118,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "topicCommitSHA",
 						ParentTreeSHA:   "topicTreeSHA",
@@ -128,21 +132,22 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						BranchCommitSHA:        "topicCommitSHA",
-						BranchTreeSHA:          "topicTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchCommitSHA:        "topicCommitSHA",
+						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}, false).
@@ -164,12 +169,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: targetRepositoryID,
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -179,7 +185,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "masterCommitSHA",
 						ParentTreeSHA:   "masterTreeSHA",
@@ -193,18 +199,19 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "master",
 						CommitSHA:  "commitSHA",
 					}, false).
@@ -228,13 +235,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{NoParent: true},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -244,7 +252,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:         theFiles,
-						Repository:    repositoryID,
+						Repository:    targetRepositoryID,
 						CommitMessage: "message",
 						NoFileMode:    c.noFileMode,
 					}).
@@ -256,19 +264,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					CreateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}).
@@ -290,13 +299,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FastForward: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FastForward: true},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -306,7 +316,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "topicCommitSHA",
 						ParentTreeSHA:   "topicTreeSHA",
@@ -320,21 +330,22 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						BranchCommitSHA:        "topicCommitSHA",
-						BranchTreeSHA:          "topicTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchCommitSHA:        "topicCommitSHA",
+						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}, false). //TODO: force update
@@ -356,13 +367,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{NoParent: true},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{NoParent: true},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -372,7 +384,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:         theFiles,
-						Repository:    repositoryID,
+						Repository:    targetRepositoryID,
 						CommitMessage: "message",
 						NoFileMode:    c.noFileMode,
 					}).
@@ -384,21 +396,22 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
+						ParentRepository: parentRepositoryID,
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						BranchCommitSHA:        "topicCommitSHA",
-						BranchTreeSHA:          "topicTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchCommitSHA:        "topicCommitSHA",
+						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}, false). //TODO: force update
@@ -422,13 +435,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FromRef: "develop"},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -438,7 +452,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						NoFileMode:      c.noFileMode,
 						ParentCommitSHA: "developCommitSHA",
@@ -452,23 +466,23 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
-						ParentRef:  "develop",
+						ParentRepository: parentRepositoryID,
+						ParentRef:        "develop",
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						ParentRefName:          git.RefQualifiedName{Prefix: "heads", Name: "develop"},
-						ParentRefCommitSHA:     "developCommitSHA",
-						ParentRefTreeSHA:       "developTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						ParentRefCommitSHA:           "developCommitSHA",
+						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					CreateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}).
@@ -490,13 +504,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FromRef: "develop"},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -506,7 +521,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "developCommitSHA",
 						ParentTreeSHA:   "developTreeSHA",
@@ -520,25 +535,25 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
-						ParentRef:  "develop",
+						ParentRepository: parentRepositoryID,
+						ParentRef:        "develop",
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						BranchCommitSHA:        "topicCommitSHA",
-						BranchTreeSHA:          "topicTreeSHA",
-						ParentRefName:          git.RefQualifiedName{Prefix: "heads", Name: "develop"},
-						ParentRefCommitSHA:     "developCommitSHA",
-						ParentRefTreeSHA:       "developTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchCommitSHA:        "topicCommitSHA",
+						TargetBranchTreeSHA:          "topicTreeSHA",
+						ParentRefCommitSHA:           "developCommitSHA",
+						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}, false). //TODO: force update
@@ -560,13 +575,14 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := usecases.CommitIn{
-					Repository:     repositoryID,
-					BranchName:     "topic",
-					ParentOfBranch: usecases.ParentOfBranch{FromRef: "develop"},
-					CommitMessage:  "message",
-					Paths:          []string{"path"},
-					NoFileMode:     c.noFileMode,
-					DryRun:         c.dryRun,
+					ParentRepository: parentRepositoryID,
+					ParentBranch:     usecases.ParentBranch{FromRef: "develop"},
+					TargetRepository: targetRepositoryID,
+					TargetBranchName: "topic",
+					CommitMessage:    "message",
+					Paths:            []string{"path"},
+					NoFileMode:       c.noFileMode,
+					DryRun:           c.dryRun,
 				}
 
 				fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
@@ -576,7 +592,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, usecases.CreateBlobTreeCommitIn{
 						Files:           theFiles,
-						Repository:      repositoryID,
+						Repository:      targetRepositoryID,
 						CommitMessage:   "message",
 						ParentCommitSHA: "developCommitSHA",
 						ParentTreeSHA:   "developTreeSHA",
@@ -590,25 +606,25 @@ func TestCommitToBranch_Do(t *testing.T) {
 				gitHub := mock_adaptors.NewMockGitHub(ctrl)
 				gitHub.EXPECT().
 					QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
-						Repository: repositoryID,
-						BranchName: "topic",
-						ParentRef:  "develop",
+						ParentRepository: parentRepositoryID,
+						ParentRef:        "develop",
+						TargetRepository: targetRepositoryID,
+						TargetBranchName: "topic",
 					}).
 					Return(&adaptors.QueryForCommitToBranchOut{
-						CurrentUserName:        "current",
-						Repository:             repositoryID,
-						DefaultBranchName:      "master",
-						DefaultBranchCommitSHA: "masterCommitSHA",
-						DefaultBranchTreeSHA:   "masterTreeSHA",
-						BranchCommitSHA:        "topicCommitSHA",
-						BranchTreeSHA:          "topicTreeSHA",
-						ParentRefName:          git.RefQualifiedName{Prefix: "heads", Name: "develop"},
-						ParentRefCommitSHA:     "developCommitSHA",
-						ParentRefTreeSHA:       "developTreeSHA",
+						CurrentUserName:              "current",
+						TargetRepository:             targetRepositoryID,
+						TargetDefaultBranchName:      "master",
+						ParentDefaultBranchCommitSHA: "masterCommitSHA",
+						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchCommitSHA:        "topicCommitSHA",
+						TargetBranchTreeSHA:          "topicTreeSHA",
+						ParentRefCommitSHA:           "developCommitSHA",
+						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
 					UpdateBranch(ctx, git.NewBranch{
-						Repository: repositoryID,
+						Repository: targetRepositoryID,
 						BranchName: "topic",
 						CommitSHA:  "commitSHA",
 					}, false). //TODO: force update

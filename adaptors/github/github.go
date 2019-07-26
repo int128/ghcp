@@ -29,10 +29,8 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryFo
 		Viewer struct {
 			Login string
 		}
-		Repository struct {
-			Name  string
-			Owner struct{ Login string }
 
+		ParentRepository struct {
 			// default branch
 			DefaultBranchRef struct {
 				Name   string
@@ -45,18 +43,6 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryFo
 					} `graphql:"... on Commit"`
 				}
 			}
-
-			// branch (optional)
-			Ref struct {
-				Target struct {
-					Commit struct {
-						Oid  string
-						Tree struct {
-							Oid string
-						}
-					} `graphql:"... on Commit"`
-				}
-			} `graphql:"ref(qualifiedName: $ref)"`
 
 			// parent ref (optional)
 			ParentRef struct {
@@ -71,13 +57,37 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryFo
 					} `graphql:"... on Commit"`
 				}
 			} `graphql:"parentRef: ref(qualifiedName: $parentRef)"`
-		} `graphql:"repository(owner: $owner, name: $repo)"`
+		} `graphql:"parentRepository: repository(owner: $parentOwner, name: $parentRepo)"`
+
+		TargetRepository struct {
+			Name  string
+			Owner struct{ Login string }
+
+			// default branch
+			DefaultBranchRef struct {
+				Name string
+			}
+
+			// branch (optional)
+			Ref struct {
+				Target struct {
+					Commit struct {
+						Oid  string
+						Tree struct {
+							Oid string
+						}
+					} `graphql:"... on Commit"`
+				}
+			} `graphql:"ref(qualifiedName: $targetRef)"`
+		} `graphql:"targetRepository: repository(owner: $targetOwner, name: $targetRepo)"`
 	}
 	v := map[string]interface{}{
-		"owner":     githubv4.String(in.Repository.Owner),
-		"repo":      githubv4.String(in.Repository.Name),
-		"ref":       githubv4.String(in.BranchName.QualifiedName().String()),
-		"parentRef": githubv4.String(in.ParentRef),
+		"parentOwner": githubv4.String(in.ParentRepository.Owner),
+		"parentRepo":  githubv4.String(in.ParentRepository.Name),
+		"parentRef":   githubv4.String(in.ParentRef),
+		"targetOwner": githubv4.String(in.TargetRepository.Owner),
+		"targetRepo":  githubv4.String(in.TargetRepository.Name),
+		"targetRef":   githubv4.String(in.TargetBranchName.QualifiedName().String()),
 	}
 	c.Logger.Debugf("Querying the repository with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
@@ -85,19 +95,15 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryFo
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	out := adaptors.QueryForCommitToBranchOut{
-		CurrentUserName:        q.Viewer.Login,
-		Repository:             git.RepositoryID{Owner: q.Repository.Owner.Login, Name: q.Repository.Name},
-		DefaultBranchName:      git.BranchName(q.Repository.DefaultBranchRef.Name),
-		DefaultBranchCommitSHA: git.CommitSHA(q.Repository.DefaultBranchRef.Target.Commit.Oid),
-		DefaultBranchTreeSHA:   git.TreeSHA(q.Repository.DefaultBranchRef.Target.Commit.Tree.Oid),
-		BranchCommitSHA:        git.CommitSHA(q.Repository.Ref.Target.Commit.Oid),
-		BranchTreeSHA:          git.TreeSHA(q.Repository.Ref.Target.Commit.Tree.Oid),
-		ParentRefName: git.RefQualifiedName{
-			Prefix: q.Repository.ParentRef.Prefix,
-			Name:   q.Repository.ParentRef.Name,
-		},
-		ParentRefCommitSHA: git.CommitSHA(q.Repository.ParentRef.Target.Commit.Oid),
-		ParentRefTreeSHA:   git.TreeSHA(q.Repository.ParentRef.Target.Commit.Tree.Oid),
+		CurrentUserName:              q.Viewer.Login,
+		ParentDefaultBranchCommitSHA: git.CommitSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Oid),
+		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
+		ParentRefCommitSHA:           git.CommitSHA(q.ParentRepository.ParentRef.Target.Commit.Oid),
+		ParentRefTreeSHA:             git.TreeSHA(q.ParentRepository.ParentRef.Target.Commit.Tree.Oid),
+		TargetRepository:             git.RepositoryID{Owner: q.TargetRepository.Owner.Login, Name: q.TargetRepository.Name},
+		TargetDefaultBranchName:      git.BranchName(q.TargetRepository.DefaultBranchRef.Name),
+		TargetBranchCommitSHA:        git.CommitSHA(q.TargetRepository.Ref.Target.Commit.Oid),
+		TargetBranchTreeSHA:          git.TreeSHA(q.TargetRepository.Ref.Target.Commit.Tree.Oid),
 	}
 	c.Logger.Debugf("Returning the repository: %+v", out)
 	return &out, nil
