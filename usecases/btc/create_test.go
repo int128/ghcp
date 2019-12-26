@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/go-test/deep"
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/adaptors/mock_adaptors"
 	"github.com/int128/ghcp/git"
@@ -79,7 +79,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		out, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
+		got, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
 			Files: []adaptors.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
@@ -96,8 +96,8 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}
-		if diff := deep.Equal(want, out); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 
@@ -164,7 +164,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			Logger:     mock_adaptors.NewLogger(t),
 			GitHub:     gitHub,
 		}
-		out, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
+		got, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
 			Files: []adaptors.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
@@ -182,8 +182,8 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}
-		if diff := deep.Equal(want, out); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 }

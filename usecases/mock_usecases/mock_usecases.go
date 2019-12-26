@@ -36,6 +36,7 @@ func (m *MockCommit) EXPECT() *MockCommitMockRecorder {
 
 // Do mocks base method
 func (m *MockCommit) Do(arg0 context.Context, arg1 usecases.CommitIn) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Do", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -43,6 +44,7 @@ func (m *MockCommit) Do(arg0 context.Context, arg1 usecases.CommitIn) error {
 
 // Do indicates an expected call of Do
 func (mr *MockCommitMockRecorder) Do(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockCommit)(nil).Do), arg0, arg1)
 }
 
@@ -71,6 +73,7 @@ func (m *MockCommitToFork) EXPECT() *MockCommitToForkMockRecorder {
 
 // Do mocks base method
 func (m *MockCommitToFork) Do(arg0 context.Context, arg1 usecases.CommitToForkIn) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Do", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -78,6 +81,7 @@ func (m *MockCommitToFork) Do(arg0 context.Context, arg1 usecases.CommitToForkIn
 
 // Do indicates an expected call of Do
 func (mr *MockCommitToForkMockRecorder) Do(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockCommitToFork)(nil).Do), arg0, arg1)
 }
 
@@ -106,6 +110,7 @@ func (m *MockCreateBlobTreeCommit) EXPECT() *MockCreateBlobTreeCommitMockRecorde
 
 // Do mocks base method
 func (m *MockCreateBlobTreeCommit) Do(arg0 context.Context, arg1 usecases.CreateBlobTreeCommitIn) (*usecases.CreateBlobTreeCommitOut, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Do", arg0, arg1)
 	ret0, _ := ret[0].(*usecases.CreateBlobTreeCommitOut)
 	ret1, _ := ret[1].(error)
@@ -114,5 +119,6 @@ func (m *MockCreateBlobTreeCommit) Do(arg0 context.Context, arg1 usecases.Create
 
 // Do indicates an expected call of Do
 func (mr *MockCreateBlobTreeCommitMockRecorder) Do(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Do", reflect.TypeOf((*MockCreateBlobTreeCommit)(nil).Do), arg0, arg1)
 }
