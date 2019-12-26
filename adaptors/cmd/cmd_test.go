@@ -15,6 +15,7 @@ import (
 
 func TestCmd_Run(t *testing.T) {
 	const cmdName = "ghcp"
+	const version = "TEST"
 	ctx := context.TODO()
 
 	t.Run("Commit", func(t *testing.T) {
@@ -47,7 +48,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -84,7 +85,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -122,7 +123,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -160,7 +161,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -189,7 +190,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeError {
 				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
 			}
@@ -226,7 +227,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -263,7 +264,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -300,7 +301,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -337,7 +338,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -379,7 +380,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -419,7 +420,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -453,7 +454,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -478,7 +479,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeError {
 				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
 			}
@@ -517,7 +518,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -555,7 +556,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args)
+			exitCode := cmd.Run(ctx, args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}

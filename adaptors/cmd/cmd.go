@@ -43,13 +43,14 @@ type Cmd struct {
 }
 
 // Run parses the arguments and executes the use-case.
-func (c *Cmd) Run(ctx context.Context, args []string) int {
+func (c *Cmd) Run(ctx context.Context, args []string, version string) int {
 	rootCmd := newRootCmd(filepath.Base(args[0]), c)
 	commitCmd := newCommitCmd(ctx, c)
 	rootCmd.AddCommand(commitCmd)
 	forkCommitCmd := newCommitToForkCmd(ctx, c)
 	rootCmd.AddCommand(forkCommitCmd)
 
+	rootCmd.Version = version
 	rootCmd.SetArgs(args[1:])
 	if err := rootCmd.Execute(); err != nil {
 		return exitCodeError
