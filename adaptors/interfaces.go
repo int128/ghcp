@@ -10,7 +10,7 @@ import (
 //go:generate mockgen -destination mock_adaptors/mock_adaptors.go github.com/int128/ghcp/adaptors Cmd,FileSystem,Env,LoggerConfig,GitHub
 
 type Cmd interface {
-	Run(ctx context.Context, args []string) int
+	Run(ctx context.Context, args []string, version string) int
 }
 
 type CmdOptions struct {

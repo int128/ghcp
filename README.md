@@ -119,8 +119,9 @@ Flags:
       --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
       --debug              Show debug logs
   -C, --directory string   Change to directory before operation
-  -h, --help               help for main
+  -h, --help               help for ghcp
       --token string       GitHub API token [$GITHUB_TOKEN]
+      --version            version for ghcp
 ```
 
 ```
