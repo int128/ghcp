@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-test/deep"
+	"github.com/google/go-cmp/cmp"
 	"github.com/int128/ghcp/adaptors"
 )
 
@@ -56,30 +56,30 @@ func TestFileSystem_FindFiles(t *testing.T) {
 	}
 
 	t.Run("FindDirectory", func(t *testing.T) {
-		files, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t})
+		got, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t})
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []adaptors.File{
+		want := []adaptors.File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/b.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
 		}
-		if diff := deep.Equal(wants, files); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("FindFiles", func(t *testing.T) {
-		files, err := fs.FindFiles([]string{"dir1/a.jpg", "dir2/c.jpg"}, &singleNameFilter{t: t})
+		got, err := fs.FindFiles([]string{"dir1/a.jpg", "dir2/c.jpg"}, &singleNameFilter{t: t})
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []adaptors.File{
+		want := []adaptors.File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
 		}
-		if diff := deep.Equal(wants, files); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("NoSuchFile", func(t *testing.T) {
@@ -92,28 +92,28 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		}
 	})
 	t.Run("ExcludeDirectory", func(t *testing.T) {
-		files, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t, dir: "dir2"})
+		got, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t, dir: "dir2"})
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []adaptors.File{
+		want := []adaptors.File{
 			{Path: "dir1/a.jpg"},
 		}
-		if diff := deep.Equal(wants, files); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("SkipFile", func(t *testing.T) {
-		files, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t, file: "b.jpg"})
+		got, err := fs.FindFiles([]string{"."}, &singleNameFilter{t: t, file: "b.jpg"})
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		wants := []adaptors.File{
+		want := []adaptors.File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
 		}
-		if diff := deep.Equal(wants, files); diff != nil {
-			t.Error(diff)
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
 }
