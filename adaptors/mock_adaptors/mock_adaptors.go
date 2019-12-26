@@ -37,6 +37,7 @@ func (m *MockCmd) EXPECT() *MockCmdMockRecorder {
 
 // Run mocks base method
 func (m *MockCmd) Run(arg0 context.Context, arg1 []string) int {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Run", arg0, arg1)
 	ret0, _ := ret[0].(int)
 	return ret0
@@ -44,6 +45,7 @@ func (m *MockCmd) Run(arg0 context.Context, arg1 []string) int {
 
 // Run indicates an expected call of Run
 func (mr *MockCmdMockRecorder) Run(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockCmd)(nil).Run), arg0, arg1)
 }
 
@@ -72,6 +74,7 @@ func (m *MockFileSystem) EXPECT() *MockFileSystemMockRecorder {
 
 // FindFiles mocks base method
 func (m *MockFileSystem) FindFiles(arg0 []string, arg1 adaptors.FindFilesFilter) ([]adaptors.File, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindFiles", arg0, arg1)
 	ret0, _ := ret[0].([]adaptors.File)
 	ret1, _ := ret[1].(error)
@@ -80,11 +83,13 @@ func (m *MockFileSystem) FindFiles(arg0 []string, arg1 adaptors.FindFilesFilter)
 
 // FindFiles indicates an expected call of FindFiles
 func (mr *MockFileSystemMockRecorder) FindFiles(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindFiles", reflect.TypeOf((*MockFileSystem)(nil).FindFiles), arg0, arg1)
 }
 
 // ReadAsBase64EncodedContent mocks base method
 func (m *MockFileSystem) ReadAsBase64EncodedContent(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadAsBase64EncodedContent", arg0)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
@@ -93,6 +98,7 @@ func (m *MockFileSystem) ReadAsBase64EncodedContent(arg0 string) (string, error)
 
 // ReadAsBase64EncodedContent indicates an expected call of ReadAsBase64EncodedContent
 func (mr *MockFileSystemMockRecorder) ReadAsBase64EncodedContent(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadAsBase64EncodedContent", reflect.TypeOf((*MockFileSystem)(nil).ReadAsBase64EncodedContent), arg0)
 }
 
@@ -121,6 +127,7 @@ func (m *MockEnv) EXPECT() *MockEnvMockRecorder {
 
 // Chdir mocks base method
 func (m *MockEnv) Chdir(arg0 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Chdir", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -128,11 +135,13 @@ func (m *MockEnv) Chdir(arg0 string) error {
 
 // Chdir indicates an expected call of Chdir
 func (mr *MockEnvMockRecorder) Chdir(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chdir", reflect.TypeOf((*MockEnv)(nil).Chdir), arg0)
 }
 
 // Getenv mocks base method
 func (m *MockEnv) Getenv(arg0 string) string {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Getenv", arg0)
 	ret0, _ := ret[0].(string)
 	return ret0
@@ -140,6 +149,7 @@ func (m *MockEnv) Getenv(arg0 string) string {
 
 // Getenv indicates an expected call of Getenv
 func (mr *MockEnvMockRecorder) Getenv(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Getenv", reflect.TypeOf((*MockEnv)(nil).Getenv), arg0)
 }
 
@@ -168,11 +178,13 @@ func (m *MockLoggerConfig) EXPECT() *MockLoggerConfigMockRecorder {
 
 // SetDebug mocks base method
 func (m *MockLoggerConfig) SetDebug(arg0 bool) {
+	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetDebug", arg0)
 }
 
 // SetDebug indicates an expected call of SetDebug
 func (mr *MockLoggerConfigMockRecorder) SetDebug(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDebug", reflect.TypeOf((*MockLoggerConfig)(nil).SetDebug), arg0)
 }
 
@@ -201,6 +213,7 @@ func (m *MockGitHub) EXPECT() *MockGitHubMockRecorder {
 
 // CreateBlob mocks base method
 func (m *MockGitHub) CreateBlob(arg0 context.Context, arg1 git.NewBlob) (git.BlobSHA, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBlob", arg0, arg1)
 	ret0, _ := ret[0].(git.BlobSHA)
 	ret1, _ := ret[1].(error)
@@ -209,11 +222,13 @@ func (m *MockGitHub) CreateBlob(arg0 context.Context, arg1 git.NewBlob) (git.Blo
 
 // CreateBlob indicates an expected call of CreateBlob
 func (mr *MockGitHubMockRecorder) CreateBlob(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBlob", reflect.TypeOf((*MockGitHub)(nil).CreateBlob), arg0, arg1)
 }
 
 // CreateBranch mocks base method
 func (m *MockGitHub) CreateBranch(arg0 context.Context, arg1 git.NewBranch) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -221,11 +236,13 @@ func (m *MockGitHub) CreateBranch(arg0 context.Context, arg1 git.NewBranch) erro
 
 // CreateBranch indicates an expected call of CreateBranch
 func (mr *MockGitHubMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockGitHub)(nil).CreateBranch), arg0, arg1)
 }
 
 // CreateCommit mocks base method
 func (m *MockGitHub) CreateCommit(arg0 context.Context, arg1 git.NewCommit) (git.CommitSHA, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCommit", arg0, arg1)
 	ret0, _ := ret[0].(git.CommitSHA)
 	ret1, _ := ret[1].(error)
@@ -234,11 +251,13 @@ func (m *MockGitHub) CreateCommit(arg0 context.Context, arg1 git.NewCommit) (git
 
 // CreateCommit indicates an expected call of CreateCommit
 func (mr *MockGitHubMockRecorder) CreateCommit(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommit", reflect.TypeOf((*MockGitHub)(nil).CreateCommit), arg0, arg1)
 }
 
 // CreateFork mocks base method
 func (m *MockGitHub) CreateFork(arg0 context.Context, arg1 git.RepositoryID) (*git.RepositoryID, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateFork", arg0, arg1)
 	ret0, _ := ret[0].(*git.RepositoryID)
 	ret1, _ := ret[1].(error)
@@ -247,11 +266,13 @@ func (m *MockGitHub) CreateFork(arg0 context.Context, arg1 git.RepositoryID) (*g
 
 // CreateFork indicates an expected call of CreateFork
 func (mr *MockGitHubMockRecorder) CreateFork(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockGitHub)(nil).CreateFork), arg0, arg1)
 }
 
 // CreateTree mocks base method
 func (m *MockGitHub) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.TreeSHA, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1)
 	ret0, _ := ret[0].(git.TreeSHA)
 	ret1, _ := ret[1].(error)
@@ -260,11 +281,13 @@ func (m *MockGitHub) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.Tre
 
 // CreateTree indicates an expected call of CreateTree
 func (mr *MockGitHubMockRecorder) CreateTree(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockGitHub)(nil).CreateTree), arg0, arg1)
 }
 
 // QueryCommit mocks base method
 func (m *MockGitHub) QueryCommit(arg0 context.Context, arg1 adaptors.QueryCommitIn) (*adaptors.QueryCommitOut, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryCommit", arg0, arg1)
 	ret0, _ := ret[0].(*adaptors.QueryCommitOut)
 	ret1, _ := ret[1].(error)
@@ -273,11 +296,13 @@ func (m *MockGitHub) QueryCommit(arg0 context.Context, arg1 adaptors.QueryCommit
 
 // QueryCommit indicates an expected call of QueryCommit
 func (mr *MockGitHubMockRecorder) QueryCommit(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryCommit", reflect.TypeOf((*MockGitHub)(nil).QueryCommit), arg0, arg1)
 }
 
 // QueryForCommitToBranch mocks base method
 func (m *MockGitHub) QueryForCommitToBranch(arg0 context.Context, arg1 adaptors.QueryForCommitToBranchIn) (*adaptors.QueryForCommitToBranchOut, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryForCommitToBranch", arg0, arg1)
 	ret0, _ := ret[0].(*adaptors.QueryForCommitToBranchOut)
 	ret1, _ := ret[1].(error)
@@ -286,11 +311,13 @@ func (m *MockGitHub) QueryForCommitToBranch(arg0 context.Context, arg1 adaptors.
 
 // QueryForCommitToBranch indicates an expected call of QueryForCommitToBranch
 func (mr *MockGitHubMockRecorder) QueryForCommitToBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCommitToBranch", reflect.TypeOf((*MockGitHub)(nil).QueryForCommitToBranch), arg0, arg1)
 }
 
 // UpdateBranch mocks base method
 func (m *MockGitHub) UpdateBranch(arg0 context.Context, arg1 git.NewBranch, arg2 bool) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBranch", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -298,5 +325,6 @@ func (m *MockGitHub) UpdateBranch(arg0 context.Context, arg1 git.NewBranch, arg2
 
 // UpdateBranch indicates an expected call of UpdateBranch
 func (mr *MockGitHubMockRecorder) UpdateBranch(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBranch", reflect.TypeOf((*MockGitHub)(nil).UpdateBranch), arg0, arg1, arg2)
 }

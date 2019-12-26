@@ -37,6 +37,7 @@ func (m *MockGitHubClient) EXPECT() *MockGitHubClientMockRecorder {
 
 // CreateBlob mocks base method
 func (m *MockGitHubClient) CreateBlob(arg0 context.Context, arg1, arg2 string, arg3 *github.Blob) (*github.Blob, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBlob", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*github.Blob)
 	ret1, _ := ret[1].(*github.Response)
@@ -46,11 +47,13 @@ func (m *MockGitHubClient) CreateBlob(arg0 context.Context, arg1, arg2 string, a
 
 // CreateBlob indicates an expected call of CreateBlob
 func (mr *MockGitHubClientMockRecorder) CreateBlob(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBlob", reflect.TypeOf((*MockGitHubClient)(nil).CreateBlob), arg0, arg1, arg2, arg3)
 }
 
 // CreateCommit mocks base method
 func (m *MockGitHubClient) CreateCommit(arg0 context.Context, arg1, arg2 string, arg3 *github.Commit) (*github.Commit, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCommit", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*github.Commit)
 	ret1, _ := ret[1].(*github.Response)
@@ -60,11 +63,13 @@ func (m *MockGitHubClient) CreateCommit(arg0 context.Context, arg1, arg2 string,
 
 // CreateCommit indicates an expected call of CreateCommit
 func (mr *MockGitHubClientMockRecorder) CreateCommit(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommit", reflect.TypeOf((*MockGitHubClient)(nil).CreateCommit), arg0, arg1, arg2, arg3)
 }
 
 // CreateFork mocks base method
 func (m *MockGitHubClient) CreateFork(arg0 context.Context, arg1, arg2 string, arg3 *github.RepositoryCreateForkOptions) (*github.Repository, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateFork", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*github.Repository)
 	ret1, _ := ret[1].(*github.Response)
@@ -74,11 +79,13 @@ func (m *MockGitHubClient) CreateFork(arg0 context.Context, arg1, arg2 string, a
 
 // CreateFork indicates an expected call of CreateFork
 func (mr *MockGitHubClientMockRecorder) CreateFork(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockGitHubClient)(nil).CreateFork), arg0, arg1, arg2, arg3)
 }
 
 // CreateRef mocks base method
 func (m *MockGitHubClient) CreateRef(arg0 context.Context, arg1, arg2 string, arg3 *github.Reference) (*github.Reference, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRef", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*github.Reference)
 	ret1, _ := ret[1].(*github.Response)
@@ -88,11 +95,13 @@ func (m *MockGitHubClient) CreateRef(arg0 context.Context, arg1, arg2 string, ar
 
 // CreateRef indicates an expected call of CreateRef
 func (mr *MockGitHubClientMockRecorder) CreateRef(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRef", reflect.TypeOf((*MockGitHubClient)(nil).CreateRef), arg0, arg1, arg2, arg3)
 }
 
 // CreateTree mocks base method
 func (m *MockGitHubClient) CreateTree(arg0 context.Context, arg1, arg2, arg3 string, arg4 []github.TreeEntry) (*github.Tree, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(*github.Tree)
 	ret1, _ := ret[1].(*github.Response)
@@ -102,11 +111,13 @@ func (m *MockGitHubClient) CreateTree(arg0 context.Context, arg1, arg2, arg3 str
 
 // CreateTree indicates an expected call of CreateTree
 func (mr *MockGitHubClientMockRecorder) CreateTree(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockGitHubClient)(nil).CreateTree), arg0, arg1, arg2, arg3, arg4)
 }
 
 // Query mocks base method
 func (m *MockGitHubClient) Query(arg0 context.Context, arg1 interface{}, arg2 map[string]interface{}) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Query", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -114,11 +125,13 @@ func (m *MockGitHubClient) Query(arg0 context.Context, arg1 interface{}, arg2 ma
 
 // Query indicates an expected call of Query
 func (mr *MockGitHubClientMockRecorder) Query(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockGitHubClient)(nil).Query), arg0, arg1, arg2)
 }
 
 // UpdateRef mocks base method
 func (m *MockGitHubClient) UpdateRef(arg0 context.Context, arg1, arg2 string, arg3 *github.Reference, arg4 bool) (*github.Reference, *github.Response, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateRef", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(*github.Reference)
 	ret1, _ := ret[1].(*github.Response)
@@ -128,6 +141,7 @@ func (m *MockGitHubClient) UpdateRef(arg0 context.Context, arg1, arg2 string, ar
 
 // UpdateRef indicates an expected call of UpdateRef
 func (mr *MockGitHubClientMockRecorder) UpdateRef(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRef", reflect.TypeOf((*MockGitHubClient)(nil).UpdateRef), arg0, arg1, arg2, arg3, arg4)
 }
 
@@ -156,6 +170,7 @@ func (m *MockGitHubClientInit) EXPECT() *MockGitHubClientInitMockRecorder {
 
 // Init mocks base method
 func (m *MockGitHubClientInit) Init(arg0 infrastructure.GitHubClientInitOptions) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Init", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -163,5 +178,6 @@ func (m *MockGitHubClientInit) Init(arg0 infrastructure.GitHubClientInitOptions)
 
 // Init indicates an expected call of Init
 func (mr *MockGitHubClientInitMockRecorder) Init(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockGitHubClientInit)(nil).Init), arg0)
 }
