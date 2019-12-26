@@ -2,7 +2,7 @@ module github.com/int128/ghcp
 
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
-	github.com/go-test/deep v1.0.1
+	github.com/go-test/deep v1.0.4
 	github.com/golang/mock v1.3.1
 	github.com/google/go-github/v24 v24.0.1
 	github.com/google/wire v0.4.0
