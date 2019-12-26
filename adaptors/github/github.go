@@ -29,11 +29,10 @@ type GitHub struct {
 func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error) {
 	fork, _, err := c.Client.CreateFork(ctx, id.Owner, id.Name, nil)
 	if err != nil {
-		if _, ok := err.(*github.AcceptedError); ok {
-			c.Logger.Debugf("Fork in progress: %+v", err)
-		} else {
+		if _, ok := err.(*github.AcceptedError); !ok {
 			return nil, xerrors.Errorf("GitHub API error: %w", err)
 		}
+		c.Logger.Debugf("Fork in progress: %+v", err)
 	}
 	forkRepository := git.RepositoryID{
 		Owner: fork.GetOwner().GetLogin(),
