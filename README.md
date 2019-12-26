@@ -10,8 +10,9 @@ Install the latest release from [here](https://github.com/int128/ghcp/releases) 
 
 ```sh
 # GitHub Releases
-curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.5.0/ghcp_linux_amd64
-chmod +x ~/bin/ghcp
+curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.5.1/ghcp_linux_amd64.zip
+unzip /tmp/ghcp.zip -d ~/bin
+rm /tmp/ghcp.zip
 
 # Homebrew
 brew tap int128/ghcp
