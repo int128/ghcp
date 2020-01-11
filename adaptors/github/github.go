@@ -6,7 +6,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/google/go-github/v24/github"
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
 	"github.com/shurcooL/githubv4"
@@ -15,13 +15,54 @@ import (
 
 var Set = wire.NewSet(
 	wire.Struct(new(GitHub), "*"),
-	wire.Bind(new(adaptors.GitHub), new(*GitHub)),
+	wire.Bind(new(Interface), new(*GitHub)),
 )
+
+//go:generate mockgen -destination mock_github/mock_github.go github.com/int128/ghcp/adaptors/github Interface
+
+type Interface interface {
+	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
+	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
+	CreateBranch(ctx context.Context, branch git.NewBranch) error
+	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
+	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
+	QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error)
+	CreateTree(ctx context.Context, tree git.NewTree) (git.TreeSHA, error)
+	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
+}
+
+type QueryForCommitToBranchIn struct {
+	ParentRepository git.RepositoryID
+	ParentRef        git.RefName // optional
+	TargetRepository git.RepositoryID
+	TargetBranchName git.BranchName // optional
+}
+
+type QueryForCommitToBranchOut struct {
+	CurrentUserName              string
+	ParentDefaultBranchCommitSHA git.CommitSHA
+	ParentDefaultBranchTreeSHA   git.TreeSHA
+	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
+	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
+	TargetRepository             git.RepositoryID
+	TargetDefaultBranchName      git.BranchName
+	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
+	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
+}
+
+type QueryCommitIn struct {
+	Repository git.RepositoryID
+	CommitSHA  git.CommitSHA
+}
+
+type QueryCommitOut struct {
+	ChangedFiles int
+}
 
 // GitHub provides GitHub API access.
 type GitHub struct {
 	Client infrastructure.GitHubClient
-	Logger adaptors.Logger
+	Logger logger.Interface
 }
 
 // CreateFork creates a fork of the repository.
@@ -75,7 +116,7 @@ func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.Reposit
 }
 
 // QueryForCommitToBranch returns the repository for updating the branch.
-func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryForCommitToBranchIn) (*adaptors.QueryForCommitToBranchOut, error) {
+func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error) {
 	var q struct {
 		Viewer struct {
 			Login string
@@ -145,7 +186,7 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in adaptors.QueryFo
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := adaptors.QueryForCommitToBranchOut{
+	out := QueryForCommitToBranchOut{
 		CurrentUserName:              q.Viewer.Login,
 		ParentDefaultBranchCommitSHA: git.CommitSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Oid),
 		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
@@ -187,7 +228,7 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) 
 }
 
 // QueryCommit returns the commit.
-func (c *GitHub) QueryCommit(ctx context.Context, in adaptors.QueryCommitIn) (*adaptors.QueryCommitOut, error) {
+func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error) {
 	var q struct {
 		Repository struct {
 			Object struct {
@@ -207,7 +248,7 @@ func (c *GitHub) QueryCommit(ctx context.Context, in adaptors.QueryCommitIn) (*a
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := adaptors.QueryCommitOut{
+	out := QueryCommitOut{
 		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
 	}
 	c.Logger.Debugf("Returning the commit: %+v", out)

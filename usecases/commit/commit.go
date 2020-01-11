@@ -6,26 +6,53 @@ import (
 	"path/filepath"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/fs"
+	"github.com/int128/ghcp/adaptors/github"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases"
+	"github.com/int128/ghcp/usecases/btc"
 	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
 	wire.Struct(new(Commit), "*"),
-	wire.Bind(new(usecases.Commit), new(*Commit)),
+	wire.Bind(new(Interface), new(*Commit)),
 )
+
+//go:generate mockgen -destination mock_commit/mock_commit.go github.com/int128/ghcp/usecases/commit Interface
+
+type Interface interface {
+	Do(ctx context.Context, in Input) error
+}
+
+type Input struct {
+	ParentRepository git.RepositoryID
+	ParentBranch     ParentBranch
+	TargetRepository git.RepositoryID
+	TargetBranchName git.BranchName // default branch if empty
+	CommitMessage    git.CommitMessage
+	Paths            []string
+	NoFileMode       bool
+	DryRun           bool
+}
+
+// ParentBranch represents a parent ref of the branch to create or update.
+// Exact one of the members must be valid.
+type ParentBranch struct {
+	NoParent    bool        // push a branch without any parent
+	FastForward bool        // push the branch by fast-forward
+	FromRef     git.RefName // push a branch based on the ref
+}
 
 // Commit commits files to the default/given branch on the repository.
 type Commit struct {
-	CreateBlobTreeCommit usecases.CreateBlobTreeCommit
-	FileSystem           adaptors.FileSystem
-	Logger               adaptors.Logger
-	GitHub               adaptors.GitHub
+	CreateBlobTreeCommit btc.Interface
+	FileSystem           fs.Interface
+	Logger               logger.Interface
+	GitHub               github.Interface
 }
 
-func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
+func (u *Commit) Do(ctx context.Context, in Input) error {
 	if !in.TargetRepository.IsValid() {
 		return xerrors.New("you must set GitHub repository")
 	}
@@ -44,7 +71,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		return xerrors.New("no file exists in given paths")
 	}
 
-	out, err := u.GitHub.QueryForCommitToBranch(ctx, adaptors.QueryForCommitToBranchIn{
+	out, err := u.GitHub.QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
 		ParentRepository: in.ParentRepository,
 		ParentRef:        in.ParentBranch.FromRef, // optional
 		TargetRepository: in.TargetRepository,
@@ -59,7 +86,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		if in.TargetBranchName == "" {
 			u.Logger.Debugf("Updating the default branch by fast-forward")
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:           files,
 					Repository:      out.TargetRepository,
 					CommitMessage:   in.CommitMessage,
@@ -77,7 +104,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		if out.TargetBranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) based on the default branch", in.TargetBranchName)
 			if err := u.createBranch(ctx, createBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:           files,
 					Repository:      out.TargetRepository,
 					CommitMessage:   in.CommitMessage,
@@ -94,7 +121,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		}
 		u.Logger.Debugf("Updating the branch (%s) by fast-forward", in.TargetBranchName)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+			Input: btc.Input{
 				Files:           files,
 				Repository:      out.TargetRepository,
 				CommitMessage:   in.CommitMessage,
@@ -115,7 +142,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 			//TODO: this requires force update
 			u.Logger.Debugf("Updating the default branch to a commit without any parent")
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:         files,
 					Repository:    out.TargetRepository,
 					CommitMessage: in.CommitMessage,
@@ -131,7 +158,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		if out.TargetBranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) without any parent", in.TargetBranchName)
 			if err := u.createBranch(ctx, createBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:         files,
 					Repository:    out.TargetRepository,
 					CommitMessage: in.CommitMessage,
@@ -147,7 +174,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		//TODO: this may require force update
 		u.Logger.Debugf("Updating the branch (%s) to a commit without any parent", in.TargetBranchName)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+			Input: btc.Input{
 				Files:         files,
 				Repository:    out.TargetRepository,
 				CommitMessage: in.CommitMessage,
@@ -166,7 +193,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 			//TODO: this requires force update
 			u.Logger.Debugf("Updating the default branch to a commit based on the parent ref (%s)", in.ParentBranch.FromRef)
 			if err := u.updateBranch(ctx, updateBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:           files,
 					Repository:      out.TargetRepository,
 					CommitMessage:   in.CommitMessage,
@@ -184,7 +211,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		if out.TargetBranchCommitSHA == "" {
 			u.Logger.Debugf("Creating a branch (%s) with a commit based on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
 			if err := u.createBranch(ctx, createBranchIn{
-				CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+				Input: btc.Input{
 					Files:           files,
 					Repository:      out.TargetRepository,
 					CommitMessage:   in.CommitMessage,
@@ -202,7 +229,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 		//TODO: this requires force update
 		u.Logger.Debugf("Updating the branch (%s) to a commit based on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
 		if err := u.updateBranch(ctx, updateBranchIn{
-			CreateBlobTreeCommitIn: usecases.CreateBlobTreeCommitIn{
+			Input: btc.Input{
 				Files:           files,
 				Repository:      out.TargetRepository,
 				CommitMessage:   in.CommitMessage,
@@ -222,7 +249,7 @@ func (u *Commit) Do(ctx context.Context, in usecases.CommitIn) error {
 }
 
 type pathFilter struct {
-	Logger adaptors.Logger
+	Logger logger.Interface
 }
 
 func (f *pathFilter) SkipDir(path string) bool {
@@ -239,7 +266,7 @@ func (f *pathFilter) ExcludeFile(path string) bool {
 }
 
 type createBranchIn struct {
-	usecases.CreateBlobTreeCommitIn
+	btc.Input
 
 	NewBranchName git.BranchName
 	DryRun        bool
@@ -247,7 +274,7 @@ type createBranchIn struct {
 
 func (u *Commit) createBranch(ctx context.Context, in createBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
+	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.Input)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
@@ -274,7 +301,7 @@ func (u *Commit) createBranch(ctx context.Context, in createBranchIn) error {
 }
 
 type updateBranchIn struct {
-	usecases.CreateBlobTreeCommitIn
+	btc.Input
 
 	BranchName  git.BranchName
 	DryRun      bool
@@ -283,7 +310,7 @@ type updateBranchIn struct {
 
 func (u *Commit) updateBranch(ctx context.Context, in updateBranchIn) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.CreateBlobTreeCommitIn)
+	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.Input)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}

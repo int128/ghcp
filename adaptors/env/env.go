@@ -4,15 +4,19 @@ import (
 	"os"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
 )
 
 var Set = wire.NewSet(
 	wire.Struct(new(Env)),
-	wire.Struct(new(FileSystem)),
-	wire.Bind(new(adaptors.Env), new(*Env)),
-	wire.Bind(new(adaptors.FileSystem), new(*FileSystem)),
+	wire.Bind(new(Interface), new(*Env)),
 )
+
+//go:generate mockgen -destination mock_env/mock_env.go github.com/int128/ghcp/adaptors/env Interface
+
+type Interface interface {
+	Getenv(key string) string
+	Chdir(dir string) error
+}
 
 // Env provides environment dependencies,
 // such as environment variables and current directory.

@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/int128/ghcp/adaptors/mock_adaptors"
+	"github.com/int128/ghcp/adaptors/github/mock_github"
+	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases"
-	"github.com/int128/ghcp/usecases/mock_usecases"
+	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/usecases/commit/mock_commit"
 )
 
 func TestCommitToFork_Do(t *testing.T) {
@@ -19,23 +20,23 @@ func TestCommitToFork_Do(t *testing.T) {
 	t.Run("FromDefaultBranch", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		in := usecases.CommitToForkIn{
+		in := Input{
 			ParentRepository: parentRepositoryID,
 			TargetBranchName: "topic",
 			CommitMessage:    "message",
 			Paths:            []string{"path"},
 		}
 
-		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub := mock_github.NewMockInterface(ctrl)
 		gitHub.EXPECT().
 			CreateFork(ctx, parentRepositoryID).
 			Return(&forkedRepositoryID, nil)
 
-		commitUseCase := mock_usecases.NewMockCommit(ctrl)
+		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, usecases.CommitIn{
+			Do(ctx, commit.Input{
 				ParentRepository: parentRepositoryID,
-				ParentBranch:     usecases.ParentBranch{FastForward: true},
+				ParentBranch:     commit.ParentBranch{FastForward: true},
 				TargetRepository: forkedRepositoryID,
 				TargetBranchName: "topic",
 				CommitMessage:    "message",
@@ -45,7 +46,7 @@ func TestCommitToFork_Do(t *testing.T) {
 		u := CommitToFork{
 			Commit: commitUseCase,
 			GitHub: gitHub,
-			Logger: mock_adaptors.NewLogger(t),
+			Logger: testingLogger.New(t),
 		}
 		if err := u.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)
@@ -55,7 +56,7 @@ func TestCommitToFork_Do(t *testing.T) {
 	t.Run("FromBranch", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		in := usecases.CommitToForkIn{
+		in := Input{
 			ParentRepository: parentRepositoryID,
 			ParentBranchName: "develop",
 			TargetBranchName: "topic",
@@ -63,16 +64,16 @@ func TestCommitToFork_Do(t *testing.T) {
 			Paths:            []string{"path"},
 		}
 
-		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub := mock_github.NewMockInterface(ctrl)
 		gitHub.EXPECT().
 			CreateFork(ctx, parentRepositoryID).
 			Return(&forkedRepositoryID, nil)
 
-		commitUseCase := mock_usecases.NewMockCommit(ctrl)
+		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, usecases.CommitIn{
+			Do(ctx, commit.Input{
 				ParentRepository: parentRepositoryID,
-				ParentBranch:     usecases.ParentBranch{FromRef: "develop"},
+				ParentBranch:     commit.ParentBranch{FromRef: "develop"},
 				TargetRepository: forkedRepositoryID,
 				TargetBranchName: "topic",
 				CommitMessage:    "message",
@@ -82,7 +83,7 @@ func TestCommitToFork_Do(t *testing.T) {
 		u := CommitToFork{
 			Commit: commitUseCase,
 			GitHub: gitHub,
-			Logger: mock_adaptors.NewLogger(t),
+			Logger: testingLogger.New(t),
 		}
 		if err := u.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)

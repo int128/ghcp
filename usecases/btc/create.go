@@ -5,25 +5,46 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/fs"
+	"github.com/int128/ghcp/adaptors/github"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases"
 	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
 	wire.Struct(new(CreateBlobTreeCommit), "*"),
-	wire.Bind(new(usecases.CreateBlobTreeCommit), new(*CreateBlobTreeCommit)),
+	wire.Bind(new(Interface), new(*CreateBlobTreeCommit)),
 )
+
+//go:generate mockgen -destination mock_btc/mock_btc.go github.com/int128/ghcp/usecases/btc Interface
+
+type Interface interface {
+	Do(ctx context.Context, in Input) (*Output, error)
+}
+
+type Input struct {
+	Files           []fs.File
+	Repository      git.RepositoryID
+	CommitMessage   git.CommitMessage
+	ParentCommitSHA git.CommitSHA // no parent if empty
+	ParentTreeSHA   git.TreeSHA   // no parent if empty
+	NoFileMode      bool
+}
+
+type Output struct {
+	CommitSHA    git.CommitSHA
+	ChangedFiles int
+}
 
 // CreateBlobTreeCommit creates blob(s), a tree and a commit.
 type CreateBlobTreeCommit struct {
-	FileSystem adaptors.FileSystem
-	Logger     adaptors.Logger
-	GitHub     adaptors.GitHub
+	FileSystem fs.Interface
+	Logger     logger.Interface
+	GitHub     github.Interface
 }
 
-func (u *CreateBlobTreeCommit) Do(ctx context.Context, in usecases.CreateBlobTreeCommitIn) (*usecases.CreateBlobTreeCommitOut, error) {
+func (u *CreateBlobTreeCommit) Do(ctx context.Context, in Input) (*Output, error) {
 	files := make([]git.File, len(in.Files))
 	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
@@ -67,7 +88,7 @@ func (u *CreateBlobTreeCommit) Do(ctx context.Context, in usecases.CreateBlobTre
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
-	commit, err := u.GitHub.QueryCommit(ctx, adaptors.QueryCommitIn{
+	commit, err := u.GitHub.QueryCommit(ctx, github.QueryCommitIn{
 		Repository: in.Repository,
 		CommitSHA:  commitSHA,
 	})
@@ -75,7 +96,7 @@ func (u *CreateBlobTreeCommit) Do(ctx context.Context, in usecases.CreateBlobTre
 		return nil, xerrors.Errorf("error while getting the commit %s: %w", commitSHA, err)
 	}
 
-	return &usecases.CreateBlobTreeCommitOut{
+	return &Output{
 		CommitSHA:    commitSHA,
 		ChangedFiles: commit.ChangedFiles,
 	}, nil

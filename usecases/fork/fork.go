@@ -4,24 +4,41 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/github"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases"
+	"github.com/int128/ghcp/usecases/commit"
 	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
 	wire.Struct(new(CommitToFork), "*"),
-	wire.Bind(new(usecases.CommitToFork), new(*CommitToFork)),
+	wire.Bind(new(Interface), new(*CommitToFork)),
 )
 
-type CommitToFork struct {
-	Commit usecases.Commit
-	Logger adaptors.Logger
-	GitHub adaptors.GitHub
+//go:generate mockgen -destination mock_fork/mock_fork.go github.com/int128/ghcp/usecases/fork Interface
+
+type Interface interface {
+	Do(ctx context.Context, in Input) error
 }
 
-func (u *CommitToFork) Do(ctx context.Context, in usecases.CommitToForkIn) error {
+type Input struct {
+	ParentRepository git.RepositoryID
+	ParentBranchName git.BranchName // if empty, the default branch of the parent repository
+	TargetBranchName git.BranchName
+	CommitMessage    git.CommitMessage
+	Paths            []string
+	NoFileMode       bool
+	DryRun           bool
+}
+
+type CommitToFork struct {
+	Commit commit.Interface
+	Logger logger.Interface
+	GitHub github.Interface
+}
+
+func (u *CommitToFork) Do(ctx context.Context, in Input) error {
 	if !in.ParentRepository.IsValid() {
 		return xerrors.New("you must set GitHub repository")
 	}
@@ -39,9 +56,9 @@ func (u *CommitToFork) Do(ctx context.Context, in usecases.CommitToForkIn) error
 	if err != nil {
 		return xerrors.Errorf("could not create a fork: %w", err)
 	}
-	if err := u.Commit.Do(ctx, usecases.CommitIn{
+	if err := u.Commit.Do(ctx, commit.Input{
 		ParentRepository: in.ParentRepository,
-		ParentBranch: usecases.ParentBranch{
+		ParentBranch: commit.ParentBranch{
 			FastForward: in.ParentBranchName == "",
 			FromRef:     git.RefName(in.ParentBranchName),
 		},

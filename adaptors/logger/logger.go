@@ -4,17 +4,29 @@ import (
 	"log"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
 )
 
 var Set = wire.NewSet(
 	wire.Struct(new(Logger)),
-	wire.Bind(new(adaptors.Logger), new(*Logger)),
-	wire.Bind(new(adaptors.LoggerConfig), new(*Logger)),
+	wire.Bind(new(Interface), new(*Logger)),
+	wire.Bind(new(Config), new(*Logger)),
 )
 
+//go:generate mockgen -destination mock_logger/mock_logger.go github.com/int128/ghcp/adaptors/logger Interface,Config
+
+type Interface interface {
+	Errorf(format string, v ...interface{})
+	Warnf(format string, v ...interface{})
+	Infof(format string, v ...interface{})
+	Debugf(format string, v ...interface{})
+}
+
+type Config interface {
+	SetDebug(debug bool)
+}
+
 // Logger provides logging using Go standard package.
-// By default debug logs are not shown but you can change it by LoggerConfig.
+// By default debug logs are not shown but you can change it by Config.
 type Logger struct {
 	debug bool
 }

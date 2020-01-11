@@ -1,4 +1,4 @@
-package env
+package fs
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/int128/ghcp/adaptors"
 )
 
 type singleNameFilter struct {
@@ -60,7 +59,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		want := []adaptors.File{
+		want := []File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/b.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
@@ -74,7 +73,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		want := []adaptors.File{
+		want := []File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
 		}
@@ -96,7 +95,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		want := []adaptors.File{
+		want := []File{
 			{Path: "dir1/a.jpg"},
 		}
 		if diff := cmp.Diff(want, got); diff != "" {
@@ -108,7 +107,7 @@ func TestFileSystem_FindFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("FindFiles returned error: %+v", err)
 		}
-		want := []adaptors.File{
+		want := []File{
 			{Path: "dir1/a.jpg"},
 			{Path: "dir2/c.jpg", Executable: true},
 		}

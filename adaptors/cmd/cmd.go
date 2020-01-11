@@ -7,17 +7,14 @@ import (
 	"strings"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/env"
+	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
 	"github.com/int128/ghcp/infrastructure"
-	"github.com/int128/ghcp/usecases"
+	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/usecases/fork"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
-)
-
-var Set = wire.NewSet(
-	wire.Struct(new(Cmd), "*"),
-	wire.Bind(new(adaptors.Cmd), new(*Cmd)),
 )
 
 const (
@@ -31,14 +28,25 @@ const (
 	commitToForkCmdName = "fork-commit"
 )
 
+var Set = wire.NewSet(
+	wire.Struct(new(Cmd), "*"),
+	wire.Bind(new(Interface), new(*Cmd)),
+)
+
+//go:generate mockgen -destination mock_cmd/mock_cmd.go github.com/int128/ghcp/adaptors/cmd Interface
+
+type Interface interface {
+	Run(ctx context.Context, args []string, version string) int
+}
+
 // Cmd interacts with command line interface.
 type Cmd struct {
-	Commit       usecases.Commit
-	CommitToFork usecases.CommitToFork
+	Commit       commit.Interface
+	CommitToFork fork.Interface
 
-	Env              adaptors.Env
-	Logger           adaptors.Logger
-	LoggerConfig     adaptors.LoggerConfig
+	Env              env.Interface
+	Logger           logger.Interface
+	LoggerConfig     logger.Config
 	GitHubClientInit infrastructure.GitHubClientInit
 }
 
@@ -158,12 +166,12 @@ func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			in := usecases.CommitIn{
+			in := commit.Input{
 				ParentRepository: git.RepositoryID{
 					Owner: o.RepositoryOwner,
 					Name:  o.RepositoryName,
 				},
-				ParentBranch: usecases.ParentBranch{
+				ParentBranch: commit.ParentBranch{
 					FastForward: o.ParentRef == "" && !o.NoParent,
 					NoParent:    o.NoParent,
 					FromRef:     git.RefName(o.ParentRef),
@@ -230,7 +238,7 @@ func newCommitToForkCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			in := usecases.CommitToForkIn{
+			in := fork.Input{
 				ParentRepository: git.RepositoryID{
 					Owner: o.UpstreamRepositoryOwner,
 					Name:  o.UpstreamRepositoryName,

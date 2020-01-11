@@ -1,4 +1,4 @@
-package env
+package fs
 
 import (
 	"encoding/base64"
@@ -7,16 +7,39 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/int128/ghcp/adaptors"
+	"github.com/google/wire"
 	"golang.org/x/xerrors"
 )
+
+var Set = wire.NewSet(
+	wire.Struct(new(FileSystem)),
+	wire.Bind(new(Interface), new(*FileSystem)),
+)
+
+//go:generate mockgen -destination mock_fs/mock_fs.go github.com/int128/ghcp/adaptors/fs Interface
+
+type Interface interface {
+	FindFiles(paths []string, filter FindFilesFilter) ([]File, error)
+	ReadAsBase64EncodedContent(filename string) (string, error)
+}
+
+// FindFilesFilter is an interface to filter directories and files.
+type FindFilesFilter interface {
+	SkipDir(path string) bool     // If true, it skips entering the directory
+	ExcludeFile(path string) bool // If true, it excludes the file from the result
+}
+
+type File struct {
+	Path       string
+	Executable bool
+}
 
 // FileSystem provides manipulation of file system.
 type FileSystem struct{}
 
 // FindFiles returns a list of files in the paths.
-func (fs *FileSystem) FindFiles(paths []string, filter adaptors.FindFilesFilter) ([]adaptors.File, error) {
-	var files []adaptors.File
+func (fs *FileSystem) FindFiles(paths []string, filter FindFilesFilter) ([]File, error) {
+	var files []File
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -32,7 +55,7 @@ func (fs *FileSystem) FindFiles(paths []string, filter adaptors.FindFilesFilter)
 				if filter.ExcludeFile(path) {
 					return nil
 				}
-				files = append(files, adaptors.File{
+				files = append(files, File{
 					Path:       path,
 					Executable: info.Mode()&0100 != 0, // mask the executable bit of owner
 				})
