@@ -1,12 +1,12 @@
-package mock_adaptors
+package testing
 
 import (
 	"testing"
 
-	adaptors2 "github.com/int128/ghcp/adaptors"
+	"github.com/int128/ghcp/adaptors/logger"
 )
 
-func NewLogger(t *testing.T) adaptors2.Logger {
+func New(t *testing.T) logger.Interface {
 	return &testLogger{t}
 }
 

@@ -5,9 +5,9 @@ package di
 
 import (
 	"github.com/google/wire"
-	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/adaptors/cmd"
 	"github.com/int128/ghcp/adaptors/env"
+	"github.com/int128/ghcp/adaptors/fs"
 	githubAdaptor "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
@@ -16,10 +16,11 @@ import (
 	"github.com/int128/ghcp/usecases/fork"
 )
 
-func NewCmd() adaptors.Cmd {
+func NewCmd() cmd.Interface {
 	wire.Build(
 		cmd.Set,
 		env.Set,
+		fs.Set,
 		githubAdaptor.Set,
 		logger.Set,
 

@@ -6,10 +6,12 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	"github.com/int128/ghcp/adaptors"
-	"github.com/int128/ghcp/adaptors/mock_adaptors"
+	"github.com/int128/ghcp/adaptors/fs"
+	"github.com/int128/ghcp/adaptors/fs/mock_fs"
+	"github.com/int128/ghcp/adaptors/github"
+	"github.com/int128/ghcp/adaptors/github/mock_github"
+	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/usecases"
 )
 
 func TestCreateBlobTreeCommit_Do(t *testing.T) {
@@ -20,7 +22,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
+		fileSystem := mock_fs.NewMockInterface(ctrl)
 		fileSystem.EXPECT().
 			ReadAsBase64EncodedContent("file1").
 			Return("base64content1", nil)
@@ -28,7 +30,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			ReadAsBase64EncodedContent("file2").
 			Return("base64content2", nil)
 
-		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub := mock_github.NewMockInterface(ctrl)
 		gitHub.EXPECT().
 			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
@@ -66,21 +68,21 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, adaptors.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitIn{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&adaptors.QueryCommitOut{
+			Return(&github.QueryCommitOut{
 				ChangedFiles: 1,
 			}, nil)
 
 		useCase := CreateBlobTreeCommit{
 			FileSystem: fileSystem,
-			Logger:     mock_adaptors.NewLogger(t),
+			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
-		got, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
-			Files: []adaptors.File{
+		got, err := useCase.Do(ctx, Input{
+			Files: []fs.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
 			},
@@ -92,7 +94,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Do returned error: %+v", err)
 		}
-		want := &usecases.CreateBlobTreeCommitOut{
+		want := &Output{
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}
@@ -105,7 +107,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		fileSystem := mock_adaptors.NewMockFileSystem(ctrl)
+		fileSystem := mock_fs.NewMockInterface(ctrl)
 		fileSystem.EXPECT().
 			ReadAsBase64EncodedContent("file1").
 			Return("base64content1", nil)
@@ -113,7 +115,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			ReadAsBase64EncodedContent("file2").
 			Return("base64content2", nil)
 
-		gitHub := mock_adaptors.NewMockGitHub(ctrl)
+		gitHub := mock_github.NewMockInterface(ctrl)
 		gitHub.EXPECT().
 			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
@@ -151,21 +153,21 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, adaptors.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitIn{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&adaptors.QueryCommitOut{
+			Return(&github.QueryCommitOut{
 				ChangedFiles: 1,
 			}, nil)
 
 		useCase := CreateBlobTreeCommit{
 			FileSystem: fileSystem,
-			Logger:     mock_adaptors.NewLogger(t),
+			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
-		got, err := useCase.Do(ctx, usecases.CreateBlobTreeCommitIn{
-			Files: []adaptors.File{
+		got, err := useCase.Do(ctx, Input{
+			Files: []fs.File{
 				{Path: "file1"},
 				{Path: "file2", Executable: true},
 			},
@@ -178,7 +180,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Do returned error: %+v", err)
 		}
-		want := &usecases.CreateBlobTreeCommitOut{
+		want := &Output{
 			CommitSHA:    "commitSHA",
 			ChangedFiles: 1,
 		}

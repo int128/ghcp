@@ -6,9 +6,9 @@
 package di
 
 import (
-	"github.com/int128/ghcp/adaptors"
 	"github.com/int128/ghcp/adaptors/cmd"
 	"github.com/int128/ghcp/adaptors/env"
+	"github.com/int128/ghcp/adaptors/fs"
 	github2 "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
@@ -19,8 +19,8 @@ import (
 
 // Injectors from di.go:
 
-func NewCmd() adaptors.Cmd {
-	fileSystem := &env.FileSystem{}
+func NewCmd() cmd.Interface {
+	fileSystem := &fs.FileSystem{}
 	loggerLogger := &logger.Logger{}
 	client := &github.Client{}
 	gitHub := &github2.GitHub{
