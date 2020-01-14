@@ -7,12 +7,12 @@ import (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(Logger)),
-	wire.Bind(new(Interface), new(*Logger)),
-	wire.Bind(new(Config), new(*Logger)),
+	wire.Value(NewFunc(New)),
 )
 
-//go:generate mockgen -destination mock_logger/mock_logger.go github.com/int128/ghcp/adaptors/logger Interface,Config
+type NewFunc func(Option) Interface
+
+//go:generate mockgen -destination mock_logger/mock_logger.go github.com/int128/ghcp/adaptors/logger Interface
 
 type Interface interface {
 	Errorf(format string, v ...interface{})
@@ -21,34 +21,32 @@ type Interface interface {
 	Debugf(format string, v ...interface{})
 }
 
-type Config interface {
-	SetDebug(debug bool)
+type Option struct {
+	Debug bool
 }
 
-// Logger provides logging using Go standard package.
-// By default debug logs are not shown but you can change it by Config.
-type Logger struct {
-	debug bool
+func New(o Option) Interface {
+	return &logger{opt: o}
 }
 
-func (*Logger) Errorf(format string, v ...interface{}) {
+type logger struct {
+	opt Option
+}
+
+func (*logger) Errorf(format string, v ...interface{}) {
 	log.Printf("ERROR "+format, v...)
 }
 
-func (*Logger) Warnf(format string, v ...interface{}) {
+func (*logger) Warnf(format string, v ...interface{}) {
 	log.Printf("WARN  "+format, v...)
 }
 
-func (*Logger) Infof(format string, v ...interface{}) {
+func (*logger) Infof(format string, v ...interface{}) {
 	log.Printf("INFO  "+format, v...)
 }
 
-func (l *Logger) Debugf(format string, v ...interface{}) {
-	if l.debug {
+func (l *logger) Debugf(format string, v ...interface{}) {
+	if l.opt.Debug {
 		log.Printf("DEBUG "+format, v...)
 	}
-}
-
-func (l *Logger) SetDebug(debug bool) {
-	l.debug = debug
 }

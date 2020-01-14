@@ -1,44 +1,75 @@
 package github
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
 	"github.com/google/go-github/v24/github"
 	"github.com/google/wire"
-	"github.com/int128/ghcp/infrastructure"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(Client)),
-	wire.Bind(new(infrastructure.GitHubClient), new(*Client)),
-	wire.Bind(new(infrastructure.GitHubClientInit), new(*Client)),
+	wire.Value(NewFunc(New)),
 )
 
-// Client provides GitHub access.
-// Caller must call Init() before an API invocation.
-type Client struct {
-	*githubv4.Client
-	*github.GitService
-	*github.RepositoriesService
+type NewFunc func(Option) (Interface, error)
+
+//go:generate mockgen -destination mock_github/mock_github.go github.com/int128/ghcp/infrastructure/github Interface
+
+type Interface interface {
+	QueryService
+	GitService
+	RepositoriesService
 }
 
-// Init initializes this client with the options.
-func (c *Client) Init(o infrastructure.GitHubClientInitOptions) error {
-	v4, v3, err := c.newClients(o)
+type QueryService interface {
+	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
+}
+
+type GitService interface {
+	CreateRef(ctx context.Context, owner string, repo string, ref *github.Reference) (*github.Reference, *github.Response, error)
+	UpdateRef(ctx context.Context, owner string, repo string, ref *github.Reference, force bool) (*github.Reference, *github.Response, error)
+	CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit) (*github.Commit, *github.Response, error)
+	CreateTree(ctx context.Context, owner string, repo string, baseTree string, entries []github.TreeEntry) (*github.Tree, *github.Response, error)
+	CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)
+}
+
+type RepositoriesService interface {
+	CreateFork(ctx context.Context, owner, repo string, opt *github.RepositoryCreateForkOptions) (*github.Repository, *github.Response, error)
+}
+
+type Option struct {
+	// A token for GitHub API.
+	Token string
+
+	// GitHub API v3 URL (for GitHub Enterprise).
+	// e.g. https://github.example.com/api/v3/
+	URLv3 string
+}
+
+type clientSet struct {
+	QueryService
+	GitService
+	RepositoriesService
+}
+
+func New(o Option) (Interface, error) {
+	v4, v3, err := newClients(o)
 	if err != nil {
-		return xerrors.Errorf("error while initializing GitHub client: %w", err)
+		return nil, xerrors.Errorf("error while initializing GitHub client: %w", err)
 	}
-	c.Client = v4
-	c.GitService = v3.Git
-	c.RepositoriesService = v3.Repositories
-	return nil
+	return &clientSet{
+		QueryService:        v4,
+		GitService:          v3.Git,
+		RepositoriesService: v3.Repositories,
+	}, nil
 }
 
-func (c *Client) newClients(o infrastructure.GitHubClientInitOptions) (*githubv4.Client, *github.Client, error) {
+func newClients(o Option) (*githubv4.Client, *github.Client, error) {
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Base:   http.DefaultTransport,

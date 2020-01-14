@@ -1,19 +1,18 @@
+// Package cmd parses command line args and runs the corresponding use-case.
 package cmd
 
 import (
 	"context"
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors/env"
 	"github.com/int128/ghcp/adaptors/logger"
-	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/infrastructure"
+	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/fork"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"golang.org/x/xerrors"
 )
 
@@ -29,33 +28,33 @@ const (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(Cmd), "*"),
-	wire.Bind(new(Interface), new(*Cmd)),
+	wire.Bind(new(Interface), new(*Runner)),
+	wire.Struct(new(Runner), "*"),
+	wire.Struct(new(InternalRunner), "*"),
 )
 
-//go:generate mockgen -destination mock_cmd/mock_cmd.go github.com/int128/ghcp/adaptors/cmd Interface
-
 type Interface interface {
-	Run(ctx context.Context, args []string, version string) int
+	Run(args []string, version string) int
 }
 
-// Cmd interacts with command line interface.
-type Cmd struct {
-	Commit       commit.Interface
-	CommitToFork fork.Interface
-
-	Env              env.Interface
-	Logger           logger.Interface
-	LoggerConfig     logger.Config
-	GitHubClientInit infrastructure.GitHubClientInit
+// Runner is the entry point for the command line application.
+// It bootstraps the InternalRunner and runs the specified use-case.
+type Runner struct {
+	Env               env.Interface
+	NewLogger         logger.NewFunc
+	NewGitHub         github.NewFunc
+	NewInternalRunner NewInternalRunnerFunc
 }
 
-// Run parses the arguments and executes the use-case.
-func (c *Cmd) Run(ctx context.Context, args []string, version string) int {
-	rootCmd := newRootCmd(filepath.Base(args[0]), c)
-	commitCmd := newCommitCmd(ctx, c)
+// Run parses the command line args and runs the corresponding use-case.
+func (r *Runner) Run(args []string, version string) int {
+	ctx := context.Background()
+
+	var o globalOptions
+	rootCmd := r.newRootCmd(&o)
+	commitCmd := r.newCommitCmd(ctx, &o)
 	rootCmd.AddCommand(commitCmd)
-	forkCommitCmd := newCommitToForkCmd(ctx, c)
+	forkCommitCmd := r.newForkCommitCmd(ctx, &o)
 	rootCmd.AddCommand(forkCommitCmd)
 
 	rootCmd.Version = version
@@ -73,197 +72,61 @@ type globalOptions struct {
 	Debug       bool
 }
 
-func newRootCmd(name string, cmd *Cmd) *cobra.Command {
-	var o globalOptions
-	c := &cobra.Command{
-		Use:          name,
-		Short:        "A command to commit files to a GitHub repository",
-		SilenceUsage: true,
-		PersistentPreRunE: func(*cobra.Command, []string) error {
-			if o.Debug {
-				cmd.LoggerConfig.SetDebug(true)
-				cmd.Logger.Debugf("Debug enabled")
-			}
-			if o.Chdir != "" {
-				if err := cmd.Env.Chdir(o.Chdir); err != nil {
-					return xerrors.Errorf("could not change to directory %s: %w", o.Chdir, err)
-				}
-				cmd.Logger.Infof("Changed to directory %s", o.Chdir)
-			}
-			if o.GitHubToken == "" {
-				o.GitHubToken = cmd.Env.Getenv(envGitHubToken)
-				if o.GitHubToken != "" {
-					cmd.Logger.Debugf("Using token from environment variable $%s", envGitHubToken)
-				}
-			}
-			if o.GitHubToken == "" {
-				return xerrors.Errorf("no GitHub API token. Set environment variable %s or --token option", envGitHubToken)
-			}
-			if o.GitHubAPI == "" {
-				o.GitHubAPI = cmd.Env.Getenv(envGitHubAPI)
-				if o.GitHubAPI != "" {
-					cmd.Logger.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
-				}
-			}
-			if err := cmd.GitHubClientInit.Init(infrastructure.GitHubClientInitOptions{
-				Token: o.GitHubToken,
-				URLv3: o.GitHubAPI,
-			}); err != nil {
-				return xerrors.Errorf("could not connect to GitHub API: %w", err)
-			}
-			return nil
-		},
-	}
-	f := c.PersistentFlags()
+func (o *globalOptions) register(f *pflag.FlagSet) {
 	f.StringVarP(&o.Chdir, "directory", "C", "", "Change to directory before operation")
 	f.StringVar(&o.GitHubToken, "token", "", fmt.Sprintf("GitHub API token [$%s]", envGitHubToken))
 	f.StringVar(&o.GitHubAPI, "api", "", fmt.Sprintf("GitHub API v3 URL (v4 will be inferred) [$%s]", envGitHubAPI))
 	f.BoolVar(&o.Debug, "debug", false, "Show debug logs")
-	return c
 }
 
-type commitOptions struct {
-	RepositoryOwner string
-	RepositoryName  string
-	CommitMessage   string
-	BranchName      string
-	ParentRef       string
-	NoParent        bool
-	NoFileMode      bool
-	DryRun          bool
-}
-
-const commitCmdExample = `  To commit files to the default branch:
-    ghcp commit -u OWNER -r REPO -m MESSAGE FILES...
-
-  To commit files to the branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
-
-  If the branch does not exist, ghcp creates a branch from the default branch.
-  It the branch exists, ghcp updates the branch by fast-forward.
-
-  To commit files to a new branch from the parent branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
-
-  If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
-
-  To commit files to a new branch without any parent:
-    ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
-
-  If the branch exists, ghcp cannot update the branch by fast-forward and will fail.`
-
-func newCommitCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
-	var o commitOptions
+func (r *Runner) newRootCmd(o *globalOptions) *cobra.Command {
 	c := &cobra.Command{
-		Use:     fmt.Sprintf("%s [flags] FILES...", commitCmdName),
-		Short:   "Commit files to the branch",
-		Long:    `This commits the files to the branch. This will create a branch if it does not exist.`,
-		Example: commitCmdExample,
-		Args: func(*cobra.Command, []string) error {
-			if o.ParentRef != "" && o.NoParent {
-				return xerrors.Errorf("do not set both --parent and --no-parent")
-			}
-			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
-			in := commit.Input{
-				ParentRepository: git.RepositoryID{
-					Owner: o.RepositoryOwner,
-					Name:  o.RepositoryName,
-				},
-				ParentBranch: commit.ParentBranch{
-					FastForward: o.ParentRef == "" && !o.NoParent,
-					NoParent:    o.NoParent,
-					FromRef:     git.RefName(o.ParentRef),
-				},
-				TargetRepository: git.RepositoryID{
-					Owner: o.RepositoryOwner,
-					Name:  o.RepositoryName,
-				},
-				TargetBranchName: git.BranchName(o.BranchName),
-				CommitMessage:    git.CommitMessage(o.CommitMessage),
-				Paths:            args,
-				NoFileMode:       o.NoFileMode,
-				DryRun:           o.DryRun,
-			}
-			if err := cmd.Commit.Do(ctx, in); err != nil {
-				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not commit the files: %s", err)
-			}
-			return nil
-		},
+		Use:          "ghcp",
+		Short:        "A command to commit files to a GitHub repository",
+		SilenceUsage: true,
 	}
-	f := c.Flags()
-	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
-	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
-	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
-	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
-	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
-	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
-	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	o.register(c.PersistentFlags())
 	return c
 }
 
-type commitToForkOptions struct {
-	UpstreamRepositoryOwner string
-	UpstreamRepositoryName  string
-	UpstreamBranchName      string
-	TargetBranchName        string
-	CommitMessage           string
-	NoFileMode              bool
-	DryRun                  bool
+type NewInternalRunnerFunc func(logger.Interface, github.Interface) *InternalRunner
+
+// InternalRunner has the set of use-cases.
+type InternalRunner struct {
+	CommitUseCase     commit.Interface
+	ForkCommitUseCase fork.Interface
+	Logger            logger.Interface
 }
 
-func newCommitToForkCmd(ctx context.Context, cmd *Cmd) *cobra.Command {
-	var o commitToForkOptions
-	c := &cobra.Command{
-		Use:   fmt.Sprintf("%s [flags] FILES...", commitToForkCmdName),
-		Short: "Fork the repository and commit files to a branch",
-		Long:  `This forks the repository and commits the files to a new branch.`,
-		Args: func(*cobra.Command, []string) error {
-			var errs []string
-			if o.UpstreamRepositoryOwner == "" {
-				errs = append(errs, "--owner is missing")
-			}
-			if o.UpstreamRepositoryName == "" {
-				errs = append(errs, "--repo is missing")
-			}
-			if o.TargetBranchName == "" {
-				errs = append(errs, "--branch is missing")
-			}
-			if len(errs) > 0 {
-				return xerrors.New(strings.Join(errs, ", "))
-			}
-			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
-			in := fork.Input{
-				ParentRepository: git.RepositoryID{
-					Owner: o.UpstreamRepositoryOwner,
-					Name:  o.UpstreamRepositoryName,
-				},
-				ParentBranchName: git.BranchName(o.UpstreamBranchName),
-				TargetBranchName: git.BranchName(o.TargetBranchName),
-				CommitMessage:    git.CommitMessage(o.CommitMessage),
-				Paths:            args,
-				NoFileMode:       o.NoFileMode,
-				DryRun:           o.DryRun,
-			}
-			if err := cmd.CommitToFork.Do(ctx, in); err != nil {
-				cmd.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not commit the files: %s", err)
-			}
-			return nil
-		},
+func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
+	log := r.NewLogger(logger.Option{Debug: o.Debug})
+	if o.Chdir != "" {
+		if err := r.Env.Chdir(o.Chdir); err != nil {
+			return nil, xerrors.Errorf("could not change to directory %s: %w", o.Chdir, err)
+		}
+		log.Infof("Changed to directory %s", o.Chdir)
 	}
-	f := c.Flags()
-	f.StringVarP(&o.UpstreamRepositoryOwner, "owner", "u", "", "Upstream repository owner (mandatory)")
-	f.StringVarP(&o.UpstreamRepositoryName, "repo", "r", "", "Upstream repository name (mandatory)")
-	f.StringVar(&o.UpstreamBranchName, "parent", "", "Upstream branch name (default: the default branch of the upstream repository)")
-	f.StringVarP(&o.TargetBranchName, "branch", "b", "", "Name of the branch to create (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
-	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
-	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
-	return c
+	if o.GitHubToken == "" {
+		o.GitHubToken = r.Env.Getenv(envGitHubToken)
+		if o.GitHubToken != "" {
+			log.Debugf("Using token from environment variable $%s", envGitHubToken)
+		}
+	}
+	if o.GitHubToken == "" {
+		return nil, xerrors.Errorf("no GitHub API token. Set environment variable %s or --token option", envGitHubToken)
+	}
+	if o.GitHubAPI == "" {
+		o.GitHubAPI = r.Env.Getenv(envGitHubAPI)
+		if o.GitHubAPI != "" {
+			log.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
+		}
+	}
+	gh, err := r.NewGitHub(github.Option{
+		Token: o.GitHubToken,
+		URLv3: o.GitHubAPI,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("could not connect to GitHub API: %w", err)
+	}
+	return r.NewInternalRunner(log, gh), nil
 }

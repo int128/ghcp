@@ -20,37 +20,51 @@ import (
 // Injectors from di.go:
 
 func NewCmd() cmd.Interface {
+	envEnv := &env.Env{}
+	newFunc := _wireNewFuncValue
+	githubNewFunc := _wireGithubNewFuncValue
+	newInternalRunnerFunc := _wireNewInternalRunnerFuncValue
+	runner := &cmd.Runner{
+		Env:               envEnv,
+		NewLogger:         newFunc,
+		NewGitHub:         githubNewFunc,
+		NewInternalRunner: newInternalRunnerFunc,
+	}
+	return runner
+}
+
+var (
+	_wireNewFuncValue               = logger.NewFunc(logger.New)
+	_wireGithubNewFuncValue         = github.NewFunc(github.New)
+	_wireNewInternalRunnerFuncValue = cmd.NewInternalRunnerFunc(NewCmdInternalRunner)
+)
+
+func NewCmdInternalRunner(loggerInterface logger.Interface, githubInterface github.Interface) *cmd.InternalRunner {
 	fileSystem := &fs.FileSystem{}
-	loggerLogger := &logger.Logger{}
-	client := &github.Client{}
 	gitHub := &github2.GitHub{
-		Client: client,
-		Logger: loggerLogger,
+		Client: githubInterface,
+		Logger: loggerInterface,
 	}
 	createBlobTreeCommit := &btc.CreateBlobTreeCommit{
 		FileSystem: fileSystem,
-		Logger:     loggerLogger,
+		Logger:     loggerInterface,
 		GitHub:     gitHub,
 	}
 	commitCommit := &commit.Commit{
 		CreateBlobTreeCommit: createBlobTreeCommit,
 		FileSystem:           fileSystem,
-		Logger:               loggerLogger,
+		Logger:               loggerInterface,
 		GitHub:               gitHub,
 	}
 	commitToFork := &fork.CommitToFork{
 		Commit: commitCommit,
-		Logger: loggerLogger,
+		Logger: loggerInterface,
 		GitHub: gitHub,
 	}
-	envEnv := &env.Env{}
-	cmdCmd := &cmd.Cmd{
-		Commit:           commitCommit,
-		CommitToFork:     commitToFork,
-		Env:              envEnv,
-		Logger:           loggerLogger,
-		LoggerConfig:     loggerLogger,
-		GitHubClientInit: client,
+	internalRunner := &cmd.InternalRunner{
+		CommitUseCase:     commitCommit,
+		ForkCommitUseCase: commitToFork,
+		Logger:            loggerInterface,
 	}
-	return cmdCmd
+	return internalRunner
 }

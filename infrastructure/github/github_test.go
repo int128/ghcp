@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/infrastructure"
 )
 
 func TestNewGitHubClient(t *testing.T) {
@@ -36,12 +35,12 @@ func TestNewGitHubClient(t *testing.T) {
 	}))
 	defer s.Close()
 
-	o := infrastructure.GitHubClientInitOptions{
+	o := Option{
 		Token: "YOUR_TOKEN",
 		URLv3: s.URL + "/api/v3/",
 	}
-	var c Client
-	if err := c.Init(o); err != nil {
+	c, err := New(o)
+	if err != nil {
 		t.Fatalf("Init returned error: %s", err)
 	}
 

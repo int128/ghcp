@@ -10,6 +10,7 @@ require (
 	github.com/shurcooL/githubv4 v0.0.0-20190119021625-d9689b595017
 	github.com/shurcooL/graphql v0.0.0-20181231061246-d48a9a75455f // indirect
 	github.com/spf13/cobra v0.0.5
+	github.com/spf13/pflag v1.0.3
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )

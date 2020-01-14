@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-github/v24/github"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/infrastructure/mock_infrastructure"
+	"github.com/int128/ghcp/infrastructure/github/mock_github"
 )
 
 func TestGitHub_CreateCommit(t *testing.T) {
@@ -19,7 +19,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		gitHubClient := mock_infrastructure.NewMockGitHubClient(ctrl)
+		gitHubClient := mock_github.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			CreateCommit(ctx, "owner", "repo", &github.Commit{
 				Message: github.String("message"),
@@ -51,7 +51,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		gitHubClient := mock_infrastructure.NewMockGitHubClient(ctrl)
+		gitHubClient := mock_github.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			CreateCommit(ctx, "owner", "repo", &github.Commit{
 				Message: github.String("message"),

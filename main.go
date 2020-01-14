@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"os"
 
 	"github.com/int128/ghcp/di"
@@ -10,5 +9,5 @@ import (
 var version = "HEAD"
 
 func main() {
-	os.Exit(di.NewCmd().Run(context.Background(), os.Args, version))
+	os.Exit(di.NewCmd().Run(os.Args, version))
 }

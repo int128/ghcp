@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/int128/ghcp/adaptors/env/mock_env"
-	"github.com/int128/ghcp/adaptors/logger/mock_logger"
+	"github.com/int128/ghcp/adaptors/logger"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/infrastructure"
-	"github.com/int128/ghcp/infrastructure/mock_infrastructure"
+	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
 	"github.com/int128/ghcp/usecases/fork"
@@ -35,12 +35,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -52,7 +51,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -71,12 +70,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -89,7 +87,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -108,12 +106,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -127,7 +124,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -146,12 +143,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -165,7 +161,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -174,12 +170,11 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--parent and --no-parent", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			cmd := Cmd{
-				Commit:           mock_commit.NewMockInterface(ctrl),
-				Env:              mock_env.NewMockInterface(ctrl),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: mock_infrastructure.NewMockGitHubClientInit(ctrl),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, nil),
+				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
 			args := []string{
 				cmdName,
@@ -194,7 +189,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeError {
 				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
 			}
@@ -213,12 +208,11 @@ func TestCmd_Run(t *testing.T) {
 					Paths:            []string{"file1", "file2"},
 					NoFileMode:       true,
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -231,7 +225,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -250,12 +244,11 @@ func TestCmd_Run(t *testing.T) {
 					Paths:            []string{"file1", "file2"},
 					DryRun:           true,
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -268,7 +261,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -287,12 +280,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				CommitToFork:     commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{ForkCommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -305,7 +297,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -323,12 +315,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				CommitToFork:     commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{ForkCommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -342,7 +333,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -353,7 +344,6 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--debug", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
@@ -363,15 +353,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			loggerConfig := mock_logger.NewMockConfig(ctrl)
-			loggerConfig.EXPECT().
-				SetDebug(true)
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     loggerConfig,
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{Debug: true}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -384,7 +370,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -393,7 +379,6 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--directory", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
@@ -403,15 +388,14 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			env := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
-			env.EXPECT().
+			mockEnv := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
+			mockEnv.EXPECT().
 				Chdir("dir")
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              env,
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               mockEnv,
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -424,7 +408,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -442,12 +426,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:           commitUseCase,
-				Env:              newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{Token: "YOUR_TOKEN"}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -458,7 +441,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -467,12 +450,11 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("NoGitHubToken", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			cmd := Cmd{
-				Commit:           mock_commit.NewMockInterface(ctrl),
-				Env:              newEnv(ctrl, map[string]string{envGitHubToken: ""}),
-				Logger:           testingLogger.New(t),
-				LoggerConfig:     mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: mock_infrastructure.NewMockGitHubClientInit(ctrl),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubToken: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
 			args := []string{
 				cmdName,
@@ -483,7 +465,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeError {
 				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
 			}
@@ -501,15 +483,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:       commitUseCase,
-				Env:          newEnv(ctrl, map[string]string{}),
-				Logger:       testingLogger.New(t),
-				LoggerConfig: mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
-					Token: "YOUR_TOKEN",
-					URLv3: "https://github.example.com/api/v3/",
-				}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
+				Env:               newEnv(ctrl, nil),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -522,7 +500,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -540,15 +518,11 @@ func TestCmd_Run(t *testing.T) {
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
-			cmd := Cmd{
-				Commit:       commitUseCase,
-				Env:          newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
-				Logger:       testingLogger.New(t),
-				LoggerConfig: mock_logger.NewMockConfig(ctrl),
-				GitHubClientInit: newGitHubClientInit(ctrl, infrastructure.GitHubClientInitOptions{
-					Token: "YOUR_TOKEN",
-					URLv3: "https://github.example.com/api/v3/",
-				}),
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
 			args := []string{
 				cmdName,
@@ -560,7 +534,7 @@ func TestCmd_Run(t *testing.T) {
 				"file1",
 				"file2",
 			}
-			exitCode := cmd.Run(ctx, args, version)
+			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
@@ -568,11 +542,22 @@ func TestCmd_Run(t *testing.T) {
 	})
 }
 
-func newGitHubClientInit(ctrl *gomock.Controller, o infrastructure.GitHubClientInitOptions) *mock_infrastructure.MockGitHubClientInit {
-	clientInit := mock_infrastructure.NewMockGitHubClientInit(ctrl)
-	clientInit.EXPECT().
-		Init(o)
-	return clientInit
+func newLogger(t *testing.T, want logger.Option) logger.NewFunc {
+	return func(got logger.Option) logger.Interface {
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
+		}
+		return testingLogger.New(t)
+	}
+}
+
+func newGitHub(t *testing.T, want github.Option) github.NewFunc {
+	return func(got github.Option) (github.Interface, error) {
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
+		}
+		return nil, nil
+	}
 }
 
 func newEnv(ctrl *gomock.Controller, getenv map[string]string) *mock_env.MockInterface {
@@ -581,4 +566,11 @@ func newEnv(ctrl *gomock.Controller, getenv map[string]string) *mock_env.MockInt
 		env.EXPECT().Getenv(k).Return(v)
 	}
 	return env
+}
+
+func newInternalRunner(base InternalRunner) NewInternalRunnerFunc {
+	return func(l logger.Interface, g github.Interface) *InternalRunner {
+		base.Logger = l
+		return &base
+	}
 }
