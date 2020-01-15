@@ -8,7 +8,7 @@ import (
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/git"
-	"github.com/int128/ghcp/infrastructure"
+	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/xerrors"
 )
@@ -61,7 +61,7 @@ type QueryCommitOut struct {
 
 // GitHub provides GitHub API access.
 type GitHub struct {
-	Client infrastructure.GitHubClient
+	Client githubInfrastructure.Interface
 	Logger logger.Interface
 }
 
