@@ -31,6 +31,23 @@ func (b BranchName) QualifiedName() RefQualifiedName {
 	return RefQualifiedName{"refs/heads/", string(b)}
 }
 
+// TagName represents name of a tag.
+type TagName string
+
+// Name returns the name of tag.
+func (t TagName) Name() string {
+	return string(t)
+}
+
+// QualifiedName returns RefQualifiedName.
+// If the TagName is empty, it returns a zero value.
+func (t TagName) QualifiedName() RefQualifiedName {
+	if t == "" {
+		return RefQualifiedName{}
+	}
+	return RefQualifiedName{"refs/tags/", string(t)}
+}
+
 // RefName represents name of a ref, that is a branch or a tag.
 // This may be simple name or qualified name.
 type RefName string
@@ -105,4 +122,24 @@ type BlobSHA string
 type NewBlob struct {
 	Repository RepositoryID
 	Content    string // base64 encoded content
+}
+
+// ReleaseID represents an ID of release.
+type ReleaseID struct {
+	Repository RepositoryID
+	InternalID int64 // GitHub API will allocate this ID
+}
+
+// Release represents a release associated to a tag.
+type Release struct {
+	ID      ReleaseID
+	TagName TagName
+	Name    string
+}
+
+// ReleaseAsset represents a release asset.
+type ReleaseAsset struct {
+	Release  ReleaseID
+	Name     string
+	RealPath string
 }

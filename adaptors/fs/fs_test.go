@@ -68,6 +68,20 @@ func TestFileSystem_FindFiles(t *testing.T) {
 			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
 	})
+	t.Run("FilterIsNil", func(t *testing.T) {
+		got, err := fs.FindFiles([]string{"."}, nil)
+		if err != nil {
+			t.Fatalf("FindFiles returned error: %+v", err)
+		}
+		want := []File{
+			{Path: "dir1/a.jpg"},
+			{Path: "dir2/b.jpg"},
+			{Path: "dir2/c.jpg", Executable: true},
+		}
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("mismatch (-want +got):\n%s", diff)
+		}
+	})
 	t.Run("FindFiles", func(t *testing.T) {
 		got, err := fs.FindFiles([]string{"dir1/a.jpg", "dir2/c.jpg"}, &singleNameFilter{t: t})
 		if err != nil {
