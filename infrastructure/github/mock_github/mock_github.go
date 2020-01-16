@@ -8,6 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	github "github.com/google/go-github/v24/github"
+	os "os"
 	reflect "reflect"
 )
 
@@ -98,6 +99,22 @@ func (mr *MockInterfaceMockRecorder) CreateRef(arg0, arg1, arg2, arg3 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRef", reflect.TypeOf((*MockInterface)(nil).CreateRef), arg0, arg1, arg2, arg3)
 }
 
+// CreateRelease mocks base method
+func (m *MockInterface) CreateRelease(arg0 context.Context, arg1, arg2 string, arg3 *github.RepositoryRelease) (*github.RepositoryRelease, *github.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*github.RepositoryRelease)
+	ret1, _ := ret[1].(*github.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// CreateRelease indicates an expected call of CreateRelease
+func (mr *MockInterfaceMockRecorder) CreateRelease(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRelease", reflect.TypeOf((*MockInterface)(nil).CreateRelease), arg0, arg1, arg2, arg3)
+}
+
 // CreateTree mocks base method
 func (m *MockInterface) CreateTree(arg0 context.Context, arg1, arg2, arg3 string, arg4 []github.TreeEntry) (*github.Tree, *github.Response, error) {
 	m.ctrl.T.Helper()
@@ -112,6 +129,22 @@ func (m *MockInterface) CreateTree(arg0 context.Context, arg1, arg2, arg3 string
 func (mr *MockInterfaceMockRecorder) CreateTree(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockInterface)(nil).CreateTree), arg0, arg1, arg2, arg3, arg4)
+}
+
+// GetReleaseByTag mocks base method
+func (m *MockInterface) GetReleaseByTag(arg0 context.Context, arg1, arg2, arg3 string) (*github.RepositoryRelease, *github.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReleaseByTag", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*github.RepositoryRelease)
+	ret1, _ := ret[1].(*github.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetReleaseByTag indicates an expected call of GetReleaseByTag
+func (mr *MockInterfaceMockRecorder) GetReleaseByTag(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseByTag", reflect.TypeOf((*MockInterface)(nil).GetReleaseByTag), arg0, arg1, arg2, arg3)
 }
 
 // Query mocks base method
@@ -142,4 +175,20 @@ func (m *MockInterface) UpdateRef(arg0 context.Context, arg1, arg2 string, arg3 
 func (mr *MockInterfaceMockRecorder) UpdateRef(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRef", reflect.TypeOf((*MockInterface)(nil).UpdateRef), arg0, arg1, arg2, arg3, arg4)
+}
+
+// UploadReleaseAsset mocks base method
+func (m *MockInterface) UploadReleaseAsset(arg0 context.Context, arg1, arg2 string, arg3 int64, arg4 *github.UploadOptions, arg5 *os.File) (*github.ReleaseAsset, *github.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadReleaseAsset", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret0, _ := ret[0].(*github.ReleaseAsset)
+	ret1, _ := ret[1].(*github.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// UploadReleaseAsset indicates an expected call of UploadReleaseAsset
+func (mr *MockInterfaceMockRecorder) UploadReleaseAsset(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadReleaseAsset", reflect.TypeOf((*MockInterface)(nil).UploadReleaseAsset), arg0, arg1, arg2, arg3, arg4, arg5)
 }

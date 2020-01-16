@@ -29,6 +29,11 @@ type FindFilesFilter interface {
 	ExcludeFile(path string) bool // If true, it excludes the file from the result
 }
 
+type nullFindFilesFilter struct{}
+
+func (*nullFindFilesFilter) SkipDir(string) bool     { return false }
+func (*nullFindFilesFilter) ExcludeFile(string) bool { return false }
+
 type File struct {
 	Path       string
 	Executable bool
@@ -38,7 +43,11 @@ type File struct {
 type FileSystem struct{}
 
 // FindFiles returns a list of files in the paths.
+// If the filter is nil, it returns any files.
 func (fs *FileSystem) FindFiles(paths []string, filter FindFilesFilter) ([]File, error) {
+	if filter == nil {
+		filter = &nullFindFilesFilter{}
+	}
 	var files []File
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {

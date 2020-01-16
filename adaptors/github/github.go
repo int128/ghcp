@@ -2,6 +2,8 @@ package github
 
 import (
 	"context"
+	"net/http"
+	"os"
 
 	"github.com/cenkalti/backoff"
 	"github.com/google/go-github/v24/github"
@@ -22,13 +24,19 @@ var Set = wire.NewSet(
 
 type Interface interface {
 	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
+
 	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
+
 	QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error)
 	CreateTree(ctx context.Context, tree git.NewTree) (git.TreeSHA, error)
 	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
+
+	GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID, tag git.TagName) (*git.Release, error)
+	CreateRelease(ctx context.Context, r git.Release) (*git.Release, error)
+	CreateReleaseAsset(ctx context.Context, a git.ReleaseAsset) error
 }
 
 type QueryForCommitToBranchIn struct {
@@ -303,4 +311,63 @@ func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, er
 		return "", xerrors.Errorf("GitHub API error: %w", err)
 	}
 	return git.BlobSHA(blob.GetSHA()), nil
+}
+
+// GetReleaseByTagOrNil returns the release associated to the tag.
+// It returns nil if it does not exist.
+func (c *GitHub) GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID, tag git.TagName) (*git.Release, error) {
+	c.Logger.Debugf("Getting the release associated to the tag %v on the repository %+v", tag, repo)
+	release, resp, err := c.Client.GetReleaseByTag(ctx, repo.Owner, repo.Name, tag.Name())
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		c.Logger.Debugf("GitHub API returned 404: %s", err)
+		return nil, nil
+	}
+	if err != nil {
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
+	}
+	return &git.Release{
+		ID: git.ReleaseID{
+			Repository: repo,
+			InternalID: release.GetID(),
+		},
+		TagName: git.TagName(release.GetTagName()),
+		Name:    release.GetName(),
+	}, nil
+}
+
+// CreateRelease creates a release.
+func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release, error) {
+	c.Logger.Debugf("Creating a release %+v", r)
+	release, _, err := c.Client.CreateRelease(ctx, r.ID.Repository.Owner, r.ID.Repository.Name, &github.RepositoryRelease{
+		TagName: github.String(r.TagName.Name()),
+		Name:    github.String(r.Name),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
+	}
+	return &git.Release{
+		ID: git.ReleaseID{
+			Repository: r.ID.Repository,
+			InternalID: release.GetID(),
+		},
+		TagName: git.TagName(release.GetTagName()),
+		Name:    release.GetName(),
+	}, nil
+}
+
+// CreateRelease creates a release asset.
+func (c *GitHub) CreateReleaseAsset(ctx context.Context, a git.ReleaseAsset) error {
+	c.Logger.Debugf("Creating a release asset %+v", a)
+	f, err := os.Open(a.RealPath)
+	if err != nil {
+		return xerrors.Errorf("could not open the file: %w", err)
+	}
+	defer f.Close()
+	_, _, err = c.Client.UploadReleaseAsset(ctx, a.Release.Repository.Owner, a.Release.Repository.Name, a.Release.InternalID, &github.UploadOptions{
+		Name: a.Name,
+	}, f)
+	if err != nil {
+		return xerrors.Errorf("GitHub API error: %w", err)
+	}
+	return nil
 }

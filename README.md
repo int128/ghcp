@@ -1,7 +1,13 @@
 # ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![codecov](https://codecov.io/gh/int128/ghcp/branch/master/graph/badge.svg)](https://codecov.io/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
-This is a command to commit files to a GitHub repository.
+This is a simple command to release files to a GitHub repository.
 It depends on GitHub APIs and works without git installation.
+
+Features:
+
+- Commit files to a repository
+- Fork a repository and commit files to the forked repository (for a pull request)
+- Upload files to the GitHub Releases
 
 
 ## Getting Started
@@ -24,7 +30,7 @@ You need to get a personal access token from the [settings](https://github.com/s
 Let's see the following examples.
 
 
-### Example: Release assets to GitHub Pages
+### Example: Commit files to GitHub Pages
 
 To commit the files to the `gh-pages` branch:
 
@@ -33,13 +39,9 @@ ghcp commit -u OWNER -r REPO -b gh-pages -m MESSAGE index.html index.css
 ```
 
 
-### Example: Release your Homebrew formula
+### Example: Commit a Homebrew formula
 
-You can release a Homebrew formula to a tap repository.
-
-You need to create a repository with the prefix `homebrew-`, e.g. `homebrew-hello`.
-
-Then create a formula file like:
+Create a formula file like:
 
 ```rb
 # hello.rb
@@ -63,14 +65,13 @@ end
 To commit the formula to the repository:
 
 ```sh
-ghcp commit -u OWNER -r homebrew-hello -m v1.0.0 hello.rb
+ghcp commit -u OWNER -r homebrew-hello -m "Release v1.0.0" hello.rb
 ```
 
 Now you can install the formula from the repository.
 
 ```sh
-brew tap OWNER/hello
-brew install hello
+brew install OWNER/hello/hello
 ```
 
 See also [Makefile](Makefile).
@@ -79,30 +80,38 @@ ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp
 
 ### Example: Bump version string
 
-You can change version string in files such as README or build script.
-For example,
+To change a version string of files in a repository:
 
 ```sh
 # substitute version string in files
 sed -i -e "s/version '[0-9.]*'/version '$TAG'/g" README.md build.gradle
 
 # commit the changes to a branch
-ghcp commit -u OWNER -r REPO -b bump-v1.1.0 -m v1.1.0 README.md build.gradle
+ghcp commit -u OWNER -r REPO -b bump-v1.1.0 -m "Bump the version to v1.1.0" README.md build.gradle
 ```
 
 
-### Example: Commit for pull request
+### Example: Fork a repository and create a branch for a pull request
 
-You can fork a repository and commit files to the forked repository.
-
-The following example will fork the upstream repository `UPSTREAM/REPO` and
-commit files to the branch `topic` of your repository `YOUR/REPO`.
+To fork the upstream repository `UPSTREAM/REPO` and commit files to the branch `topic` of your repository `YOUR/REPO`:
 
 ```sh
 ghcp fork-commit -u UPSTREAM -r REPO -b topic -m 'Add foo' foo.txt
 ```
 
-This is useful for preparing a commit for a pull request.
+You can manually create a pull request of the created branch.
+
+
+### Example: Release assets
+
+To upload files to the release associated to the tag `v1.0.0`:
+
+```sh
+ghcp release -u OWNER -r REPO -v v1.0.0 dist/
+```
+
+If the release does not exist, it will create a release.
+If the tag does not exist, it will create a tag from the master branch and a release.
 
 
 ## Usage
@@ -115,6 +124,7 @@ Available Commands:
   commit      Commit files to the branch
   fork-commit Fork the repository and commit files to a branch
   help        Help about any command
+  release     Release files to the repository
 
 Flags:
       --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
@@ -154,6 +164,23 @@ Flags:
   -u, --owner string     Upstream repository owner (mandatory)
       --parent string    Upstream branch name (default: the default branch of the upstream repository)
   -r, --repo string      Upstream repository name (mandatory)
+```
+
+```
+Usage:
+  ghcp release [flags] FILES...
+
+Examples:
+  To release files to the tag:
+    ghcp release -u OWNER -r REPO -t TAG FILES...
+
+
+Flags:
+      --dry-run        Do not create a release and assets actually
+  -h, --help           help for release
+  -u, --owner string   GitHub repository owner (mandatory)
+  -r, --repo string    GitHub repository name (mandatory)
+  -t, --tag string     Tag name (mandatory)
 ```
 
 
@@ -218,27 +245,6 @@ ghcp fork-commit -u UPSTREAM -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES.
 If the branch does not exist, ghcp creates a branch from the branch of the upstream repository.
 If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
 
-
-### Working with CI
-
-Here is an example for CircleCI:
-
-```yaml
-version: 2
-jobs:
-  release:
-    steps:
-      - run: |
-          mkdir -p ~/bin
-          echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
-      - run: |
-          curl -L -o ~/bin/ghcp https://github.com/int128/ghcp/releases/download/v1.3.0/ghcp_linux_amd64
-          chmod +x ~/bin/ghcp
-      - checkout
-      # release the Homebrew formula
-      - run: |
-          ghcp -u "$CIRCLE_PROJECT_USERNAME" -r "homebrew-$CIRCLE_PROJECT_REPONAME" -m "$CIRCLE_TAG" hello.rb
-```
 
 ### GitHub Enterprise
 

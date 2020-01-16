@@ -15,6 +15,8 @@ import (
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
 	"github.com/int128/ghcp/usecases/fork"
 	"github.com/int128/ghcp/usecases/fork/mock_fork"
+	"github.com/int128/ghcp/usecases/release"
+	"github.com/int128/ghcp/usecases/release/mock_release"
 )
 
 func TestCmd_Run(t *testing.T) {
@@ -330,6 +332,40 @@ func TestCmd_Run(t *testing.T) {
 				"-m", "commit-message",
 				"-b", "topic",
 				"--parent", "develop",
+				"file1",
+				"file2",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+	})
+
+	t.Run("Release", func(t *testing.T) {
+		t.Run("BasicOptions", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			releaseUseCase := mock_release.NewMockInterface(ctrl)
+			releaseUseCase.EXPECT().
+				Do(ctx, release.Input{
+					Repository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					TagName:    "v1.0.0",
+					Paths:      []string{"file1", "file2"},
+				})
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{ReleaseUseCase: releaseUseCase}),
+			}
+			args := []string{
+				cmdName,
+				releaseCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-t", "v1.0.0",
 				"file1",
 				"file2",
 			}

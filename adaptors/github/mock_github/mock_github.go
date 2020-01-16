@@ -94,6 +94,35 @@ func (mr *MockInterfaceMockRecorder) CreateFork(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockInterface)(nil).CreateFork), arg0, arg1)
 }
 
+// CreateRelease mocks base method
+func (m *MockInterface) CreateRelease(arg0 context.Context, arg1 git.Release) (*git.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1)
+	ret0, _ := ret[0].(*git.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateRelease indicates an expected call of CreateRelease
+func (mr *MockInterfaceMockRecorder) CreateRelease(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRelease", reflect.TypeOf((*MockInterface)(nil).CreateRelease), arg0, arg1)
+}
+
+// CreateReleaseAsset mocks base method
+func (m *MockInterface) CreateReleaseAsset(arg0 context.Context, arg1 git.ReleaseAsset) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReleaseAsset", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateReleaseAsset indicates an expected call of CreateReleaseAsset
+func (mr *MockInterfaceMockRecorder) CreateReleaseAsset(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReleaseAsset", reflect.TypeOf((*MockInterface)(nil).CreateReleaseAsset), arg0, arg1)
+}
+
 // CreateTree mocks base method
 func (m *MockInterface) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.TreeSHA, error) {
 	m.ctrl.T.Helper()
@@ -107,6 +136,21 @@ func (m *MockInterface) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.
 func (mr *MockInterfaceMockRecorder) CreateTree(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockInterface)(nil).CreateTree), arg0, arg1)
+}
+
+// GetReleaseByTagOrNil mocks base method
+func (m *MockInterface) GetReleaseByTagOrNil(arg0 context.Context, arg1 git.RepositoryID, arg2 git.TagName) (*git.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReleaseByTagOrNil", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*git.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetReleaseByTagOrNil indicates an expected call of GetReleaseByTagOrNil
+func (mr *MockInterfaceMockRecorder) GetReleaseByTagOrNil(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseByTagOrNil", reflect.TypeOf((*MockInterface)(nil).GetReleaseByTagOrNil), arg0, arg1, arg2)
 }
 
 // QueryCommit mocks base method
