@@ -12,7 +12,10 @@ jobs:
       - run: make check
       - run: bash <(curl -s https://codecov.io/bash)
       - run: make dist
-      - run: make release
+      - run: |
+          if [ "$CIRCLE_TAG" ]; then
+            make release
+          fi
 
 workflows:
   version: 2
