@@ -1,6 +1,6 @@
 # ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![codecov](https://codecov.io/gh/int128/ghcp/branch/master/graph/badge.svg)](https://codecov.io/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
-This is a simple command to release files to a GitHub repository.
+This is a release engineering tool for GitHub.
 It depends on GitHub APIs and works without git installation.
 
 Features:
@@ -16,13 +16,11 @@ Install the latest release from [here](https://github.com/int128/ghcp/releases) 
 
 ```sh
 # GitHub Releases
-curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.5.1/ghcp_linux_amd64.zip
+curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.6.0/ghcp_linux_amd64.zip
 unzip /tmp/ghcp.zip -d ~/bin
-rm /tmp/ghcp.zip
 
 # Homebrew
-brew tap int128/ghcp
-brew install ghcp
+brew install int128/ghcp/ghcp
 ```
 
 You need to get a personal access token from the [settings](https://github.com/settings/tokens) and set it to the `GITHUB_TOKEN` environment variable or `--token` option.
