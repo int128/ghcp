@@ -8,7 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	github "github.com/int128/ghcp/adaptors/github"
-	git "github.com/int128/ghcp/git"
+	git "github.com/int128/ghcp/domain/git"
 	reflect "reflect"
 )
 

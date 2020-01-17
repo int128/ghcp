@@ -6,7 +6,7 @@ import (
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/usecases/commit"
 	"golang.org/x/xerrors"
 )
