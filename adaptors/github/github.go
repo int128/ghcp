@@ -58,6 +58,10 @@ type QueryForCommitToBranchOut struct {
 	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
 }
 
+func (q *QueryForCommitToBranchOut) TargetBranchExists() bool {
+	return q.TargetBranchCommitSHA != ""
+}
+
 type QueryCommitIn struct {
 	Repository git.RepositoryID
 	CommitSHA  git.CommitSHA

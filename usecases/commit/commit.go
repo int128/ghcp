@@ -36,6 +36,10 @@ type Input struct {
 	DryRun           bool
 }
 
+func (in *Input) TargetIsDefaultBranch() bool {
+	return in.TargetBranchName == ""
+}
+
 // ParentBranch represents a parent ref of the branch to create or update.
 // Exact one of the members must be valid.
 type ParentBranch struct {
@@ -71,7 +75,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 		return xerrors.New("no file exists in given paths")
 	}
 
-	out, err := u.GitHub.QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+	q, err := u.GitHub.QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
 		ParentRepository: in.ParentRepository,
 		ParentRef:        in.ParentBranch.FromRef, // optional
 		TargetRepository: in.TargetRepository,
@@ -80,172 +84,205 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 	if err != nil {
 		return xerrors.Errorf("could not find the repository: %w", err)
 	}
-	u.Logger.Infof("Author and committer: %s", out.CurrentUserName)
+	u.Logger.Infof("Author and committer: %s", q.CurrentUserName)
 
 	if in.ParentBranch.FastForward {
-		if in.TargetBranchName == "" {
-			u.Logger.Debugf("Updating the default branch by fast-forward")
-			if err := u.updateBranch(ctx, updateBranchIn{
-				Input: btc.Input{
-					Files:           files,
-					Repository:      out.TargetRepository,
-					CommitMessage:   in.CommitMessage,
-					ParentCommitSHA: out.ParentDefaultBranchCommitSHA,
-					ParentTreeSHA:   out.ParentDefaultBranchTreeSHA,
-					NoFileMode:      in.NoFileMode,
-				},
-				BranchName: out.TargetDefaultBranchName,
-				DryRun:     in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not update the default branch by fast-forward: %w", err)
-			}
-			return nil
+		if in.TargetIsDefaultBranch() {
+			return u.updateDefaultBranchByFastForward(ctx, in, files, q)
 		}
-		if out.TargetBranchCommitSHA == "" {
-			u.Logger.Debugf("Creating a branch (%s) based on the default branch", in.TargetBranchName)
-			if err := u.createBranch(ctx, createBranchIn{
-				Input: btc.Input{
-					Files:           files,
-					Repository:      out.TargetRepository,
-					CommitMessage:   in.CommitMessage,
-					ParentCommitSHA: out.ParentDefaultBranchCommitSHA,
-					ParentTreeSHA:   out.ParentDefaultBranchTreeSHA,
-					NoFileMode:      in.NoFileMode,
-				},
-				NewBranchName: in.TargetBranchName,
-				DryRun:        in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not create a branch (%s) based on the default branch: %w", in.TargetBranchName, err)
-			}
-			return nil
+		if q.TargetBranchExists() {
+			return u.updateTargetBranchByFastForward(ctx, in, files, q)
 		}
-		u.Logger.Debugf("Updating the branch (%s) by fast-forward", in.TargetBranchName)
-		if err := u.updateBranch(ctx, updateBranchIn{
-			Input: btc.Input{
-				Files:           files,
-				Repository:      out.TargetRepository,
-				CommitMessage:   in.CommitMessage,
-				ParentCommitSHA: out.TargetBranchCommitSHA,
-				ParentTreeSHA:   out.TargetBranchTreeSHA,
-				NoFileMode:      in.NoFileMode,
-			},
-			BranchName: in.TargetBranchName,
-			DryRun:     in.DryRun,
-		}); err != nil {
-			return xerrors.Errorf("could not update the branch (%s) by fast-forward: %w", in.TargetBranchName, err)
-		}
-		return nil
+		return u.createNewBranchFromDefaultBranch(ctx, in, files, q)
 	}
-
 	if in.ParentBranch.NoParent {
-		if in.TargetBranchName == "" {
-			//TODO: this requires force update
-			u.Logger.Debugf("Updating the default branch to a commit without any parent")
-			if err := u.updateBranch(ctx, updateBranchIn{
-				Input: btc.Input{
-					Files:         files,
-					Repository:    out.TargetRepository,
-					CommitMessage: in.CommitMessage,
-					NoFileMode:    in.NoFileMode,
-				},
-				BranchName: out.TargetDefaultBranchName,
-				DryRun:     in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not update the default branch to a commit without any parent: %w", err)
-			}
-			return nil
+		if in.TargetIsDefaultBranch() {
+			return u.updateDefaultBranchWithoutParent(ctx, in, files, q)
 		}
-		if out.TargetBranchCommitSHA == "" {
-			u.Logger.Debugf("Creating a branch (%s) without any parent", in.TargetBranchName)
-			if err := u.createBranch(ctx, createBranchIn{
-				Input: btc.Input{
-					Files:         files,
-					Repository:    out.TargetRepository,
-					CommitMessage: in.CommitMessage,
-					NoFileMode:    in.NoFileMode,
-				},
-				NewBranchName: in.TargetBranchName,
-				DryRun:        in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not create a branch (%s) without any parent: %w", in.TargetBranchName, err)
-			}
-			return nil
+		if q.TargetBranchExists() {
+			return u.updateTargetBranchWithoutParent(ctx, in, files, q)
 		}
-		//TODO: this may require force update
-		u.Logger.Debugf("Updating the branch (%s) to a commit without any parent", in.TargetBranchName)
-		if err := u.updateBranch(ctx, updateBranchIn{
-			Input: btc.Input{
-				Files:         files,
-				Repository:    out.TargetRepository,
-				CommitMessage: in.CommitMessage,
-				NoFileMode:    in.NoFileMode,
-			},
-			BranchName: in.TargetBranchName,
-			DryRun:     in.DryRun,
-		}); err != nil {
-			return xerrors.Errorf("could not update the branch (%s) to a commit without any parent: %w", in.TargetBranchName, err)
-		}
-		return nil
+		return u.createNewBranchWithoutParent(ctx, in, files, q)
 	}
-
 	if in.ParentBranch.FromRef != "" {
-		if in.TargetBranchName == "" {
-			//TODO: this requires force update
-			u.Logger.Debugf("Updating the default branch to a commit based on the parent ref (%s)", in.ParentBranch.FromRef)
-			if err := u.updateBranch(ctx, updateBranchIn{
-				Input: btc.Input{
-					Files:           files,
-					Repository:      out.TargetRepository,
-					CommitMessage:   in.CommitMessage,
-					ParentCommitSHA: out.ParentRefCommitSHA,
-					ParentTreeSHA:   out.ParentRefTreeSHA,
-					NoFileMode:      in.NoFileMode,
-				},
-				BranchName: out.TargetDefaultBranchName,
-				DryRun:     in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not update the default branch to a commit based on the parent ref %s: %w", in.ParentBranch.FromRef, err)
-			}
-			return nil
+		if in.TargetIsDefaultBranch() {
+			return u.rebaseDefaultBranchOnParentBranch(ctx, in, files, q)
 		}
-		if out.TargetBranchCommitSHA == "" {
-			u.Logger.Debugf("Creating a branch (%s) with a commit based on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
-			if err := u.createBranch(ctx, createBranchIn{
-				Input: btc.Input{
-					Files:           files,
-					Repository:      out.TargetRepository,
-					CommitMessage:   in.CommitMessage,
-					ParentCommitSHA: out.ParentRefCommitSHA,
-					ParentTreeSHA:   out.ParentRefTreeSHA,
-					NoFileMode:      in.NoFileMode,
-				},
-				NewBranchName: in.TargetBranchName,
-				DryRun:        in.DryRun,
-			}); err != nil {
-				return xerrors.Errorf("could not create a branch (%s) with a commit based on the parent ref (%s): %w", in.TargetBranchName, in.ParentBranch.FromRef, err)
-			}
-			return nil
+		if q.TargetBranchExists() {
+			return u.rebaseTargetBranchOnParentBranch(ctx, in, files, q)
 		}
-		//TODO: this requires force update
-		u.Logger.Debugf("Updating the branch (%s) to a commit based on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
-		if err := u.updateBranch(ctx, updateBranchIn{
-			Input: btc.Input{
-				Files:           files,
-				Repository:      out.TargetRepository,
-				CommitMessage:   in.CommitMessage,
-				ParentCommitSHA: out.ParentRefCommitSHA,
-				ParentTreeSHA:   out.ParentRefTreeSHA,
-				NoFileMode:      in.NoFileMode,
-			},
-			BranchName: in.TargetBranchName,
-			DryRun:     in.DryRun,
-		}); err != nil {
-			return xerrors.Errorf("could not update the branch (%s) to a commit based on the parent ref (%s): %w", in.TargetBranchName, in.ParentBranch.FromRef, err)
-		}
-		return nil
+		return u.createNewBranchFromParentBranch(ctx, in, files, q)
 	}
-
 	return xerrors.New("exact one of ParentBranch members must be valid")
+}
+
+func (u *Commit) rebaseTargetBranchOnParentBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	//TODO: this requires force update
+	u.Logger.Debugf("Rebasing the branch (%s) on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.ParentRefCommitSHA,
+			ParentTreeSHA:   q.ParentRefTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		BranchName: in.TargetBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not rebase the branch (%s) on the parent ref (%s): %w", in.TargetBranchName, in.ParentBranch.FromRef, err)
+	}
+	return nil
+}
+
+func (u *Commit) createNewBranchFromParentBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	u.Logger.Debugf("Creating a branch (%s) on the parent ref (%s)", in.TargetBranchName, in.ParentBranch.FromRef)
+	if err := u.createBranch(ctx, createBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.ParentRefCommitSHA,
+			ParentTreeSHA:   q.ParentRefTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		NewBranchName: in.TargetBranchName,
+		DryRun:        in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not create a branch (%s) on the parent ref (%s): %w", in.TargetBranchName, in.ParentBranch.FromRef, err)
+	}
+	return nil
+}
+
+func (u *Commit) rebaseDefaultBranchOnParentBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	//TODO: this requires force update
+	u.Logger.Debugf("Rebasing the default branch on the parent ref (%s)", in.ParentBranch.FromRef)
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.ParentRefCommitSHA,
+			ParentTreeSHA:   q.ParentRefTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		BranchName: q.TargetDefaultBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not rebase the default branch on the parent ref %s: %w", in.ParentBranch.FromRef, err)
+	}
+	return nil
+}
+
+func (u *Commit) updateTargetBranchWithoutParent(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	//TODO: this may require force update
+	u.Logger.Debugf("Updating the branch (%s) to a commit without any parent", in.TargetBranchName)
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:         files,
+			Repository:    q.TargetRepository,
+			CommitMessage: in.CommitMessage,
+			NoFileMode:    in.NoFileMode,
+		},
+		BranchName: in.TargetBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not update the branch (%s) to a commit without any parent: %w", in.TargetBranchName, err)
+	}
+	return nil
+}
+
+func (u *Commit) createNewBranchWithoutParent(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	u.Logger.Debugf("Creating a branch (%s) without any parent", in.TargetBranchName)
+	if err := u.createBranch(ctx, createBranchIn{
+		Input: btc.Input{
+			Files:         files,
+			Repository:    q.TargetRepository,
+			CommitMessage: in.CommitMessage,
+			NoFileMode:    in.NoFileMode,
+		},
+		NewBranchName: in.TargetBranchName,
+		DryRun:        in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not create a branch (%s) without any parent: %w", in.TargetBranchName, err)
+	}
+	return nil
+}
+
+func (u *Commit) updateDefaultBranchWithoutParent(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	//TODO: this requires force update
+	u.Logger.Debugf("Updating the default branch to a commit without any parent")
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:         files,
+			Repository:    q.TargetRepository,
+			CommitMessage: in.CommitMessage,
+			NoFileMode:    in.NoFileMode,
+		},
+		BranchName: q.TargetDefaultBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not update the default branch to a commit without any parent: %w", err)
+	}
+	return nil
+}
+
+func (u *Commit) updateDefaultBranchByFastForward(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	u.Logger.Debugf("Updating the default branch by fast-forward")
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.ParentDefaultBranchCommitSHA,
+			ParentTreeSHA:   q.ParentDefaultBranchTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		BranchName: q.TargetDefaultBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not update the default branch by fast-forward: %w", err)
+	}
+	return nil
+}
+
+func (u *Commit) updateTargetBranchByFastForward(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	u.Logger.Debugf("Updating the branch (%s) by fast-forward", in.TargetBranchName)
+	if err := u.updateBranch(ctx, updateBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.TargetBranchCommitSHA,
+			ParentTreeSHA:   q.TargetBranchTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		BranchName: in.TargetBranchName,
+		DryRun:     in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not update the branch (%s) by fast-forward: %w", in.TargetBranchName, err)
+	}
+	return nil
+}
+
+func (u *Commit) createNewBranchFromDefaultBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitToBranchOut) error {
+	u.Logger.Debugf("Creating a branch (%s) based on the default branch", in.TargetBranchName)
+	if err := u.createBranch(ctx, createBranchIn{
+		Input: btc.Input{
+			Files:           files,
+			Repository:      q.TargetRepository,
+			CommitMessage:   in.CommitMessage,
+			ParentCommitSHA: q.ParentDefaultBranchCommitSHA,
+			ParentTreeSHA:   q.ParentDefaultBranchTreeSHA,
+			NoFileMode:      in.NoFileMode,
+		},
+		NewBranchName: in.TargetBranchName,
+		DryRun:        in.DryRun,
+	}); err != nil {
+		return xerrors.Errorf("could not create a branch (%s) based on the default branch: %w", in.TargetBranchName, err)
+	}
+	return nil
 }
 
 type pathFilter struct {
