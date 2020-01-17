@@ -1,10 +1,15 @@
 // Package git provides the models of Git such as a repository and branch.
 package git
 
+// InternalNodeID represents a node ID for GitHub v4 API.
+// This is allocated by GitHub.
+type InternalNodeID interface{}
+
 // RepositoryID represents a pointer to a repository.
 type RepositoryID struct {
-	Owner string
-	Name  string
+	Owner          string
+	Name           string
+	InternalNodeID InternalNodeID
 }
 
 // IsValid returns true if owner and name is not empty.

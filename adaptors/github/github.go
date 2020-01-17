@@ -160,6 +160,7 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitTo
 		} `graphql:"parentRepository: repository(owner: $parentOwner, name: $parentRepo)"`
 
 		TargetRepository struct {
+			ID    githubv4.ID
 			Name  string
 			Owner struct{ Login string }
 
@@ -200,7 +201,7 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitTo
 		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
 		ParentRefCommitSHA:           git.CommitSHA(q.ParentRepository.ParentRef.Target.Commit.Oid),
 		ParentRefTreeSHA:             git.TreeSHA(q.ParentRepository.ParentRef.Target.Commit.Tree.Oid),
-		TargetRepository:             git.RepositoryID{Owner: q.TargetRepository.Owner.Login, Name: q.TargetRepository.Name},
+		TargetRepository:             git.RepositoryID{Owner: q.TargetRepository.Owner.Login, Name: q.TargetRepository.Name, InternalNodeID: q.TargetRepository.ID},
 		TargetDefaultBranchName:      git.BranchName(q.TargetRepository.DefaultBranchRef.Name),
 		TargetBranchCommitSHA:        git.CommitSHA(q.TargetRepository.Ref.Target.Commit.Oid),
 		TargetBranchTreeSHA:          git.TreeSHA(q.TargetRepository.Ref.Target.Commit.Tree.Oid),
@@ -212,10 +213,15 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitTo
 // CreateBranch creates a branch and returns nil or an error.
 func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 	c.Logger.Debugf("Creating a branch %+v", n)
-	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(n.BranchName.QualifiedName().String()),
-		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
-	})
+	var m struct {
+		CreateRef struct{} `graphql:"createRef(input: $input)"`
+	}
+	input := githubv4.CreateRefInput{
+		RepositoryID: n.Repository.InternalNodeID,
+		Name:         githubv4.String(n.BranchName.QualifiedName().String()),
+		Oid:          githubv4.GitObjectID(n.CommitSHA),
+	}
+	err := c.Client.Mutate(ctx, &m, input, nil)
 	if err != nil {
 		return xerrors.Errorf("GitHub API error: %w", err)
 	}
@@ -225,10 +231,15 @@ func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
 // UpdateBranch updates the branch and returns nil or an error.
 func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) error {
 	c.Logger.Debugf("Updating the branch %+v, force: %v", n, force)
-	_, _, err := c.Client.UpdateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(n.BranchName.QualifiedName().String()),
-		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
-	}, force)
+	var m struct {
+		CreateRef struct{} `graphql:"updateRef(input: $input)"`
+	}
+	input := githubv4.UpdateRefInput{
+		RefID: struct{}{}, //FIXME: need Node ID
+		Force: githubv4.NewBoolean(githubv4.Boolean(force)),
+		Oid:   githubv4.GitObjectID(n.CommitSHA),
+	}
+	err := c.Client.Mutate(ctx, &m, input, nil)
 	if err != nil {
 		return xerrors.Errorf("GitHub API error: %w", err)
 	}
