@@ -1,4 +1,4 @@
-package fork
+package forkcommit
 
 import (
 	"context"
@@ -12,11 +12,11 @@ import (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(CommitToFork), "*"),
-	wire.Bind(new(Interface), new(*CommitToFork)),
+	wire.Struct(new(ForkCommit), "*"),
+	wire.Bind(new(Interface), new(*ForkCommit)),
 )
 
-//go:generate mockgen -destination mock_fork/mock_fork.go github.com/int128/ghcp/usecases/fork Interface
+//go:generate mockgen -destination mock_forkcommit/mock_forkcommit.go github.com/int128/ghcp/usecases/forkcommit Interface
 
 type Interface interface {
 	Do(ctx context.Context, in Input) error
@@ -32,13 +32,13 @@ type Input struct {
 	DryRun           bool
 }
 
-type CommitToFork struct {
+type ForkCommit struct {
 	Commit commit.Interface
 	Logger logger.Interface
 	GitHub github.Interface
 }
 
-func (u *CommitToFork) Do(ctx context.Context, in Input) error {
+func (u *ForkCommit) Do(ctx context.Context, in Input) error {
 	if !in.ParentRepository.IsValid() {
 		return xerrors.New("you must set GitHub repository")
 	}
@@ -54,7 +54,7 @@ func (u *CommitToFork) Do(ctx context.Context, in Input) error {
 
 	fork, err := u.GitHub.CreateFork(ctx, in.ParentRepository)
 	if err != nil {
-		return xerrors.Errorf("could not create a fork: %w", err)
+		return xerrors.Errorf("could not fork the repository: %w", err)
 	}
 	if err := u.Commit.Do(ctx, commit.Input{
 		ParentRepository: in.ParentRepository,
@@ -69,7 +69,7 @@ func (u *CommitToFork) Do(ctx context.Context, in Input) error {
 		NoFileMode:       in.NoFileMode,
 		DryRun:           in.DryRun,
 	}); err != nil {
-		return xerrors.Errorf("could not commit to the fork: %w", err)
+		return xerrors.Errorf("could not fork and commit: %w", err)
 	}
 	return nil
 }

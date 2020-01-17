@@ -10,7 +10,7 @@ import (
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
-	"github.com/int128/ghcp/usecases/fork"
+	"github.com/int128/ghcp/usecases/forkcommit"
 	"github.com/int128/ghcp/usecases/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -24,9 +24,9 @@ const (
 	exitCodeOK    = 0
 	exitCodeError = 1
 
-	commitCmdName       = "commit"
-	commitToForkCmdName = "fork-commit"
-	releaseCmdName      = "release"
+	commitCmdName     = "commit"
+	forkCommitCmdName = "fork-commit"
+	releaseCmdName    = "release"
 )
 
 var Set = wire.NewSet(
@@ -98,7 +98,7 @@ type NewInternalRunnerFunc func(logger.Interface, github.Interface) *InternalRun
 // InternalRunner has the set of use-cases.
 type InternalRunner struct {
 	CommitUseCase     commit.Interface
-	ForkCommitUseCase fork.Interface
+	ForkCommitUseCase forkcommit.Interface
 	ReleaseUseCase    release.Interface
 	Logger            logger.Interface
 }

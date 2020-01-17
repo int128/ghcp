@@ -1,4 +1,4 @@
-package fork
+package forkcommit
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
 )
 
-func TestCommitToFork_Do(t *testing.T) {
+func TestForkCommit_Do(t *testing.T) {
 	ctx := context.TODO()
 	parentRepositoryID := git.RepositoryID{Owner: "upstream", Name: "repo"}
 	forkedRepositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
@@ -43,7 +43,7 @@ func TestCommitToFork_Do(t *testing.T) {
 				Paths:            []string{"path"},
 			})
 
-		u := CommitToFork{
+		u := ForkCommit{
 			Commit: commitUseCase,
 			GitHub: gitHub,
 			Logger: testingLogger.New(t),
@@ -80,7 +80,7 @@ func TestCommitToFork_Do(t *testing.T) {
 				Paths:            []string{"path"},
 			})
 
-		u := CommitToFork{
+		u := ForkCommit{
 			Commit: commitUseCase,
 			GitHub: gitHub,
 			Logger: testingLogger.New(t),
