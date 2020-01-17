@@ -261,7 +261,7 @@ func (f *pathFilter) SkipDir(path string) bool {
 	return false
 }
 
-func (f *pathFilter) ExcludeFile(path string) bool {
+func (f *pathFilter) ExcludeFile(string) bool {
 	return false
 }
 

@@ -34,7 +34,11 @@ func TestFileSystem_FindFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Errorf("could not remove the temp dir: %s", err)
+		}
+	}()
 	if err := os.Chdir(tempDir); err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +138,11 @@ func TestFileSystem_FindFiles(t *testing.T) {
 func TestFileSystem_ReadAsBase64EncodedContent(t *testing.T) {
 	fs := &FileSystem{}
 	tempFile := makeTempFile(t, "hello\nworld")
-	defer os.RemoveAll(tempFile)
+	defer func() {
+		if err := os.RemoveAll(tempFile); err != nil {
+			t.Errorf("could not remove the temp file: %s", err)
+		}
+	}()
 	content, err := fs.ReadAsBase64EncodedContent(tempFile)
 	if err != nil {
 		t.Fatalf("ReadAsBase64EncodedContent returned error: %+v", err)

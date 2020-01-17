@@ -102,7 +102,7 @@ func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
 			Client: gitHubClient,
 			Logger: testingLogger.New(t),
 		}
-		got, err := gitHub.GetReleaseByTagOrNil(ctx, repositoryID, git.TagName("v1.0.0"))
+		got, err := gitHub.GetReleaseByTagOrNil(ctx, repositoryID, "v1.0.0")
 		if err != nil {
 			t.Fatalf("GetReleaseByTagOrNil returned error: %+v", err)
 		}
@@ -131,7 +131,7 @@ func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
 			Client: gitHubClient,
 			Logger: testingLogger.New(t),
 		}
-		got, err := gitHub.GetReleaseByTagOrNil(ctx, repositoryID, git.TagName("v1.0.0"))
+		got, err := gitHub.GetReleaseByTagOrNil(ctx, repositoryID, "v1.0.0")
 		if err != nil {
 			t.Fatalf("GetReleaseByTagOrNil returned error: %+v", err)
 		}

@@ -90,6 +90,8 @@ func (fs *FileSystem) ReadAsBase64EncodedContent(filename string) (string, error
 	if _, err := io.Copy(e, r); err != nil {
 		return "", xerrors.Errorf("error while encoding file %s: %w", filename, err)
 	}
-	e.Close()
+	if err := e.Close(); err != nil {
+		return "", xerrors.Errorf("error while encoding file %s: %w", filename, err)
+	}
 	return s.String(), nil
 }
