@@ -8,7 +8,7 @@ import (
 	"github.com/int128/ghcp/adaptors/fs"
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 	"golang.org/x/xerrors"
 )
 

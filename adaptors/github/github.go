@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-github/v24/github"
 	"github.com/google/wire"
 	"github.com/int128/ghcp/adaptors/logger"
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 	githubInfrastructure "github.com/int128/ghcp/infrastructure/github"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/xerrors"

@@ -1,22 +1,20 @@
-package git_test
+package git
 
 import (
 	"testing"
-
-	"github.com/int128/ghcp/git"
 )
 
 func TestBranchName_QualifiedName(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
-		qn := git.BranchName("master").QualifiedName()
-		want := git.RefQualifiedName{Prefix: "refs/heads/", Name: "master"}
+		qn := BranchName("master").QualifiedName()
+		want := RefQualifiedName{Prefix: "refs/heads/", Name: "master"}
 		if qn != want {
 			t.Errorf("QualifiedName wants %+v but %+v", want, qn)
 		}
 	})
 	t.Run("Empty", func(t *testing.T) {
-		qn := git.BranchName("").QualifiedName()
-		if qn != (git.RefQualifiedName{}) {
+		qn := BranchName("").QualifiedName()
+		if qn != (RefQualifiedName{}) {
 			t.Errorf("QualifiedName wants zero but %+v", qn)
 		}
 	})
@@ -24,13 +22,13 @@ func TestBranchName_QualifiedName(t *testing.T) {
 
 func TestRefQualifiedName_IsValid(t *testing.T) {
 	for _, c := range []struct {
-		RefQualifiedName git.RefQualifiedName
+		RefQualifiedName RefQualifiedName
 		Valid            bool
 	}{
-		{git.RefQualifiedName{}, false},
-		{git.RefQualifiedName{Prefix: "refs/heads/"}, false},
-		{git.RefQualifiedName{Name: "master"}, false},
-		{git.RefQualifiedName{Prefix: "refs/heads/", Name: "master"}, true},
+		{RefQualifiedName{}, false},
+		{RefQualifiedName{Prefix: "refs/heads/"}, false},
+		{RefQualifiedName{Name: "master"}, false},
+		{RefQualifiedName{Prefix: "refs/heads/", Name: "master"}, true},
 	} {
 		t.Run(c.RefQualifiedName.String(), func(t *testing.T) {
 			valid := c.RefQualifiedName.IsValid()
@@ -43,13 +41,13 @@ func TestRefQualifiedName_IsValid(t *testing.T) {
 
 func TestRefQualifiedName_String(t *testing.T) {
 	for _, c := range []struct {
-		RefQualifiedName git.RefQualifiedName
+		RefQualifiedName RefQualifiedName
 		String           string
 	}{
-		{git.RefQualifiedName{}, ""},
-		{git.RefQualifiedName{Prefix: "refs/heads/"}, ""},
-		{git.RefQualifiedName{Name: "master"}, ""},
-		{git.RefQualifiedName{Prefix: "refs/heads/", Name: "master"}, "refs/heads/master"},
+		{RefQualifiedName{}, ""},
+		{RefQualifiedName{Prefix: "refs/heads/"}, ""},
+		{RefQualifiedName{Name: "master"}, ""},
+		{RefQualifiedName{Prefix: "refs/heads/", Name: "master"}, "refs/heads/master"},
 	} {
 		t.Run(c.RefQualifiedName.String(), func(t *testing.T) {
 			s := c.RefQualifiedName.String()

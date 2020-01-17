@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/usecases/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

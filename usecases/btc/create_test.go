@@ -11,7 +11,7 @@ import (
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/github/mock_github"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 )
 
 func TestCreateBlobTreeCommit_Do(t *testing.T) {

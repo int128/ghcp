@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v24/github"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
-	"github.com/int128/ghcp/git"
+	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/infrastructure/github/mock_github"
 	"golang.org/x/xerrors"
 )
