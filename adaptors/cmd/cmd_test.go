@@ -13,8 +13,8 @@ import (
 	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
-	"github.com/int128/ghcp/usecases/fork"
-	"github.com/int128/ghcp/usecases/fork/mock_fork"
+	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/forkcommit/mock_forkcommit"
 	"github.com/int128/ghcp/usecases/release"
 	"github.com/int128/ghcp/usecases/release/mock_release"
 )
@@ -270,13 +270,13 @@ func TestCmd_Run(t *testing.T) {
 		})
 	})
 
-	t.Run("CommitToFork", func(t *testing.T) {
+	t.Run("ForkCommit", func(t *testing.T) {
 		t.Run("BasicOptions", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitUseCase := mock_fork.NewMockInterface(ctrl)
+			commitUseCase := mock_forkcommit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, fork.Input{
+				Do(ctx, forkcommit.Input{
 					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					TargetBranchName: "topic",
 					CommitMessage:    "commit-message",
@@ -290,7 +290,7 @@ func TestCmd_Run(t *testing.T) {
 			}
 			args := []string{
 				cmdName,
-				commitToForkCmdName,
+				forkCommitCmdName,
 				"--token", "YOUR_TOKEN",
 				"-u", "owner",
 				"-r", "repo",
@@ -308,9 +308,9 @@ func TestCmd_Run(t *testing.T) {
 		t.Run("--parent", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			commitUseCase := mock_fork.NewMockInterface(ctrl)
+			commitUseCase := mock_forkcommit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, fork.Input{
+				Do(ctx, forkcommit.Input{
 					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					ParentBranchName: "develop",
 					TargetBranchName: "topic",
@@ -325,7 +325,7 @@ func TestCmd_Run(t *testing.T) {
 			}
 			args := []string{
 				cmdName,
-				commitToForkCmdName,
+				forkCommitCmdName,
 				"--token", "YOUR_TOKEN",
 				"-u", "owner",
 				"-r", "repo",

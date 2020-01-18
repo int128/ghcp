@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/int128/ghcp/domain/git"
-	"github.com/int128/ghcp/usecases/fork"
+	"github.com/int128/ghcp/usecases/forkcommit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/xerrors"
@@ -15,7 +15,7 @@ import (
 func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {
 	var o forkCommitOptions
 	c := &cobra.Command{
-		Use:   fmt.Sprintf("%s [flags] FILES...", commitToForkCmdName),
+		Use:   fmt.Sprintf("%s [flags] FILES...", forkCommitCmdName),
 		Short: "Fork the repository and commit files to a branch",
 		Long:  `This forks the repository and commits the files to a new branch.`,
 		Args: func(*cobra.Command, []string) error {
@@ -39,7 +39,7 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 			if err != nil {
 				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
-			in := fork.Input{
+			in := forkcommit.Input{
 				ParentRepository: git.RepositoryID{
 					Owner: o.UpstreamRepositoryOwner,
 					Name:  o.UpstreamRepositoryName,
