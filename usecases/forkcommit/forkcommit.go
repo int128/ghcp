@@ -7,6 +7,7 @@ import (
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/commit"
 	"golang.org/x/xerrors"
 )
@@ -24,8 +25,8 @@ type Interface interface {
 
 type Input struct {
 	ParentRepository git.RepositoryID
-	ParentBranchName git.BranchName // if empty, the default branch of the parent repository
 	TargetBranchName git.BranchName
+	CommitStrategy   commitstrategy.CommitStrategy
 	CommitMessage    git.CommitMessage
 	Paths            []string
 	NoFileMode       bool
@@ -57,13 +58,10 @@ func (u *ForkCommit) Do(ctx context.Context, in Input) error {
 		return xerrors.Errorf("could not fork the repository: %w", err)
 	}
 	if err := u.Commit.Do(ctx, commit.Input{
-		ParentRepository: in.ParentRepository,
-		ParentBranch: commit.ParentBranch{
-			FastForward: in.ParentBranchName == "",
-			FromRef:     git.RefName(in.ParentBranchName),
-		},
 		TargetRepository: *fork,
 		TargetBranchName: in.TargetBranchName,
+		ParentRepository: in.ParentRepository,
+		CommitStrategy:   in.CommitStrategy,
 		CommitMessage:    in.CommitMessage,
 		Paths:            in.Paths,
 		NoFileMode:       in.NoFileMode,

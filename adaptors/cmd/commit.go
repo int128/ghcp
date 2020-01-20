@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -49,24 +50,20 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := commit.Input{
-				ParentRepository: git.RepositoryID{
-					Owner: o.RepositoryOwner,
-					Name:  o.RepositoryName,
-				},
-				ParentBranch: commit.ParentBranch{
-					FastForward: o.ParentRef == "" && !o.NoParent,
-					NoParent:    o.NoParent,
-					FromRef:     git.RefName(o.ParentRef),
-				},
 				TargetRepository: git.RepositoryID{
 					Owner: o.RepositoryOwner,
 					Name:  o.RepositoryName,
 				},
 				TargetBranchName: git.BranchName(o.BranchName),
-				CommitMessage:    git.CommitMessage(o.CommitMessage),
-				Paths:            args,
-				NoFileMode:       o.NoFileMode,
-				DryRun:           o.DryRun,
+				ParentRepository: git.RepositoryID{
+					Owner: o.RepositoryOwner,
+					Name:  o.RepositoryName,
+				},
+				CommitStrategy: o.commitStrategy(),
+				CommitMessage:  git.CommitMessage(o.CommitMessage),
+				Paths:          args,
+				NoFileMode:     o.NoFileMode,
+				DryRun:         o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
@@ -88,6 +85,16 @@ type commitOptions struct {
 	NoParent        bool
 	NoFileMode      bool
 	DryRun          bool
+}
+
+func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
+	if o.NoParent {
+		return commitstrategy.NoParent
+	}
+	if o.ParentRef != "" {
+		return commitstrategy.RebaseOn(git.RefName(o.ParentRef))
+	}
+	return commitstrategy.FastForward
 }
 
 func (o *commitOptions) register(f *pflag.FlagSet) {
