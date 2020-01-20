@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/forkcommit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -44,8 +45,8 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 					Owner: o.UpstreamRepositoryOwner,
 					Name:  o.UpstreamRepositoryName,
 				},
-				ParentBranchName: git.BranchName(o.UpstreamBranchName),
 				TargetBranchName: git.BranchName(o.TargetBranchName),
+				CommitStrategy:   o.commitStrategy(),
 				CommitMessage:    git.CommitMessage(o.CommitMessage),
 				Paths:            args,
 				NoFileMode:       o.NoFileMode,
@@ -70,6 +71,13 @@ type forkCommitOptions struct {
 	CommitMessage           string
 	NoFileMode              bool
 	DryRun                  bool
+}
+
+func (o *forkCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
+	if o.UpstreamBranchName != "" {
+		return commitstrategy.RebaseOn(git.RefName(o.UpstreamBranchName))
+	}
+	return commitstrategy.FastForward
 }
 
 func (o *forkCommitOptions) register(f *pflag.FlagSet) {

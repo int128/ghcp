@@ -10,6 +10,7 @@ import (
 	"github.com/int128/ghcp/adaptors/logger"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
@@ -31,9 +32,9 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -66,9 +67,9 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
 					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					TargetBranchName: "gh-pages",
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -101,10 +102,10 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FromRef: "develop"},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					TargetBranchName: "topic",
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.RebaseOn("develop"),
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -138,10 +139,10 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{NoParent: true},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					TargetBranchName: "topic",
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.NoParent,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -203,9 +204,9 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 					NoFileMode:       true,
@@ -239,9 +240,9 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
 					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 					DryRun:           true,
@@ -279,6 +280,7 @@ func TestCmd_Run(t *testing.T) {
 				Do(ctx, forkcommit.Input{
 					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 					TargetBranchName: "topic",
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -311,9 +313,9 @@ func TestCmd_Run(t *testing.T) {
 			commitUseCase := mock_forkcommit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
 				Do(ctx, forkcommit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranchName: "develop",
 					TargetBranchName: "topic",
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.RebaseOn("develop"),
 					CommitMessage:    "commit-message",
 					Paths:            []string{"file1", "file2"},
 				})
@@ -377,18 +379,20 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("GlobalOptions", func(t *testing.T) {
+		input := commit.Input{
+			TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+			ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+			CommitStrategy:   commitstrategy.FastForward,
+			CommitMessage:    "commit-message",
+			Paths:            []string{"file1", "file2"},
+		}
+
 		t.Run("--debug", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
-					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					CommitMessage:    "commit-message",
-					Paths:            []string{"file1", "file2"},
-				})
+				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{Debug: true}),
 				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
@@ -417,13 +421,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
-					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					CommitMessage:    "commit-message",
-					Paths:            []string{"file1", "file2"},
-				})
+				Do(ctx, input)
 			mockEnv := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
 			mockEnv.EXPECT().
 				Chdir("dir")
@@ -455,13 +453,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
-					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					CommitMessage:    "commit-message",
-					Paths:            []string{"file1", "file2"},
-				})
+				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
 				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
@@ -512,13 +504,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
-					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					CommitMessage:    "commit-message",
-					Paths:            []string{"file1", "file2"},
-				})
+				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
 				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
@@ -547,13 +533,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			commitUseCase := mock_commit.NewMockInterface(ctrl)
 			commitUseCase.EXPECT().
-				Do(ctx, commit.Input{
-					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					ParentBranch:     commit.ParentBranch{FastForward: true},
-					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					CommitMessage:    "commit-message",
-					Paths:            []string{"file1", "file2"},
-				})
+				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
 				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),

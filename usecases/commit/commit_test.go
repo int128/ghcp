@@ -11,6 +11,7 @@ import (
 	"github.com/int128/ghcp/adaptors/github/mock_github"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/btc/mock_btc"
 )
@@ -38,10 +39,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FastForward: true},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -104,10 +105,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FastForward: true},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -172,9 +173,9 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FastForward: true},
 					TargetRepository: targetRepositoryID,
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.FastForward,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -238,10 +239,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{NoParent: true},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.NoParent,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -302,10 +303,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FastForward: true},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.NoParent,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -318,12 +319,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				createBlobTreeCommit := mock_btc.NewMockInterface(ctrl)
 				createBlobTreeCommit.EXPECT().
 					Do(ctx, btc.Input{
-						Files:           theFiles,
-						Repository:      targetRepositoryID,
-						CommitMessage:   "message",
-						ParentCommitSHA: "topicCommitSHA",
-						ParentTreeSHA:   "topicTreeSHA",
-						NoFileMode:      c.noFileMode,
+						Files:         theFiles,
+						Repository:    targetRepositoryID,
+						CommitMessage: "message",
+						NoFileMode:    c.noFileMode,
 					}).
 					Return(&btc.Output{
 						CommitSHA:    "commitSHA",
@@ -370,10 +369,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{NoParent: true},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.NoParent,
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -433,15 +432,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 			})
 		})
 
-		t.Run("FromRef", func(t *testing.T) {
+		t.Run("Rebase", func(t *testing.T) {
 			t.Run("CreateBranchIfItDoesNotExist", func(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FromRef: "develop"},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.RebaseOn("develop"),
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -507,10 +506,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FromRef: "develop"},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.RebaseOn("develop"),
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
@@ -578,10 +577,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				defer ctrl.Finish()
 				in := Input{
-					ParentRepository: parentRepositoryID,
-					ParentBranch:     ParentBranch{FromRef: "develop"},
 					TargetRepository: targetRepositoryID,
 					TargetBranchName: "topic",
+					ParentRepository: parentRepositoryID,
+					CommitStrategy:   commitstrategy.RebaseOn("develop"),
 					CommitMessage:    "message",
 					Paths:            []string{"path"},
 					NoFileMode:       c.noFileMode,
