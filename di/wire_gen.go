@@ -15,6 +15,7 @@ import (
 	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 )
 
@@ -62,16 +63,21 @@ func NewCmdInternalRunner(loggerInterface logger.Interface, githubInterface gith
 		Logger: loggerInterface,
 		GitHub: gitHub,
 	}
+	pullRequest := &pullrequest.PullRequest{
+		GitHub: gitHub,
+		Logger: loggerInterface,
+	}
 	releaseRelease := &release.Release{
 		FileSystem: fileSystem,
 		Logger:     loggerInterface,
 		GitHub:     gitHub,
 	}
 	internalRunner := &cmd.InternalRunner{
-		CommitUseCase:     commitCommit,
-		ForkCommitUseCase: forkCommit,
-		ReleaseUseCase:    releaseRelease,
-		Logger:            loggerInterface,
+		CommitUseCase:      commitCommit,
+		ForkCommitUseCase:  forkCommit,
+		PullRequestUseCase: pullRequest,
+		ReleaseUseCase:     releaseRelease,
+		Logger:             loggerInterface,
 	}
 	return internalRunner
 }

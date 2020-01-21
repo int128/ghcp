@@ -16,6 +16,8 @@ import (
 	"github.com/int128/ghcp/usecases/commit/mock_commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
 	"github.com/int128/ghcp/usecases/forkcommit/mock_forkcommit"
+	"github.com/int128/ghcp/usecases/pullrequest"
+	"github.com/int128/ghcp/usecases/pullrequest/mock_pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 	"github.com/int128/ghcp/usecases/release/mock_release"
 )
@@ -25,7 +27,7 @@ func TestCmd_Run(t *testing.T) {
 	const version = "TEST"
 	ctx := context.TODO()
 
-	t.Run("Commit", func(t *testing.T) {
+	t.Run("commit", func(t *testing.T) {
 		t.Run("BasicOptions", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -271,7 +273,7 @@ func TestCmd_Run(t *testing.T) {
 		})
 	})
 
-	t.Run("ForkCommit", func(t *testing.T) {
+	t.Run("fork", func(t *testing.T) {
 		t.Run("BasicOptions", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -344,7 +346,78 @@ func TestCmd_Run(t *testing.T) {
 		})
 	})
 
-	t.Run("Release", func(t *testing.T) {
+	t.Run("pull-request", func(t *testing.T) {
+		t.Run("BasicOptions", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			useCase := mock_pullrequest.NewMockInterface(ctrl)
+			useCase.EXPECT().
+				Do(ctx, pullrequest.Input{
+					HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					HeadBranchName: "feature",
+					BaseRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					Title:          "commit-message",
+				})
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
+			}
+			args := []string{
+				cmdName,
+				pullRequestCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-b", "feature",
+				"--title", "commit-message",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+		t.Run("--base", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			useCase := mock_pullrequest.NewMockInterface(ctrl)
+			useCase.EXPECT().
+				Do(ctx, pullrequest.Input{
+					HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					HeadBranchName: "feature",
+					BaseRepository: git.RepositoryID{Owner: "upstream-owner", Name: "upstream-repo"},
+					BaseBranchName: "develop",
+					Title:          "commit-message",
+					Body:           "body",
+				})
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
+			}
+			args := []string{
+				cmdName,
+				pullRequestCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-b", "feature",
+				"--base-owner", "upstream-owner",
+				"--base-repo", "upstream-repo",
+				"--base", "develop",
+				"--title", "commit-message",
+				"--body", "body",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+	})
+
+	t.Run("release", func(t *testing.T) {
 		t.Run("BasicOptions", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()

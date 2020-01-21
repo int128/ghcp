@@ -14,6 +14,7 @@ import (
 	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 )
 
@@ -38,6 +39,7 @@ func NewCmdInternalRunner(logger.Interface, github.Interface) *cmd.InternalRunne
 		btc.Set,
 		commit.Set,
 		forkcommit.Set,
+		pullrequest.Set,
 		release.Set,
 	)
 	return nil

@@ -6,7 +6,8 @@ It depends on GitHub APIs and works without git installation.
 Features:
 
 - Commit files to a repository
-- Fork a repository and commit files to the forked repository (for a pull request)
+- Fork a repository and commit files to the forked repository
+- Create a pull request
 - Upload files to the GitHub Releases
 
 
@@ -25,118 +26,42 @@ brew install int128/ghcp/ghcp
 
 You need to get a personal access token from the [settings](https://github.com/settings/tokens) and set it to the `GITHUB_TOKEN` environment variable or `--token` option.
 
-Let's see the following examples.
 
+### Commit files to a branch
 
-### Example: Commit files to GitHub Pages
-
-To commit the files to the `gh-pages` branch:
+To commit the files to the default branch:
 
 ```sh
-ghcp commit -u OWNER -r REPO -b gh-pages -m MESSAGE index.html index.css
+ghcp commit -u OWNER -r REPO -m MESSAGE file1 file2
 ```
 
-
-### Example: Commit a Homebrew formula
-
-Create a formula file like:
-
-```rb
-# hello.rb
-class Hello < Formula
-  desc "Your awesome application"
-  homepage "https://github.com/OWNER/hello"
-  url "https://github.com/OWNER/hello/releases/download/v1.0.0/hello_darwin_amd64"
-  version "v1.0.0"
-  sha256 "SHA256_SUM"
-
-  def install
-    bin.install "hello_darwin_amd64" => "hello"
-  end
-
-  test do
-    system "#{bin}/hello -h"
-  end
-end
-```
-
-To commit the formula to the repository:
+To commit the files to the `feature` branch:
 
 ```sh
-ghcp commit -u OWNER -r homebrew-hello -m "Release v1.0.0" hello.rb
+ghcp commit -u OWNER -r REPO -b feature -m MESSAGE file1 file2
 ```
 
-Now you can install the formula from the repository.
+If the `feature` branch does not exist, ghcp will create it.
+
+To create a `feature` branch based on the `develop` branch:
 
 ```sh
-brew install OWNER/hello/hello
+ghcp commit -u OWNER -r REPO -b feature --parent=develop -m MESSAGE file1 file2
 ```
 
-See also [Makefile](Makefile).
-ghcp is released to [the tap repository](https://github.com/int128/homebrew-ghcp) by using ghcp.
+If the branch already exists, ghcp will fail.
+It supports only fast-forward for now.
 
+ghcp performs a commit operation as follows:
 
-### Example: Bump version string
+- An author and committer of a commit are set to the login user (depending on the token).
+- If the branch has same files, do not create a new commit. It prevents an empty commit.
+- It excludes `.git` directories.
+- Do not support `.gitconfig`.
 
-To change a version string of files in a repository:
-
-```sh
-# substitute version string in files
-sed -i -e "s/version '[0-9.]*'/version '$TAG'/g" README.md build.gradle
-
-# commit the changes to a branch
-ghcp commit -u OWNER -r REPO -b bump-v1.1.0 -m "Bump the version to v1.1.0" README.md build.gradle
-```
-
-
-### Example: Fork a repository and create a branch for a pull request
-
-To fork the upstream repository `UPSTREAM/REPO` and commit files to the branch `topic` of your repository `YOUR/REPO`:
-
-```sh
-ghcp fork-commit -u UPSTREAM -r REPO -b topic -m 'Add foo' foo.txt
-```
-
-You can manually create a pull request of the created branch.
-
-
-### Example: Release assets
-
-To upload files to the release associated to the tag `v1.0.0`:
-
-```sh
-ghcp release -u OWNER -r REPO -v v1.0.0 dist/
-```
-
-If the release does not exist, it will create a release.
-If the tag does not exist, it will create a tag from the master branch and a release.
-
-
-## Usage
+You can set the following options.
 
 ```
-Usage:
-  ghcp [command]
-
-Available Commands:
-  commit      Commit files to the branch
-  fork-commit Fork the repository and commit files to a branch
-  help        Help about any command
-  release     Release files to the repository
-
-Flags:
-      --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
-      --debug              Show debug logs
-  -C, --directory string   Change to directory before operation
-  -h, --help               help for ghcp
-      --token string       GitHub API token [$GITHUB_TOKEN]
-      --version            version for ghcp
-```
-
-```
-Usage:
-  ghcp commit [flags] FILES...
-
 Flags:
   -b, --branch string    Name of the branch to create or update (default: the default branch of repository)
       --dry-run          Upload files but do not update the branch actually
@@ -149,10 +74,27 @@ Flags:
   -r, --repo string      GitHub repository name (mandatory)
 ```
 
-```
-Usage:
-  ghcp fork-commit [flags] FILES...
 
+### Fork the repository and commit files to a new branch
+
+To fork the repository `UPSTREAM/REPO` and create a `feature` branch based on the default branch:
+
+```sh
+ghcp fork-commit -u UPSTREAM -r REPO -b feature -m MESSAGE file1 file2
+```
+
+To fork the repository `UPSTREAM/REPO` and create a `feature` branch based on the `develop` branch of the upstream:
+
+```sh
+ghcp fork-commit -u UPSTREAM -r REPO -b feature --parent develop -m MESSAGE file1 file2
+```
+
+If the branch already exists, ghcp will fail.
+It supports only fast-forward for now.
+
+You can set the following options.
+
+```
 Flags:
   -b, --branch string    Name of the branch to create (mandatory)
       --dry-run          Upload files but do not update the branch actually
@@ -164,15 +106,65 @@ Flags:
   -r, --repo string      Upstream repository name (mandatory)
 ```
 
+
+### Create a pull request
+
+To create a pull request from the `feature` branch to the default branch:
+
+```sh
+ghcp pull-request -u OWNER -r REPO -b feature --title TITLE --body BODY
 ```
-Usage:
-  ghcp release [flags] FILES...
 
-Examples:
-  To release files to the tag:
-    ghcp release -u OWNER -r REPO -t TAG FILES...
+To create a pull request from the `feature` branch to the `develop` branch:
+
+```sh
+ghcp pull-request -u OWNER -r REPO -b feature --base develop --title TITLE --body BODY
+```
+
+To create a pull request from the `feature` branch of the `OWNER/REPO` repository to the default branch of the `UPSTREAM/REPO` repository:
+
+```sh
+ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --title TITLE --body BODY
+```
+
+To create a pull request from the `feature` branch of the `OWNER/REPO` repository to the default branch of the `UPSTREAM/REPO` repository:
+
+```sh
+ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --base feature --title TITLE --body BODY
+```
+
+If a pull request already exists, ghcp do nothing.
+
+You can set the following options.
+
+```
+Flags:
+      --base string         Base branch name (default: default branch of base repository)
+      --base-owner string   Base repository owner (default: head)
+      --base-repo string    Base repository name (default: head)
+      --body string         Body of a pull request
+  -b, --head string         Head branch name (mandatory)
+  -u, --head-owner string   Head repository owner (mandatory)
+  -r, --head-repo string    Head repository name (mandatory)
+  -h, --help                help for pull-request
+      --title string        Title of a pull request (mandatory)
+```
 
 
+### Release assets
+
+To upload files to the release associated to the tag `v1.0.0`:
+
+```sh
+ghcp release -u OWNER -r REPO -v v1.0.0 dist/
+```
+
+If the release does not exist, it will create a release.
+If the tag does not exist, it will create a tag from the default branch and create a release.
+
+You can set the following options.
+
+```
 Flags:
       --dry-run        Do not create a release and assets actually
   -h, --help           help for release
@@ -182,67 +174,19 @@ Flags:
 ```
 
 
-### Behavior of `commit`
+## Usage
 
-To commit files to the default branch:
+### Global options
 
-```sh
-ghcp commit -u OWNER -r REPO -m MESSAGE FILES...
+You can set the following options.
+
 ```
-
-To commit files to the branch:
-
-```sh
-ghcp commit -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
+Global Flags:
+      --api string         GitHub API v3 URL (v4 will be inferred) [$GITHUB_API]
+      --debug              Show debug logs
+  -C, --directory string   Change to directory before operation
+      --token string       GitHub API token [$GITHUB_TOKEN]
 ```
-
-If the branch does not exist, ghcp creates a branch from the default branch.
-It the branch exists, ghcp updates the branch by fast-forward.
-
-To commit files to a new branch from the parent branch:
-
-```sh
-ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
-```
-
-If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
-
-To commit files to a new branch without any parent:
-
-```sh
-ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
-```
-
-If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
-
-ghcp performs a commit operation as follows:
-
-- An author and committer of a commit are set to the login user depending on the token.
-- It does not create a new commit if the branch has same files, that prevents an empty commit.
-- It does not read the current Git config (`.gitconfig`) and Git state (`.git`) and you need to always set owner and name of a repository.
-- It excludes `.git` directories.
-
-
-### Behavior of `fork-commit`
-
-To fork the repository and commit files to a branch:
-
-```sh
-ghcp fork-commit -u UPSTREAM -r REPO -b BRANCH -m MESSAGE FILES...
-```
-
-If the branch does not exist, ghcp creates a branch from the default branch of the upstream repository.
-It the branch exists, ghcp updates the branch by fast-forward.
-
-To fork the repository and commit files to a branch from the branch of the upstream:
-
-```sh
-ghcp fork-commit -u UPSTREAM -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
-```
-
-If the branch does not exist, ghcp creates a branch from the branch of the upstream repository.
-If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
-
 
 ### GitHub Enterprise
 

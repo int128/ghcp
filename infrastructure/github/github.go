@@ -29,6 +29,7 @@ type Interface interface {
 
 type QueryService interface {
 	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
+	Mutate(ctx context.Context, m interface{}, input githubv4.Input, variables map[string]interface{}) error
 }
 
 type GitService interface {
