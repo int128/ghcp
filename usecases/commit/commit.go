@@ -37,10 +37,6 @@ type Input struct {
 	DryRun           bool
 }
 
-func (in *Input) TargetIsDefaultBranch() bool {
-	return in.TargetBranchName == ""
-}
-
 // Commit commits files to the default/given branch on the repository.
 type Commit struct {
 	CreateGitObject gitobject.Interface
@@ -68,7 +64,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 		return xerrors.New("no file exists in given paths")
 	}
 
-	if in.TargetIsDefaultBranch() {
+	if in.TargetBranchName == "" {
 		return u.commitDefaultBranch(ctx, in, files)
 	}
 	return u.commitTargetBranch(ctx, in, files)
@@ -84,6 +80,10 @@ func (f *pathFilter) SkipDir(path string) bool {
 		f.Logger.Debugf("Exclude .git directory: %s", path)
 		return true
 	}
+	return false
+}
+
+func (f *pathFilter) ExcludeFile(string) bool {
 	return false
 }
 
@@ -199,10 +199,6 @@ func (u *Commit) commitTargetBranch(ctx context.Context, in Input, files []fs.Fi
 		return xerrors.Errorf("could not create a branch (%s) based on the default branch: %w", in.TargetBranchName, err)
 	}
 	return nil
-}
-
-func (f *pathFilter) ExcludeFile(string) bool {
-	return false
 }
 
 type createBranchInput struct {
