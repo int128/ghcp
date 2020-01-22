@@ -1,4 +1,4 @@
-package btc
+package gitobject
 
 import (
 	"context"
@@ -68,15 +68,15 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, github.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitInput{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&github.QueryCommitOut{
+			Return(&github.QueryCommitOutput{
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := CreateBlobTreeCommit{
+		useCase := CreateGitObject{
 			FileSystem: fileSystem,
 			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
@@ -153,15 +153,15 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, github.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitInput{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&github.QueryCommitOut{
+			Return(&github.QueryCommitOutput{
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := CreateBlobTreeCommit{
+		useCase := CreateGitObject{
 			FileSystem: fileSystem,
 			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,

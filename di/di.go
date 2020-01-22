@@ -11,9 +11,9 @@ import (
 	githubAdaptor "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/gitobject"
 	"github.com/int128/ghcp/usecases/pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 )
@@ -36,7 +36,7 @@ func NewCmdInternalRunner(logger.Interface, github.Interface) *cmd.InternalRunne
 		fs.Set,
 		githubAdaptor.Set,
 
-		btc.Set,
+		gitobject.Set,
 		commit.Set,
 		forkcommit.Set,
 		pullrequest.Set,

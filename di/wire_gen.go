@@ -12,9 +12,9 @@ import (
 	github2 "github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
-	"github.com/int128/ghcp/usecases/btc"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/gitobject"
 	"github.com/int128/ghcp/usecases/pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 )
@@ -47,16 +47,16 @@ func NewCmdInternalRunner(loggerInterface logger.Interface, githubInterface gith
 		Client: githubInterface,
 		Logger: loggerInterface,
 	}
-	createBlobTreeCommit := &btc.CreateBlobTreeCommit{
+	createGitObject := &gitobject.CreateGitObject{
 		FileSystem: fileSystem,
 		Logger:     loggerInterface,
 		GitHub:     gitHub,
 	}
 	commitCommit := &commit.Commit{
-		CreateBlobTreeCommit: createBlobTreeCommit,
-		FileSystem:           fileSystem,
-		Logger:               loggerInterface,
-		GitHub:               gitHub,
+		CreateGitObject: createGitObject,
+		FileSystem:      fileSystem,
+		Logger:          loggerInterface,
+		GitHub:          gitHub,
 	}
 	forkCommit := &forkcommit.ForkCommit{
 		Commit: commitCommit,
