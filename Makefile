@@ -15,6 +15,10 @@ dist:
 	# make the zip files for GitHub Releases
 	VERSION=$(CIRCLE_TAG) CGO_ENABLED=0 goxzst -d dist/ -i "LICENSE" -o ghcp -t "ghcp.rb" -- -ldflags "$(LDFLAGS)"
 
+.PHONY: acceptance-test
+acceptance-test: ghcp
+	make -C acceptance_test
+
 .PHONY: release
 release: ghcp dist
 	# publish to the GitHub Releases

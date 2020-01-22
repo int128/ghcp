@@ -156,7 +156,7 @@ Flags:
 To upload files to the release associated to tag `v1.0.0`:
 
 ```sh
-ghcp release -u OWNER -r REPO -v v1.0.0 dist/
+ghcp release -u OWNER -r REPO -t v1.0.0 dist/
 ```
 
 If the release does not exist, it will create a release.
