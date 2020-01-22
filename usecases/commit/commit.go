@@ -11,7 +11,7 @@ import (
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
-	"github.com/int128/ghcp/usecases/btc"
+	"github.com/int128/ghcp/usecases/gitobject"
 	"golang.org/x/xerrors"
 )
 
@@ -43,10 +43,10 @@ func (in *Input) TargetIsDefaultBranch() bool {
 
 // Commit commits files to the default/given branch on the repository.
 type Commit struct {
-	CreateBlobTreeCommit btc.Interface
-	FileSystem           fs.Interface
-	Logger               logger.Interface
-	GitHub               github.Interface
+	CreateGitObject gitobject.Interface
+	FileSystem      fs.Interface
+	Logger          logger.Interface
+	GitHub          github.Interface
 }
 
 func (u *Commit) Do(ctx context.Context, in Input) error {
@@ -99,7 +99,7 @@ func (u *Commit) commitDefaultBranch(ctx context.Context, in Input, files []fs.F
 	u.Logger.Infof("Author and committer: %s", q.CurrentUserName)
 
 	bi := updateBranchInput{
-		Input: btc.Input{
+		Input: gitobject.Input{
 			Files:         files,
 			Repository:    q.TargetRepository,
 			CommitMessage: in.CommitMessage,
@@ -142,7 +142,7 @@ func (u *Commit) commitTargetBranch(ctx context.Context, in Input, files []fs.Fi
 
 	if q.TargetBranchExists() {
 		bi := updateBranchInput{
-			Input: btc.Input{
+			Input: gitobject.Input{
 				Files:         files,
 				Repository:    q.TargetRepository,
 				CommitMessage: in.CommitMessage,
@@ -172,7 +172,7 @@ func (u *Commit) commitTargetBranch(ctx context.Context, in Input, files []fs.Fi
 	}
 
 	bi := createBranchInput{
-		Input: btc.Input{
+		Input: gitobject.Input{
 			Files:         files,
 			Repository:    q.TargetRepository,
 			CommitMessage: in.CommitMessage,
@@ -206,7 +206,7 @@ func (f *pathFilter) ExcludeFile(string) bool {
 }
 
 type createBranchInput struct {
-	btc.Input
+	gitobject.Input
 
 	NewBranchName git.BranchName
 	DryRun        bool
@@ -214,7 +214,7 @@ type createBranchInput struct {
 
 func (u *Commit) createBranch(ctx context.Context, in createBranchInput) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.Input)
+	commit, err := u.CreateGitObject.Do(ctx, in.Input)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
@@ -241,7 +241,7 @@ func (u *Commit) createBranch(ctx context.Context, in createBranchInput) error {
 }
 
 type updateBranchInput struct {
-	btc.Input
+	gitobject.Input
 
 	BranchName  git.BranchName
 	DryRun      bool
@@ -250,7 +250,7 @@ type updateBranchInput struct {
 
 func (u *Commit) updateBranch(ctx context.Context, in updateBranchInput) error {
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(in.Files))
-	commit, err := u.CreateBlobTreeCommit.Do(ctx, in.Input)
+	commit, err := u.CreateGitObject.Do(ctx, in.Input)
 	if err != nil {
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}

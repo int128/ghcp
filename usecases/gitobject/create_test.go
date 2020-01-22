@@ -1,4 +1,4 @@
-package btc
+package gitobject
 
 import (
 	"context"
@@ -76,7 +76,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := CreateBlobTreeCommit{
+		useCase := CreateGitObject{
 			FileSystem: fileSystem,
 			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
@@ -161,7 +161,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 				ChangedFiles: 1,
 			}, nil)
 
-		useCase := CreateBlobTreeCommit{
+		useCase := CreateGitObject{
 			FileSystem: fileSystem,
 			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,

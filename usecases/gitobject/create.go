@@ -1,5 +1,5 @@
-// Package btc provides the internal use-case for a set of blob, tree and commit.
-package btc
+// Package gitobject provides the internal use-case for a set of blob, tree and commit.
+package gitobject
 
 import (
 	"context"
@@ -13,11 +13,11 @@ import (
 )
 
 var Set = wire.NewSet(
-	wire.Struct(new(CreateBlobTreeCommit), "*"),
-	wire.Bind(new(Interface), new(*CreateBlobTreeCommit)),
+	wire.Struct(new(CreateGitObject), "*"),
+	wire.Bind(new(Interface), new(*CreateGitObject)),
 )
 
-//go:generate mockgen -destination mock_btc/mock_btc.go github.com/int128/ghcp/usecases/btc Interface
+//go:generate mockgen -destination mock_gitobject/mock_gitobject.go github.com/int128/ghcp/usecases/gitobject Interface
 
 type Interface interface {
 	Do(ctx context.Context, in Input) (*Output, error)
@@ -37,14 +37,14 @@ type Output struct {
 	ChangedFiles int
 }
 
-// CreateBlobTreeCommit creates blob(s), a tree and a commit.
-type CreateBlobTreeCommit struct {
+// CreateGitObject creates blob(s), a tree and a commit.
+type CreateGitObject struct {
 	FileSystem fs.Interface
 	Logger     logger.Interface
 	GitHub     github.Interface
 }
 
-func (u *CreateBlobTreeCommit) Do(ctx context.Context, in Input) (*Output, error) {
+func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 	files := make([]git.File, len(in.Files))
 	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
