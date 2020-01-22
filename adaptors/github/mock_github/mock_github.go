@@ -94,6 +94,21 @@ func (mr *MockInterfaceMockRecorder) CreateFork(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockInterface)(nil).CreateFork), arg0, arg1)
 }
 
+// CreatePullRequest mocks base method
+func (m *MockInterface) CreatePullRequest(arg0 context.Context, arg1 github.CreatePullRequestInput) (*github.CreatePullRequestOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePullRequest", arg0, arg1)
+	ret0, _ := ret[0].(*github.CreatePullRequestOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreatePullRequest indicates an expected call of CreatePullRequest
+func (mr *MockInterfaceMockRecorder) CreatePullRequest(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePullRequest", reflect.TypeOf((*MockInterface)(nil).CreatePullRequest), arg0, arg1)
+}
+
 // CreateRelease mocks base method
 func (m *MockInterface) CreateRelease(arg0 context.Context, arg1 git.Release) (*git.Release, error) {
 	m.ctrl.T.Helper()
@@ -168,6 +183,21 @@ func (mr *MockInterfaceMockRecorder) QueryCommit(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryCommit", reflect.TypeOf((*MockInterface)(nil).QueryCommit), arg0, arg1)
 }
 
+// QueryDefaultBranch mocks base method
+func (m *MockInterface) QueryDefaultBranch(arg0 context.Context, arg1 github.QueryDefaultBranchInput) (*github.QueryDefaultBranchOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryDefaultBranch", arg0, arg1)
+	ret0, _ := ret[0].(*github.QueryDefaultBranchOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryDefaultBranch indicates an expected call of QueryDefaultBranch
+func (mr *MockInterfaceMockRecorder) QueryDefaultBranch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryDefaultBranch", reflect.TypeOf((*MockInterface)(nil).QueryDefaultBranch), arg0, arg1)
+}
+
 // QueryForCommitToBranch mocks base method
 func (m *MockInterface) QueryForCommitToBranch(arg0 context.Context, arg1 github.QueryForCommitToBranchIn) (*github.QueryForCommitToBranchOut, error) {
 	m.ctrl.T.Helper()
@@ -181,6 +211,21 @@ func (m *MockInterface) QueryForCommitToBranch(arg0 context.Context, arg1 github
 func (mr *MockInterfaceMockRecorder) QueryForCommitToBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCommitToBranch", reflect.TypeOf((*MockInterface)(nil).QueryForCommitToBranch), arg0, arg1)
+}
+
+// QueryForPullRequest mocks base method
+func (m *MockInterface) QueryForPullRequest(arg0 context.Context, arg1 github.QueryForPullRequestInput) (*github.QueryForPullRequestOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "QueryForPullRequest", arg0, arg1)
+	ret0, _ := ret[0].(*github.QueryForPullRequestOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// QueryForPullRequest indicates an expected call of QueryForPullRequest
+func (mr *MockInterfaceMockRecorder) QueryForPullRequest(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForPullRequest", reflect.TypeOf((*MockInterface)(nil).QueryForPullRequest), arg0, arg1)
 }
 
 // UpdateBranch mocks base method

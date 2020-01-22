@@ -24,12 +24,12 @@ const commitCmdExample = `  To commit files to the default branch:
   To commit files to a new branch from the parent branch:
     ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
 
-  If the branch exists, ghcp cannot update the branch by fast-forward and will fail.
+  If the branch exists, it will fail.
 
   To commit files to a new branch without any parent:
     ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
 
-  If the branch exists, ghcp cannot update the branch by fast-forward and will fail.`
+  If the branch exists, it will fail.`
 
 func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {
 	var o commitOptions

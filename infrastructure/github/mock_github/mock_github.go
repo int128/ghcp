@@ -8,6 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	github "github.com/google/go-github/v24/github"
+	githubv4 "github.com/shurcooL/githubv4"
 	os "os"
 	reflect "reflect"
 )
@@ -145,6 +146,20 @@ func (m *MockInterface) GetReleaseByTag(arg0 context.Context, arg1, arg2, arg3 s
 func (mr *MockInterfaceMockRecorder) GetReleaseByTag(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseByTag", reflect.TypeOf((*MockInterface)(nil).GetReleaseByTag), arg0, arg1, arg2, arg3)
+}
+
+// Mutate mocks base method
+func (m *MockInterface) Mutate(arg0 context.Context, arg1 interface{}, arg2 githubv4.Input, arg3 map[string]interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Mutate", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Mutate indicates an expected call of Mutate
+func (mr *MockInterfaceMockRecorder) Mutate(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mutate", reflect.TypeOf((*MockInterface)(nil).Mutate), arg0, arg1, arg2, arg3)
 }
 
 // Query mocks base method

@@ -11,6 +11,7 @@ import (
 	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/usecases/pullrequest"
 	"github.com/int128/ghcp/usecases/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -24,9 +25,10 @@ const (
 	exitCodeOK    = 0
 	exitCodeError = 1
 
-	commitCmdName     = "commit"
-	forkCommitCmdName = "fork-commit"
-	releaseCmdName    = "release"
+	commitCmdName      = "commit"
+	forkCommitCmdName  = "fork-commit"
+	pullRequestCmdName = "pull-request"
+	releaseCmdName     = "release"
 )
 
 var Set = wire.NewSet(
@@ -58,6 +60,8 @@ func (r *Runner) Run(args []string, version string) int {
 	rootCmd.AddCommand(commitCmd)
 	forkCommitCmd := r.newForkCommitCmd(ctx, &o)
 	rootCmd.AddCommand(forkCommitCmd)
+	pullRequestCmd := r.newPullRequestCmd(ctx, &o)
+	rootCmd.AddCommand(pullRequestCmd)
 	releaseCmd := r.newReleaseCmd(ctx, &o)
 	rootCmd.AddCommand(releaseCmd)
 
@@ -97,10 +101,11 @@ type NewInternalRunnerFunc func(logger.Interface, github.Interface) *InternalRun
 
 // InternalRunner has the set of use-cases.
 type InternalRunner struct {
-	CommitUseCase     commit.Interface
-	ForkCommitUseCase forkcommit.Interface
-	ReleaseUseCase    release.Interface
-	Logger            logger.Interface
+	CommitUseCase      commit.Interface
+	ForkCommitUseCase  forkcommit.Interface
+	PullRequestUseCase pullrequest.Interface
+	ReleaseUseCase     release.Interface
+	Logger             logger.Interface
 }
 
 func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
