@@ -69,12 +69,12 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -135,12 +135,12 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -202,11 +202,11 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -267,12 +267,12 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -331,12 +331,12 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -397,12 +397,12 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -467,13 +467,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						ParentRef:        "develop",
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -536,13 +536,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						ParentRef:        "develop",
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",
@@ -607,13 +607,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 
 				gitHub := mock_github.NewMockInterface(ctrl)
 				gitHub.EXPECT().
-					QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
 						ParentRef:        "develop",
 						TargetRepository: targetRepositoryID,
 						TargetBranchName: "topic",
 					}).
-					Return(&github.QueryForCommitToBranchOut{
+					Return(&github.QueryForCommitOutput{
 						CurrentUserName:              "current",
 						TargetRepository:             targetRepositoryID,
 						TargetDefaultBranchName:      "master",

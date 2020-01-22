@@ -88,7 +88,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
-	commit, err := u.GitHub.QueryCommit(ctx, github.QueryCommitIn{
+	commit, err := u.GitHub.QueryCommit(ctx, github.QueryCommitInput{
 		Repository: in.Repository,
 		CommitSHA:  commitSHA,
 	})

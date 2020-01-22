@@ -88,7 +88,7 @@ func (f *pathFilter) ExcludeFile(string) bool {
 }
 
 func (u *Commit) commitDefaultBranch(ctx context.Context, in Input, files []fs.File) error {
-	q, err := u.GitHub.QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+	q, err := u.GitHub.QueryForCommit(ctx, github.QueryForCommitInput{
 		ParentRepository: in.ParentRepository,
 		ParentRef:        in.CommitStrategy.RebaseUpstream(), // valid only if rebase
 		TargetRepository: in.TargetRepository,
@@ -129,7 +129,7 @@ func (u *Commit) commitDefaultBranch(ctx context.Context, in Input, files []fs.F
 }
 
 func (u *Commit) commitTargetBranch(ctx context.Context, in Input, files []fs.File) error {
-	q, err := u.GitHub.QueryForCommitToBranch(ctx, github.QueryForCommitToBranchIn{
+	q, err := u.GitHub.QueryForCommit(ctx, github.QueryForCommitInput{
 		ParentRepository: in.ParentRepository,
 		ParentRef:        in.CommitStrategy.RebaseUpstream(), // valid only if rebase
 		TargetRepository: in.TargetRepository,

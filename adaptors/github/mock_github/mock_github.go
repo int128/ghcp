@@ -169,10 +169,10 @@ func (mr *MockInterfaceMockRecorder) GetReleaseByTagOrNil(arg0, arg1, arg2 inter
 }
 
 // QueryCommit mocks base method
-func (m *MockInterface) QueryCommit(arg0 context.Context, arg1 github.QueryCommitIn) (*github.QueryCommitOut, error) {
+func (m *MockInterface) QueryCommit(arg0 context.Context, arg1 github.QueryCommitInput) (*github.QueryCommitOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryCommit", arg0, arg1)
-	ret0, _ := ret[0].(*github.QueryCommitOut)
+	ret0, _ := ret[0].(*github.QueryCommitOutput)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -198,19 +198,19 @@ func (mr *MockInterfaceMockRecorder) QueryDefaultBranch(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryDefaultBranch", reflect.TypeOf((*MockInterface)(nil).QueryDefaultBranch), arg0, arg1)
 }
 
-// QueryForCommitToBranch mocks base method
-func (m *MockInterface) QueryForCommitToBranch(arg0 context.Context, arg1 github.QueryForCommitToBranchIn) (*github.QueryForCommitToBranchOut, error) {
+// QueryForCommit mocks base method
+func (m *MockInterface) QueryForCommit(arg0 context.Context, arg1 github.QueryForCommitInput) (*github.QueryForCommitOutput, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "QueryForCommitToBranch", arg0, arg1)
-	ret0, _ := ret[0].(*github.QueryForCommitToBranchOut)
+	ret := m.ctrl.Call(m, "QueryForCommit", arg0, arg1)
+	ret0, _ := ret[0].(*github.QueryForCommitOutput)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// QueryForCommitToBranch indicates an expected call of QueryForCommitToBranch
-func (mr *MockInterfaceMockRecorder) QueryForCommitToBranch(arg0, arg1 interface{}) *gomock.Call {
+// QueryForCommit indicates an expected call of QueryForCommit
+func (mr *MockInterfaceMockRecorder) QueryForCommit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCommitToBranch", reflect.TypeOf((*MockInterface)(nil).QueryForCommitToBranch), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCommit", reflect.TypeOf((*MockInterface)(nil).QueryForCommit), arg0, arg1)
 }
 
 // QueryForPullRequest mocks base method

@@ -68,11 +68,11 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, github.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitInput{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&github.QueryCommitOut{
+			Return(&github.QueryCommitOutput{
 				ChangedFiles: 1,
 			}, nil)
 
@@ -153,11 +153,11 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			}).
 			Return(git.CommitSHA("commitSHA"), nil)
 		gitHub.EXPECT().
-			QueryCommit(ctx, github.QueryCommitIn{
+			QueryCommit(ctx, github.QueryCommitInput{
 				Repository: repositoryID,
 				CommitSHA:  "commitSHA",
 			}).
-			Return(&github.QueryCommitOut{
+			Return(&github.QueryCommitOutput{
 				ChangedFiles: 1,
 			}, nil)
 

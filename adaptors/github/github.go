@@ -19,12 +19,12 @@ var Set = wire.NewSet(
 type Interface interface {
 	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
 
-	QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error)
+	QueryForCommit(ctx context.Context, in QueryForCommitInput) (*QueryForCommitOutput, error)
 	CreateBranch(ctx context.Context, branch git.NewBranch) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
 
-	QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error)
+	QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCommitOutput, error)
 	CreateTree(ctx context.Context, tree git.NewTree) (git.TreeSHA, error)
 	CreateBlob(ctx context.Context, blob git.NewBlob) (git.BlobSHA, error)
 

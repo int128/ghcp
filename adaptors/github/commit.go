@@ -12,38 +12,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type QueryForCommitToBranchIn struct {
-	ParentRepository git.RepositoryID
-	ParentRef        git.RefName // optional
-	TargetRepository git.RepositoryID
-	TargetBranchName git.BranchName // optional
-}
-
-type QueryForCommitToBranchOut struct {
-	CurrentUserName              string
-	ParentDefaultBranchCommitSHA git.CommitSHA
-	ParentDefaultBranchTreeSHA   git.TreeSHA
-	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
-	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
-	TargetRepository             git.RepositoryID
-	TargetDefaultBranchName      git.BranchName
-	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
-	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
-}
-
-func (q *QueryForCommitToBranchOut) TargetBranchExists() bool {
-	return q.TargetBranchCommitSHA != ""
-}
-
-type QueryCommitIn struct {
-	Repository git.RepositoryID
-	CommitSHA  git.CommitSHA
-}
-
-type QueryCommitOut struct {
-	ChangedFiles int
-}
-
 // GitHub provides GitHub API access.
 type GitHub struct {
 	Client githubInfrastructure.Interface
@@ -100,8 +68,31 @@ func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.Reposit
 	return nil
 }
 
-// QueryForCommitToBranch returns the repository for updating the branch.
-func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitToBranchIn) (*QueryForCommitToBranchOut, error) {
+type QueryForCommitInput struct {
+	ParentRepository git.RepositoryID
+	ParentRef        git.RefName // optional
+	TargetRepository git.RepositoryID
+	TargetBranchName git.BranchName // optional
+}
+
+type QueryForCommitOutput struct {
+	CurrentUserName              string
+	ParentDefaultBranchCommitSHA git.CommitSHA
+	ParentDefaultBranchTreeSHA   git.TreeSHA
+	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
+	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
+	TargetRepository             git.RepositoryID
+	TargetDefaultBranchName      git.BranchName
+	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
+	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
+}
+
+func (q *QueryForCommitOutput) TargetBranchExists() bool {
+	return q.TargetBranchCommitSHA != ""
+}
+
+// QueryForCommit returns the repository for updating the branch.
+func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*QueryForCommitOutput, error) {
 	var q struct {
 		Viewer struct {
 			Login string
@@ -171,7 +162,7 @@ func (c *GitHub) QueryForCommitToBranch(ctx context.Context, in QueryForCommitTo
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := QueryForCommitToBranchOut{
+	out := QueryForCommitOutput{
 		CurrentUserName:              q.Viewer.Login,
 		ParentDefaultBranchCommitSHA: git.CommitSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Oid),
 		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
@@ -212,8 +203,17 @@ func (c *GitHub) UpdateBranch(ctx context.Context, n git.NewBranch, force bool) 
 	return nil
 }
 
+type QueryCommitInput struct {
+	Repository git.RepositoryID
+	CommitSHA  git.CommitSHA
+}
+
+type QueryCommitOutput struct {
+	ChangedFiles int
+}
+
 // QueryCommit returns the commit.
-func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommitOut, error) {
+func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCommitOutput, error) {
 	var q struct {
 		Repository struct {
 			Object struct {
@@ -233,7 +233,7 @@ func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitIn) (*QueryCommi
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
-	out := QueryCommitOut{
+	out := QueryCommitOutput{
 		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
 	}
 	c.Logger.Debugf("Returning the commit: %+v", out)
