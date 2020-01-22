@@ -21,9 +21,12 @@ acceptance-test: ghcp
 
 .PHONY: release
 release: ghcp dist
-	# publish to the GitHub Releases
+	# release assets
 	./ghcp release -u "$(CIRCLE_PROJECT_USERNAME)" -r "$(CIRCLE_PROJECT_REPONAME)" -t "$(CIRCLE_TAG)" dist/
-	# publish to the Homebrew tap repository
+	# update the Homebrew tap repository
 	./ghcp commit -u "$(CIRCLE_PROJECT_USERNAME)" -r "homebrew-$(CIRCLE_PROJECT_REPONAME)" -b "bump-$(CIRCLE_TAG)" \
 		-m "Bump the version to $(CIRCLE_TAG)" \
 		-C dist/ ghcp.rb
+	# create a pull request
+	./ghcp pull-request -u "$(CIRCLE_PROJECT_USERNAME)" -r "homebrew-$(CIRCLE_PROJECT_REPONAME)" -b "bump-$(CIRCLE_TAG)" \
+		--title "Bump the version to $(CIRCLE_TAG)"
