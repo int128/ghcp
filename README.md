@@ -3,17 +3,17 @@
 This is a release engineering tool for GitHub.
 It depends on GitHub APIs and works without git installation.
 
-Features:
+It provides the following features:
 
 - Commit files to a repository
 - Fork a repository and commit files to the forked repository
 - Create a pull request
-- Upload files to the GitHub Releases
+- Upload files to GitHub Releases
 
 
 ## Getting Started
 
-Install the latest release from [here](https://github.com/int128/ghcp/releases) or Homebrew.
+You can install the latest release from [GitHub Releases](https://github.com/int128/ghcp/releases) or Homebrew.
 
 ```sh
 # GitHub Releases
@@ -24,40 +24,40 @@ unzip /tmp/ghcp.zip -d ~/bin
 brew install int128/ghcp/ghcp
 ```
 
-You need to get a personal access token from the [settings](https://github.com/settings/tokens) and set it to the `GITHUB_TOKEN` environment variable or `--token` option.
+You need to get a personal access token from the [settings](https://github.com/settings/tokens) and set it to `GITHUB_TOKEN` environment variable or `--token` option.
 
 
 ### Commit files to a branch
 
-To commit the files to the default branch:
+To commit files to the default branch:
 
 ```sh
 ghcp commit -u OWNER -r REPO -m MESSAGE file1 file2
 ```
 
-To commit the files to the `feature` branch:
+To commit files to `feature` branch:
 
 ```sh
 ghcp commit -u OWNER -r REPO -b feature -m MESSAGE file1 file2
 ```
 
-If the `feature` branch does not exist, ghcp will create it.
+If `feature` branch does not exist, ghcp will create it from the default branch.
 
-To create a `feature` branch based on the `develop` branch:
+To create `feature` branch from `develop` branch:
 
 ```sh
 ghcp commit -u OWNER -r REPO -b feature --parent=develop -m MESSAGE file1 file2
 ```
 
-If the branch already exists, ghcp will fail.
-It supports only fast-forward for now.
+If `feature` branch already exists, ghcp will fail.
+Currently only fast-forward is supported.
 
 ghcp performs a commit operation as follows:
 
 - An author and committer of a commit are set to the login user (depending on the token).
 - If the branch has same files, do not create a new commit. It prevents an empty commit.
 - It excludes `.git` directories.
-- Do not support `.gitconfig`.
+- It does not support `.gitconfig`.
 
 You can set the following options.
 
@@ -77,20 +77,20 @@ Flags:
 
 ### Fork the repository and commit files to a new branch
 
-To fork the repository `UPSTREAM/REPO` and create a `feature` branch based on the default branch:
+To fork repository `UPSTREAM/REPO` and create `feature` branch from the default branch:
 
 ```sh
 ghcp fork-commit -u UPSTREAM -r REPO -b feature -m MESSAGE file1 file2
 ```
 
-To fork the repository `UPSTREAM/REPO` and create a `feature` branch based on the `develop` branch of the upstream:
+To fork repository `UPSTREAM/REPO` and create `feature` branch from `develop` branch of the upstream:
 
 ```sh
 ghcp fork-commit -u UPSTREAM -r REPO -b feature --parent develop -m MESSAGE file1 file2
 ```
 
 If the branch already exists, ghcp will fail.
-It supports only fast-forward for now.
+Currently only fast-forward is supported.
 
 You can set the following options.
 
@@ -109,25 +109,25 @@ Flags:
 
 ### Create a pull request
 
-To create a pull request from the `feature` branch to the default branch:
+To create a pull request from `feature` branch to the default branch:
 
 ```sh
 ghcp pull-request -u OWNER -r REPO -b feature --title TITLE --body BODY
 ```
 
-To create a pull request from the `feature` branch to the `develop` branch:
+To create a pull request from `feature` branch to the `develop` branch:
 
 ```sh
 ghcp pull-request -u OWNER -r REPO -b feature --base develop --title TITLE --body BODY
 ```
 
-To create a pull request from the `feature` branch of the `OWNER/REPO` repository to the default branch of the `UPSTREAM/REPO` repository:
+To create a pull request from `feature` branch of `OWNER/REPO` repository to the default branch of `UPSTREAM/REPO` repository:
 
 ```sh
 ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --title TITLE --body BODY
 ```
 
-To create a pull request from the `feature` branch of the `OWNER/REPO` repository to the default branch of the `UPSTREAM/REPO` repository:
+To create a pull request from `feature` branch of `OWNER/REPO` repository to the default branch of `UPSTREAM/REPO` repository:
 
 ```sh
 ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --base feature --title TITLE --body BODY
@@ -153,7 +153,7 @@ Flags:
 
 ### Release assets
 
-To upload files to the release associated to the tag `v1.0.0`:
+To upload files to the release associated to tag `v1.0.0`:
 
 ```sh
 ghcp release -u OWNER -r REPO -v v1.0.0 dist/
