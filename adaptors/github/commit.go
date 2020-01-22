@@ -81,8 +81,6 @@ type QueryForCommitOutput struct {
 	ParentDefaultBranchTreeSHA   git.TreeSHA
 	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
 	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
-	TargetRepository             git.RepositoryID
-	TargetDefaultBranchName      git.BranchName
 	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
 	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
 }
@@ -128,15 +126,6 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		} `graphql:"parentRepository: repository(owner: $parentOwner, name: $parentRepo)"`
 
 		TargetRepository struct {
-			Name  string
-			Owner struct{ Login string }
-
-			// default branch
-			DefaultBranchRef struct {
-				Name string
-			}
-
-			// branch (optional)
 			Ref struct {
 				Target struct {
 					Commit struct {
@@ -168,8 +157,6 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
 		ParentRefCommitSHA:           git.CommitSHA(q.ParentRepository.ParentRef.Target.Commit.Oid),
 		ParentRefTreeSHA:             git.TreeSHA(q.ParentRepository.ParentRef.Target.Commit.Tree.Oid),
-		TargetRepository:             git.RepositoryID{Owner: q.TargetRepository.Owner.Login, Name: q.TargetRepository.Name},
-		TargetDefaultBranchName:      git.BranchName(q.TargetRepository.DefaultBranchRef.Name),
 		TargetBranchCommitSHA:        git.CommitSHA(q.TargetRepository.Ref.Target.Commit.Oid),
 		TargetBranchTreeSHA:          git.TreeSHA(q.TargetRepository.Ref.Target.Commit.Tree.Oid),
 	}

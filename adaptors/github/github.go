@@ -51,8 +51,8 @@ type QueryDefaultBranchOutput struct {
 // QueryDefaultBranch returns the default branch names.
 // You can set both repositories or either repository.
 func (c *GitHub) QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchInput) (*QueryDefaultBranchOutput, error) {
-	if !in.BaseRepository.IsValid() && !in.HeadRepository.IsValid() {
-		return nil, xerrors.New("BaseRepository and HeadRepository are zero")
+	if !in.BaseRepository.IsValid() || !in.HeadRepository.IsValid() {
+		return nil, xerrors.New("you need to set both BaseRepository and HeadRepository")
 	}
 	var q struct {
 		BaseRepository struct {
