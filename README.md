@@ -17,7 +17,7 @@ You can install the latest release from [GitHub Releases](https://github.com/int
 
 ```sh
 # GitHub Releases
-curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.6.0/ghcp_linux_amd64.zip
+curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.7.0/ghcp_linux_amd64.zip
 unzip /tmp/ghcp.zip -d ~/bin
 
 # Homebrew
