@@ -2,6 +2,7 @@ package logger
 
 import (
 	"log"
+	"os"
 
 	"github.com/google/wire"
 )
@@ -26,27 +27,29 @@ type Option struct {
 }
 
 func New(o Option) Interface {
-	return &logger{opt: o}
+	lgr := log.New(os.Stderr, "", log.Lmicroseconds)
+	return &logger{opt: o, lgr: lgr}
 }
 
 type logger struct {
+	lgr *log.Logger
 	opt Option
 }
 
-func (*logger) Errorf(format string, v ...interface{}) {
-	log.Printf("ERROR "+format, v...)
+func (l *logger) Errorf(format string, v ...interface{}) {
+	l.lgr.Printf("ERROR "+format, v...)
 }
 
-func (*logger) Warnf(format string, v ...interface{}) {
-	log.Printf("WARN  "+format, v...)
+func (l *logger) Warnf(format string, v ...interface{}) {
+	l.lgr.Printf("WARN  "+format, v...)
 }
 
-func (*logger) Infof(format string, v ...interface{}) {
-	log.Printf("INFO  "+format, v...)
+func (l *logger) Infof(format string, v ...interface{}) {
+	l.lgr.Printf("INFO  "+format, v...)
 }
 
 func (l *logger) Debugf(format string, v ...interface{}) {
 	if l.opt.Debug {
-		log.Printf("DEBUG "+format, v...)
+		l.lgr.Printf("DEBUG "+format, v...)
 	}
 }
