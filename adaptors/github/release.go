@@ -36,8 +36,9 @@ func (c *GitHub) GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID
 func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release, error) {
 	c.Logger.Debugf("Creating a release %+v", r)
 	release, _, err := c.Client.CreateRelease(ctx, r.ID.Repository.Owner, r.ID.Repository.Name, &github.RepositoryRelease{
-		TagName: github.String(r.TagName.Name()),
-		Name:    github.String(r.Name),
+		Name:            github.String(r.Name),
+		TagName:         github.String(r.TagName.Name()),
+		TargetCommitish: github.String(r.TargetCommitish),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("GitHub API error: %w", err)
@@ -47,8 +48,9 @@ func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release
 			Repository: r.ID.Repository,
 			InternalID: release.GetID(),
 		},
-		TagName: git.TagName(release.GetTagName()),
-		Name:    release.GetName(),
+		TagName:         git.TagName(release.GetTagName()),
+		TargetCommitish: release.GetTargetCommitish(),
+		Name:            release.GetName(),
 	}, nil
 }
 

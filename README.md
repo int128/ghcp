@@ -162,15 +162,25 @@ ghcp release -u OWNER -r REPO -t v1.0.0 dist/
 If the release does not exist, it will create a release.
 If the tag does not exist, it will create a tag from the default branch and create a release.
 
+To create a tag and release on commit `COMMIT_SHA` and upload files to the release:
+
+```sh
+ghcp release -u OWNER -r REPO -t v1.0.0 --target COMMIT_SHA dist/
+```
+
+If the tag already exists, it ignores the target commit.
+If the release already exist, it only uploads the files.
+
 You can set the following options.
 
 ```
 Flags:
-      --dry-run        Do not create a release and assets actually
-  -h, --help           help for release
-  -u, --owner string   GitHub repository owner (mandatory)
-  -r, --repo string    GitHub repository name (mandatory)
-  -t, --tag string     Tag name (mandatory)
+      --dry-run         Do not create a release and assets actually
+  -h, --help            help for release
+  -u, --owner string    GitHub repository owner (mandatory)
+  -r, --repo string     GitHub repository name (mandatory)
+  -t, --tag string      Tag name (mandatory)
+      --target string   Branch name or commit SHA of a tag. Unused if the Git tag already exists (default: the default branch)
 ```
 
 

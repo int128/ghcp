@@ -424,9 +424,10 @@ func TestCmd_Run(t *testing.T) {
 			releaseUseCase := mock_release.NewMockInterface(ctrl)
 			releaseUseCase.EXPECT().
 				Do(ctx, release.Input{
-					Repository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					TagName:    "v1.0.0",
-					Paths:      []string{"file1", "file2"},
+					Repository:              git.RepositoryID{Owner: "owner", Name: "repo"},
+					TagName:                 "v1.0.0",
+					TargetBranchOrCommitSHA: "COMMIT_SHA",
+					Paths:                   []string{"file1", "file2"},
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
@@ -441,6 +442,7 @@ func TestCmd_Run(t *testing.T) {
 				"-u", "owner",
 				"-r", "repo",
 				"-t", "v1.0.0",
+				"--target", "COMMIT_SHA",
 				"file1",
 				"file2",
 			}

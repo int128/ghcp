@@ -24,10 +24,11 @@ type Interface interface {
 }
 
 type Input struct {
-	Repository git.RepositoryID
-	TagName    git.TagName
-	Paths      []string
-	DryRun     bool
+	Repository              git.RepositoryID
+	TagName                 git.TagName
+	TargetBranchOrCommitSHA string // optional
+	Paths                   []string
+	DryRun                  bool
 }
 
 // Release create a release with the files to the tag in the repository.
@@ -67,9 +68,10 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 			return nil
 		}
 		release, err = u.GitHub.CreateRelease(ctx, git.Release{
-			ID:      git.ReleaseID{Repository: in.Repository},
-			TagName: in.TagName,
-			Name:    in.TagName.Name(),
+			ID:              git.ReleaseID{Repository: in.Repository},
+			Name:            in.TagName.Name(),
+			TagName:         in.TagName,
+			TargetCommitish: in.TargetBranchOrCommitSHA,
 		})
 		if err != nil {
 			return xerrors.Errorf("could not create a release: %w", err)
