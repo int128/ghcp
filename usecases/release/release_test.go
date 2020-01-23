@@ -25,9 +25,10 @@ func TestRelease_Do(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		in := Input{
-			Repository: targetRepositoryID,
-			TagName:    targetTagName,
-			Paths:      []string{"path"},
+			Repository:              targetRepositoryID,
+			TagName:                 targetTagName,
+			TargetBranchOrCommitSHA: "TARGET_COMMIT",
+			Paths:                   []string{"path"},
 		}
 		fileSystem := mock_fs.NewMockInterface(ctrl)
 		fileSystem.EXPECT().FindFiles([]string{"path"}, gomock.Any()).Return(theFiles, nil)
@@ -40,16 +41,18 @@ func TestRelease_Do(t *testing.T) {
 				ID: git.ReleaseID{
 					Repository: targetRepositoryID,
 				},
-				TagName: targetTagName,
-				Name:    targetTagName.Name(),
+				TagName:         targetTagName,
+				Name:            targetTagName.Name(),
+				TargetCommitish: "TARGET_COMMIT",
 			}).
 			Return(&git.Release{
 				ID: git.ReleaseID{
 					Repository: targetRepositoryID,
 					InternalID: 1234567890,
 				},
-				TagName: targetTagName,
-				Name:    targetTagName.Name(),
+				TagName:         targetTagName,
+				Name:            targetTagName.Name(),
+				TargetCommitish: "TARGET_COMMIT",
 			}, nil)
 		gitHub.EXPECT().
 			CreateReleaseAsset(ctx, git.ReleaseAsset{

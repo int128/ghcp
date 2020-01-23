@@ -8,9 +8,10 @@ type ReleaseID struct {
 
 // Release represents a release associated to a tag.
 type Release struct {
-	ID      ReleaseID
-	TagName TagName
-	Name    string
+	ID              ReleaseID
+	TagName         TagName
+	TargetCommitish string // branch name or commit SHA
+	Name            string
 }
 
 // ReleaseAsset represents a release asset.
