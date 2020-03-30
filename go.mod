@@ -8,7 +8,7 @@ require (
 	github.com/google/wire v0.4.0
 	github.com/shurcooL/githubv4 v0.0.0-20191127044304-8f68eb5628d0
 	github.com/shurcooL/graphql v0.0.0-20181231061246-d48a9a75455f // indirect
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v0.0.7
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
