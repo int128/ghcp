@@ -6,6 +6,7 @@ It depends on GitHub APIs and works without git installation.
 It provides the following features:
 
 - Commit files to a repository
+- Create an empty commit
 - Fork a repository and commit files to the forked repository
 - Create a pull request
 - Upload files to GitHub Releases
@@ -69,6 +70,45 @@ Flags:
   -m, --message string   Commit message (mandatory)
       --no-file-mode     Ignore executable bit of file and treat as 0644
       --no-parent        Create a commit without a parent
+  -u, --owner string     GitHub repository owner (mandatory)
+      --parent string    Create a commit from the parent branch/tag (default: fast-forward)
+  -r, --repo string      GitHub repository name (mandatory)
+```
+
+
+### Create an empty commit to a branch
+
+To create an empty commit to the default branch:
+
+```sh
+ghcp empty-commit -u OWNER -r REPO -m MESSAGE
+```
+
+To create an empty commit to the branch:
+
+```sh
+ghcp empty-commit -u OWNER -r REPO -b BRANCH -m MESSAGE
+```
+
+If the branch does not exist, ghcp creates a branch from the default branch.
+It the branch exists, ghcp updates the branch by fast-forward.
+
+To create an empty commit to a new branch from the parent branch:
+
+```sh
+ghcp empty-commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE
+```
+
+If the branch exists, it will fail.
+
+You can set the following options.
+
+```
+Flags:
+  -b, --branch string    Name of the branch to create or update (default: the default branch of repository)
+      --dry-run          Do not update the branch actually
+  -h, --help             help for empty-commit
+  -m, --message string   Commit message (mandatory)
   -u, --owner string     GitHub repository owner (mandatory)
       --parent string    Create a commit from the parent branch/tag (default: fast-forward)
   -r, --repo string      GitHub repository name (mandatory)

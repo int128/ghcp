@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/int128/ghcp/adaptors/env/mock_env"
 	"github.com/int128/ghcp/adaptors/logger"
 	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
@@ -265,6 +266,39 @@ func TestCmd_Run(t *testing.T) {
 				"--dry-run",
 				"file1",
 				"file2",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeOK {
+				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+			}
+		})
+	})
+
+	t.Run("empty-commit", func(t *testing.T) {
+		t.Run("BasicOptions", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commitUseCase := mock_commit.NewMockInterface(ctrl)
+			commitUseCase.EXPECT().
+				Do(ctx, commit.Input{
+					TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+					CommitStrategy:   commitstrategy.FastForward,
+					CommitMessage:    "commit-message",
+				})
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
+			}
+			args := []string{
+				cmdName,
+				emptyCommitCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
 			}
 			exitCode := r.Run(args, version)
 			if exitCode != exitCodeOK {

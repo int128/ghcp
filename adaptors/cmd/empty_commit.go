@@ -13,42 +13,34 @@ import (
 	"github.com/int128/ghcp/usecases/commit"
 )
 
-const commitCmdExample = `  To commit files to the default branch:
-    ghcp commit -u OWNER -r REPO -m MESSAGE FILES...
+const emptyCommitCmdExample = `  To create an empty commit to the default branch:
+    ghcp empty-commit -u OWNER -r REPO -m MESSAGE
 
-  To commit files to the branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
+  To create an empty commit to the branch:
+    ghcp empty-commit -u OWNER -r REPO -b BRANCH -m MESSAGE
 
   If the branch does not exist, ghcp creates a branch from the default branch.
   It the branch exists, ghcp updates the branch by fast-forward.
 
-  To commit files to a new branch from the parent branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
-
-  If the branch exists, it will fail.
-
-  To commit files to a new branch without any parent:
-    ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
+  To create an empty commit to a new branch from the parent branch:
+    ghcp empty-commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE
 
   If the branch exists, it will fail.`
 
-func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {
-	var o commitOptions
+func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {
+	var o emptyCommitOptions
 	c := &cobra.Command{
-		Use:     fmt.Sprintf("%s [flags] FILES...", commitCmdName),
-		Short:   "Commit files to the branch",
-		Long:    `This commits the files to the branch. This will create a branch if it does not exist.`,
-		Example: commitCmdExample,
+		Use:     fmt.Sprintf("%s [flags]", emptyCommitCmdName),
+		Short:   "Create an empty commit to the branch",
+		Long:    `This creates an empty commit to the branch. This will create a branch if it does not exist.`,
+		Example: emptyCommitCmdExample,
 		Args: func(_ *cobra.Command, args []string) error {
-			if o.ParentRef != "" && o.NoParent {
-				return xerrors.Errorf("do not set both --parent and --no-parent")
-			}
-			if len(args) == 0 {
-				return xerrors.New("you need to set one or more paths")
+			if len(args) > 0 {
+				return xerrors.New("do not set any argument")
 			}
 			return nil
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(*cobra.Command, []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
 				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
@@ -65,13 +57,11 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 				},
 				CommitStrategy: o.commitStrategy(),
 				CommitMessage:  git.CommitMessage(o.CommitMessage),
-				Paths:          args,
-				NoFileMode:     o.NoFileMode,
 				DryRun:         o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not commit the files: %s", err)
+				return xerrors.Errorf("could not create an empty commit: %s", err)
 			}
 			return nil
 		},
@@ -80,34 +70,27 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 	return c
 }
 
-type commitOptions struct {
+type emptyCommitOptions struct {
 	RepositoryOwner string
 	RepositoryName  string
 	CommitMessage   string
 	BranchName      string
 	ParentRef       string
-	NoParent        bool
-	NoFileMode      bool
 	DryRun          bool
 }
 
-func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
-	if o.NoParent {
-		return commitstrategy.NoParent
-	}
+func (o *emptyCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
 	if o.ParentRef != "" {
 		return commitstrategy.RebaseOn(git.RefName(o.ParentRef))
 	}
 	return commitstrategy.FastForward
 }
 
-func (o *commitOptions) register(f *pflag.FlagSet) {
+func (o *emptyCommitOptions) register(f *pflag.FlagSet) {
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
 	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
 	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
-	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
-	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
-	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	f.BoolVar(&o.DryRun, "dry-run", false, "Do not update the branch actually")
 }
