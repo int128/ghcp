@@ -6,13 +6,14 @@ import (
 	"path/filepath"
 
 	"github.com/google/wire"
+	"golang.org/x/xerrors"
+
 	"github.com/int128/ghcp/adaptors/fs"
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/gitobject"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -32,7 +33,7 @@ type Input struct {
 	ParentRepository git.RepositoryID
 	CommitStrategy   commitstrategy.CommitStrategy
 	CommitMessage    git.CommitMessage
-	Paths            []string
+	Paths            []string // if empty or nil, create an empty commit
 	NoFileMode       bool
 	DryRun           bool
 
@@ -54,15 +55,12 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 	if in.CommitMessage == "" {
 		return xerrors.New("you must set commit message")
 	}
-	if len(in.Paths) == 0 {
-		return xerrors.New("you must set one or more paths")
-	}
 
 	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{Logger: u.Logger})
 	if err != nil {
 		return xerrors.Errorf("could not find files: %w", err)
 	}
-	if len(files) == 0 {
+	if len(in.Paths) > 0 && len(files) == 0 {
 		return xerrors.New("no file exists in given paths")
 	}
 
@@ -144,7 +142,7 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
-	if commit.ChangedFiles == 0 {
+	if len(files) > 0 && commit.ChangedFiles == 0 {
 		u.Logger.Warnf("Nothing to commit because the branch has the same file(s)")
 		return nil
 	}
@@ -193,7 +191,7 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 		return xerrors.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
-	if commit.ChangedFiles == 0 {
+	if len(files) > 0 && commit.ChangedFiles == 0 {
 		u.Logger.Warnf("Nothing to commit because %s branch has the same file(s)", in.TargetBranchName)
 		return nil
 	}

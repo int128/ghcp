@@ -26,6 +26,7 @@ const (
 	exitCodeError = 1
 
 	commitCmdName      = "commit"
+	emptyCommitCmdName = "empty-commit"
 	forkCommitCmdName  = "fork-commit"
 	pullRequestCmdName = "pull-request"
 	releaseCmdName     = "release"
@@ -58,6 +59,8 @@ func (r *Runner) Run(args []string, version string) int {
 	rootCmd := r.newRootCmd(&o)
 	commitCmd := r.newCommitCmd(ctx, &o)
 	rootCmd.AddCommand(commitCmd)
+	emptyCommitCmd := r.newEmptyCommitCmd(ctx, &o)
+	rootCmd.AddCommand(emptyCommitCmd)
 	forkCommitCmd := r.newForkCommitCmd(ctx, &o)
 	rootCmd.AddCommand(forkCommitCmd)
 	pullRequestCmd := r.newPullRequestCmd(ctx, &o)

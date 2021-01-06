@@ -10,7 +10,7 @@ type CommitMessage string
 type NewCommit struct {
 	Repository      RepositoryID
 	Message         CommitMessage
-	ParentCommitSHA CommitSHA
+	ParentCommitSHA CommitSHA // optional
 	TreeSHA         TreeSHA
 }
 

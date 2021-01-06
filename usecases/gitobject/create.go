@@ -5,11 +5,12 @@ import (
 	"context"
 
 	"github.com/google/wire"
+	"golang.org/x/xerrors"
+
 	"github.com/int128/ghcp/adaptors/fs"
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -24,7 +25,7 @@ type Interface interface {
 }
 
 type Input struct {
-	Files           []fs.File
+	Files           []fs.File // nil or empty to create an empty commit
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	ParentCommitSHA git.CommitSHA // no parent if empty
@@ -45,37 +46,10 @@ type CreateGitObject struct {
 }
 
 func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
-	files := make([]git.File, len(in.Files))
-	for i, file := range in.Files {
-		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
-		if err != nil {
-			return nil, xerrors.Errorf("error while reading file %s: %w", file.Path, err)
-		}
-		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
-			Repository: in.Repository,
-			Content:    content,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("error while creating a blob for %s: %w", file.Path, err)
-		}
-		gitFile := git.File{
-			Filename:   file.Path,
-			BlobSHA:    blobSHA,
-			Executable: !in.NoFileMode && file.Executable,
-		}
-		files[i] = gitFile
-		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
-	}
-
-	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
-		Repository:  in.Repository,
-		BaseTreeSHA: in.ParentTreeSHA,
-		Files:       files,
-	})
+	treeSHA, err := u.uploadFilesIfSet(ctx, in)
 	if err != nil {
 		return nil, xerrors.Errorf("error while creating a tree: %w", err)
 	}
-	u.Logger.Infof("Created tree %s", treeSHA)
 
 	commitSHA, err := u.GitHub.CreateCommit(ctx, git.NewCommit{
 		Repository:      in.Repository,
@@ -100,4 +74,44 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 		CommitSHA:    commitSHA,
 		ChangedFiles: commit.ChangedFiles,
 	}, nil
+}
+
+func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.TreeSHA, error) {
+	if len(in.Files) == 0 {
+		u.Logger.Debugf("Using the parent tree (%s) because of nothing to upload", in.ParentTreeSHA)
+		return in.ParentTreeSHA, nil
+	}
+
+	files := make([]git.File, len(in.Files))
+	for i, file := range in.Files {
+		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
+		if err != nil {
+			return "", xerrors.Errorf("error while reading file %s: %w", file.Path, err)
+		}
+		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
+			Repository: in.Repository,
+			Content:    content,
+		})
+		if err != nil {
+			return "", xerrors.Errorf("error while creating a blob for %s: %w", file.Path, err)
+		}
+		gitFile := git.File{
+			Filename:   file.Path,
+			BlobSHA:    blobSHA,
+			Executable: !in.NoFileMode && file.Executable,
+		}
+		files[i] = gitFile
+		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
+	}
+
+	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
+		Repository:  in.Repository,
+		BaseTreeSHA: in.ParentTreeSHA,
+		Files:       files,
+	})
+	if err != nil {
+		return "", xerrors.Errorf("error while creating a tree: %w", err)
+	}
+	u.Logger.Infof("Created tree %s", treeSHA)
+	return treeSHA, nil
 }
