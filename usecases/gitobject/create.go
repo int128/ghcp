@@ -28,8 +28,10 @@ type Input struct {
 	Files           []fs.File // nil or empty to create an empty commit
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
-	ParentCommitSHA git.CommitSHA // no parent if empty
-	ParentTreeSHA   git.TreeSHA   // no parent if empty
+	Author          *git.CommitAuthor // optional
+	Committer       *git.CommitAuthor // optional
+	ParentCommitSHA git.CommitSHA     // no parent if empty
+	ParentTreeSHA   git.TreeSHA       // no parent if empty
 	NoFileMode      bool
 }
 
@@ -54,6 +56,8 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 	commitSHA, err := u.GitHub.CreateCommit(ctx, git.NewCommit{
 		Repository:      in.Repository,
 		Message:         in.CommitMessage,
+		Author:          in.Author,
+		Committer:       in.Committer,
 		ParentCommitSHA: in.ParentCommitSHA,
 		TreeSHA:         treeSHA,
 	})

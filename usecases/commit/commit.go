@@ -33,7 +33,9 @@ type Input struct {
 	ParentRepository git.RepositoryID
 	CommitStrategy   commitstrategy.CommitStrategy
 	CommitMessage    git.CommitMessage
-	Paths            []string // if empty or nil, create an empty commit
+	Author           *git.CommitAuthor // optional
+	Committer        *git.CommitAuthor // optional
+	Paths            []string          // if empty or nil, create an empty commit
 	NoFileMode       bool
 	DryRun           bool
 
@@ -119,6 +121,8 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 		Files:         files,
 		Repository:    in.TargetRepository,
 		CommitMessage: in.CommitMessage,
+		Author:        in.Author,
+		Committer:     in.Committer,
 		NoFileMode:    in.NoFileMode,
 	}
 	switch {
@@ -168,6 +172,8 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 		Files:         files,
 		Repository:    in.TargetRepository,
 		CommitMessage: in.CommitMessage,
+		Author:        in.Author,
+		Committer:     in.Committer,
 		NoFileMode:    in.NoFileMode,
 	}
 	switch {

@@ -201,6 +201,56 @@ func TestCmd_Run(t *testing.T) {
 			}
 		})
 
+		t.Run("only --author-name", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, nil),
+				NewInternalRunner: newInternalRunner(InternalRunner{}),
+			}
+			args := []string{
+				cmdName,
+				commitCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
+				"--author-name", "Some Author",
+				"file1",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeError {
+				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
+			}
+		})
+
+		t.Run("only --committer-email", func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			r := Runner{
+				NewLogger:         newLogger(t, logger.Option{}),
+				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				Env:               newEnv(ctrl, nil),
+				NewInternalRunner: newInternalRunner(InternalRunner{}),
+			}
+			args := []string{
+				cmdName,
+				commitCmdName,
+				"--token", "YOUR_TOKEN",
+				"-u", "owner",
+				"-r", "repo",
+				"-m", "commit-message",
+				"--committer-email", "committer@example.com",
+				"file1",
+			}
+			exitCode := r.Run(args, version)
+			if exitCode != exitCodeError {
+				t.Errorf("exitCode wants %d but %d", exitCodeError, exitCode)
+			}
+		})
+
 		t.Run("--no-file-mode", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
