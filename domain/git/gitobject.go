@@ -10,8 +10,16 @@ type CommitMessage string
 type NewCommit struct {
 	Repository      RepositoryID
 	Message         CommitMessage
-	ParentCommitSHA CommitSHA // optional
+	Author          *CommitAuthor // optional
+	Committer       *CommitAuthor // optional
+	ParentCommitSHA CommitSHA     // optional
 	TreeSHA         TreeSHA
+}
+
+// CommitAuthor represents an author of commit.
+type CommitAuthor struct {
+	Name  string
+	Email string
 }
 
 // TreeSHA represents a pointer to a tree.

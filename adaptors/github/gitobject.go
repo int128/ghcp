@@ -4,8 +4,9 @@ import (
 	"context"
 
 	"github.com/google/go-github/v24/github"
-	"github.com/int128/ghcp/domain/git"
 	"golang.org/x/xerrors"
+
+	"github.com/int128/ghcp/domain/git"
 )
 
 // CreateCommit creates a commit and returns SHA of it.
@@ -15,15 +16,28 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 	if n.ParentCommitSHA != "" {
 		parents = append(parents, github.Commit{SHA: github.String(string(n.ParentCommitSHA))})
 	}
-	commit, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &github.Commit{
+	commit := github.Commit{
 		Message: github.String(string(n.Message)),
 		Parents: parents,
 		Tree:    &github.Tree{SHA: github.String(string(n.TreeSHA))},
-	})
+	}
+	if n.Author != nil {
+		commit.Author = &github.CommitAuthor{
+			Name:  github.String(n.Author.Name),
+			Email: github.String(n.Author.Email),
+		}
+	}
+	if n.Committer != nil {
+		commit.Committer = &github.CommitAuthor{
+			Name:  github.String(n.Committer.Name),
+			Email: github.String(n.Committer.Email),
+		}
+	}
+	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit)
 	if err != nil {
 		return "", xerrors.Errorf("GitHub API error: %w", err)
 	}
-	return git.CommitSHA(commit.GetSHA()), nil
+	return git.CommitSHA(created.GetSHA()), nil
 }
 
 // CreateTree creates a tree and returns SHA of it.

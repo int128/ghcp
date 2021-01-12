@@ -35,6 +35,9 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 		Long:    `This creates an empty commit to the branch. This will create a branch if it does not exist.`,
 		Example: emptyCommitCmdExample,
 		Args: func(_ *cobra.Command, args []string) error {
+			if err := o.validate(); err != nil {
+				return xerrors.Errorf("invalid flag: %w", err)
+			}
 			if len(args) > 0 {
 				return xerrors.New("do not set any argument")
 			}
@@ -57,6 +60,8 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 				},
 				CommitStrategy: o.commitStrategy(),
 				CommitMessage:  git.CommitMessage(o.CommitMessage),
+				Author:         o.author(),
+				Committer:      o.committer(),
 				DryRun:         o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
@@ -71,12 +76,20 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 }
 
 type emptyCommitOptions struct {
+	commitAttributeOptions
+
 	RepositoryOwner string
 	RepositoryName  string
-	CommitMessage   string
 	BranchName      string
 	ParentRef       string
 	DryRun          bool
+}
+
+func (o *emptyCommitOptions) validate() error {
+	if err := o.commitAttributeOptions.validate(); err != nil {
+		return xerrors.Errorf("%w", err)
+	}
+	return nil
 }
 
 func (o *emptyCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
@@ -89,8 +102,8 @@ func (o *emptyCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
 func (o *emptyCommitOptions) register(f *pflag.FlagSet) {
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
 	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Do not update the branch actually")
+	o.commitAttributeOptions.register(f)
 }

@@ -64,15 +64,19 @@ You can set the following options.
 
 ```
 Flags:
-  -b, --branch string    Name of the branch to create or update (default: the default branch of repository)
-      --dry-run          Upload files but do not update the branch actually
-  -h, --help             help for commit
-  -m, --message string   Commit message (mandatory)
-      --no-file-mode     Ignore executable bit of file and treat as 0644
-      --no-parent        Create a commit without a parent
-  -u, --owner string     GitHub repository owner (mandatory)
-      --parent string    Create a commit from the parent branch/tag (default: fast-forward)
-  -r, --repo string      GitHub repository name (mandatory)
+      --author-email string      Author email (default: login email)
+      --author-name string       Author name (default: login name)
+  -b, --branch string            Name of the branch to create or update (default: the default branch of repository)
+      --committer-email string   Committer email (default: login email)
+      --committer-name string    Committer name (default: login name)
+      --dry-run                  Upload files but do not update the branch actually
+  -h, --help                     help for commit
+  -m, --message string           Commit message (mandatory)
+      --no-file-mode             Ignore executable bit of file and treat as 0644
+      --no-parent                Create a commit without a parent
+  -u, --owner string             GitHub repository owner (mandatory)
+      --parent string            Create a commit from the parent branch/tag (default: fast-forward)
+  -r, --repo string              GitHub repository name (mandatory)
 ```
 
 
@@ -105,13 +109,17 @@ You can set the following options.
 
 ```
 Flags:
-  -b, --branch string    Name of the branch to create or update (default: the default branch of repository)
-      --dry-run          Do not update the branch actually
-  -h, --help             help for empty-commit
-  -m, --message string   Commit message (mandatory)
-  -u, --owner string     GitHub repository owner (mandatory)
-      --parent string    Create a commit from the parent branch/tag (default: fast-forward)
-  -r, --repo string      GitHub repository name (mandatory)
+      --author-email string      Author email (default: login email)
+      --author-name string       Author name (default: login name)
+  -b, --branch string            Name of the branch to create or update (default: the default branch of repository)
+      --committer-email string   Committer email (default: login email)
+      --committer-name string    Committer name (default: login name)
+      --dry-run                  Do not update the branch actually
+  -h, --help                     help for empty-commit
+  -m, --message string           Commit message (mandatory)
+  -u, --owner string             GitHub repository owner (mandatory)
+      --parent string            Create a commit from the parent branch/tag (default: fast-forward)
+  -r, --repo string              GitHub repository name (mandatory)
 ```
 
 
@@ -136,14 +144,18 @@ You can set the following options.
 
 ```
 Flags:
-  -b, --branch string    Name of the branch to create (mandatory)
-      --dry-run          Upload files but do not update the branch actually
-  -h, --help             help for fork-commit
-  -m, --message string   Commit message (mandatory)
-      --no-file-mode     Ignore executable bit of file and treat as 0644
-  -u, --owner string     Upstream repository owner (mandatory)
-      --parent string    Upstream branch name (default: the default branch of the upstream repository)
-  -r, --repo string      Upstream repository name (mandatory)
+      --author-email string      Author email (default: login email)
+      --author-name string       Author name (default: login name)
+  -b, --branch string            Name of the branch to create (mandatory)
+      --committer-email string   Committer email (default: login email)
+      --committer-name string    Committer name (default: login name)
+      --dry-run                  Upload files but do not update the branch actually
+  -h, --help                     help for fork-commit
+  -m, --message string           Commit message (mandatory)
+      --no-file-mode             Ignore executable bit of file and treat as 0644
+  -u, --owner string             Upstream repository owner (mandatory)
+      --parent string            Upstream branch name (default: the default branch of the upstream repository)
+  -r, --repo string              Upstream repository name (mandatory)
 ```
 
 

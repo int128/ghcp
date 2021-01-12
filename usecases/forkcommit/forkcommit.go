@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/google/wire"
+	"golang.org/x/xerrors"
+
 	"github.com/int128/ghcp/adaptors/github"
 	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/commit"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -28,6 +29,8 @@ type Input struct {
 	TargetBranchName git.BranchName
 	CommitStrategy   commitstrategy.CommitStrategy
 	CommitMessage    git.CommitMessage
+	Author           *git.CommitAuthor // optional
+	Committer        *git.CommitAuthor // optional
 	Paths            []string
 	NoFileMode       bool
 	DryRun           bool
@@ -63,6 +66,8 @@ func (u *ForkCommit) Do(ctx context.Context, in Input) error {
 		ParentRepository: in.ParentRepository,
 		CommitStrategy:   in.CommitStrategy,
 		CommitMessage:    in.CommitMessage,
+		Author:           in.Author,
+		Committer:        in.Committer,
 		Paths:            in.Paths,
 		NoFileMode:       in.NoFileMode,
 		DryRun:           in.DryRun,

@@ -3,14 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/usecases/forkcommit"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 )
 
 func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {
@@ -20,18 +20,8 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 		Short: "Fork the repository and commit files to a branch",
 		Long:  `This forks the repository and commits the files to a new branch.`,
 		Args: func(*cobra.Command, []string) error {
-			var errs []string
-			if o.UpstreamRepositoryOwner == "" {
-				errs = append(errs, "--owner is missing")
-			}
-			if o.UpstreamRepositoryName == "" {
-				errs = append(errs, "--repo is missing")
-			}
-			if o.TargetBranchName == "" {
-				errs = append(errs, "--branch is missing")
-			}
-			if len(errs) > 0 {
-				return xerrors.New(strings.Join(errs, ", "))
+			if err := o.validate(); err != nil {
+				return xerrors.Errorf("invalid flag: %w", err)
 			}
 			return nil
 		},
@@ -48,6 +38,8 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 				TargetBranchName: git.BranchName(o.TargetBranchName),
 				CommitStrategy:   o.commitStrategy(),
 				CommitMessage:    git.CommitMessage(o.CommitMessage),
+				Author:           o.author(),
+				Committer:        o.committer(),
 				Paths:            args,
 				NoFileMode:       o.NoFileMode,
 				DryRun:           o.DryRun,
@@ -64,13 +56,30 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 }
 
 type forkCommitOptions struct {
+	commitAttributeOptions
+
 	UpstreamRepositoryOwner string
 	UpstreamRepositoryName  string
 	UpstreamBranchName      string
 	TargetBranchName        string
-	CommitMessage           string
 	NoFileMode              bool
 	DryRun                  bool
+}
+
+func (o *forkCommitOptions) validate() error {
+	if o.UpstreamRepositoryOwner == "" {
+		return xerrors.New("--owner is missing")
+	}
+	if o.UpstreamRepositoryName == "" {
+		return xerrors.New("--repo is missing")
+	}
+	if o.TargetBranchName == "" {
+		return xerrors.New("--branch is missing")
+	}
+	if err := o.commitAttributeOptions.validate(); err != nil {
+		return xerrors.Errorf("%w", err)
+	}
+	return nil
 }
 
 func (o *forkCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
@@ -85,7 +94,7 @@ func (o *forkCommitOptions) register(f *pflag.FlagSet) {
 	f.StringVarP(&o.UpstreamRepositoryName, "repo", "r", "", "Upstream repository name (mandatory)")
 	f.StringVar(&o.UpstreamBranchName, "parent", "", "Upstream branch name (default: the default branch of the upstream repository)")
 	f.StringVarP(&o.TargetBranchName, "branch", "b", "", "Name of the branch to create (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	o.commitAttributeOptions.register(f)
 }

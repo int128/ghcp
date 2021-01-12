@@ -40,8 +40,8 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 		Long:    `This commits the files to the branch. This will create a branch if it does not exist.`,
 		Example: commitCmdExample,
 		Args: func(_ *cobra.Command, args []string) error {
-			if o.ParentRef != "" && o.NoParent {
-				return xerrors.Errorf("do not set both --parent and --no-parent")
+			if err := o.validate(); err != nil {
+				return xerrors.Errorf("invalid flag: %w", err)
 			}
 			if len(args) == 0 {
 				return xerrors.New("you need to set one or more paths")
@@ -65,6 +65,8 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 				},
 				CommitStrategy: o.commitStrategy(),
 				CommitMessage:  git.CommitMessage(o.CommitMessage),
+				Author:         o.author(),
+				Committer:      o.committer(),
 				Paths:          args,
 				NoFileMode:     o.NoFileMode,
 				DryRun:         o.DryRun,
@@ -81,14 +83,25 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 }
 
 type commitOptions struct {
+	commitAttributeOptions
+
 	RepositoryOwner string
 	RepositoryName  string
-	CommitMessage   string
 	BranchName      string
 	ParentRef       string
 	NoParent        bool
 	NoFileMode      bool
 	DryRun          bool
+}
+
+func (o *commitOptions) validate() error {
+	if o.ParentRef != "" && o.NoParent {
+		return xerrors.Errorf("do not set both --parent and --no-parent")
+	}
+	if err := o.commitAttributeOptions.validate(); err != nil {
+		return xerrors.Errorf("%w", err)
+	}
+	return nil
 }
 
 func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
@@ -104,10 +117,10 @@ func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
 func (o *commitOptions) register(f *pflag.FlagSet) {
 	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
 	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
-	f.StringVarP(&o.CommitMessage, "message", "m", "", "Commit message (mandatory)")
 	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
 	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
 	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	o.commitAttributeOptions.register(f)
 }
