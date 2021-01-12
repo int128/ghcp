@@ -11,7 +11,7 @@ test:
 	# create feature branch from master branch and add a file
 	$(GHCP) commit $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --parent $(BRANCH_PREFIX)-master -m "Add fixture2.txt" fixture2.txt
 	# add a file to feature branch
-	$(GHCP) commit $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature -m "Add fixture3.txt" fixture3.txt
+	$(GHCP) commit $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature -m "Add fixture3.txt" --author-name="octocat" --author-email="octocat@github.com" fixture3.txt
 	# add a file to feature branch but do nothing
 	$(GHCP) commit $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature -m "Add fixture1.txt" fixture1.txt
 	# create a pull request from feature to master
