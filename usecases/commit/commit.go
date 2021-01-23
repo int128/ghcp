@@ -208,11 +208,12 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 	}
 
 	u.Logger.Debugf("Updating the branch (%s)", in.TargetBranchName)
-	if err := u.GitHub.UpdateBranch(ctx, git.NewBranch{
-		Repository: in.TargetRepository,
-		BranchName: in.TargetBranchName,
-		CommitSHA:  commit.CommitSHA,
-	}, in.ForceUpdate); err != nil {
+	updateBranchIn := github.UpdateBranchInput{
+		BranchRefNodeID: q.TargetBranchNodeID,
+		CommitSHA:       commit.CommitSHA,
+		Force:           in.ForceUpdate,
+	}
+	if err := u.GitHub.UpdateBranch(ctx, updateBranchIn); err != nil {
 		return xerrors.Errorf("error while updating %s branch: %w", in.TargetBranchName, err)
 	}
 	u.Logger.Infof("Updated the branch (%s)", in.TargetBranchName)

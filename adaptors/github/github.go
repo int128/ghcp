@@ -21,7 +21,7 @@ type Interface interface {
 
 	QueryForCommit(ctx context.Context, in QueryForCommitInput) (*QueryForCommitOutput, error)
 	CreateBranch(ctx context.Context, in CreateBranchInput) error
-	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
+	UpdateBranch(ctx context.Context, in UpdateBranchInput) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
 
 	QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCommitOutput, error)
@@ -37,6 +37,9 @@ type Interface interface {
 
 	QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchInput) (*QueryDefaultBranchOutput, error)
 }
+
+type InternalRepositoryNodeID githubv4.ID
+type InternalBranchNodeID githubv4.ID
 
 type QueryDefaultBranchInput struct {
 	BaseRepository git.RepositoryID

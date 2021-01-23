@@ -71,8 +71,6 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 	return &out, nil
 }
 
-type InternalRepositoryNodeID githubv4.ID
-
 type CreatePullRequestInput struct {
 	BaseRepository       git.RepositoryID
 	BaseBranchName       git.BranchName
