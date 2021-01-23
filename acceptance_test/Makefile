@@ -15,6 +15,8 @@ test:
 	# add a file to feature branch but do nothing
 	$(GHCP) commit $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature -m "Add fixture1.txt" fixture1.txt
 	# create a pull request from feature to master
-	$(GHCP) pull-request $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --base $(BRANCH_PREFIX)-master --title "Test: feature -> master"
+	$(GHCP) pull-request $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --base $(BRANCH_PREFIX)-master \
+		--title "Test: feature -> master" \
+		--body "ref: $(CIRCLE_PULL_REQUESTS)"
 	# create a release
 	$(GHCP) release $(GHCP_FLAGS) -t $(BRANCH_PREFIX) fixture1.txt
