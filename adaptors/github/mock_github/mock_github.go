@@ -51,7 +51,7 @@ func (mr *MockInterfaceMockRecorder) CreateBlob(arg0, arg1 interface{}) *gomock.
 }
 
 // CreateBranch mocks base method
-func (m *MockInterface) CreateBranch(arg0 context.Context, arg1 git.NewBranch) error {
+func (m *MockInterface) CreateBranch(arg0 context.Context, arg1 github.CreateBranchInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
 	ret0, _ := ret[0].(error)

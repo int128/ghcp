@@ -81,6 +81,7 @@ type QueryForCommitOutput struct {
 	ParentDefaultBranchTreeSHA   git.TreeSHA
 	ParentRefCommitSHA           git.CommitSHA // empty if the parent ref does not exist
 	ParentRefTreeSHA             git.TreeSHA   // empty if the parent ref does not exist
+	TargetRepositoryNodeID       InternalRepositoryNodeID
 	TargetBranchCommitSHA        git.CommitSHA // empty if the branch does not exist
 	TargetBranchTreeSHA          git.TreeSHA   // empty if the branch does not exist
 }
@@ -126,6 +127,7 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		} `graphql:"parentRepository: repository(owner: $parentOwner, name: $parentRepo)"`
 
 		TargetRepository struct {
+			ID  githubv4.ID
 			Ref struct {
 				Target struct {
 					Commit struct {
@@ -157,6 +159,7 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		ParentDefaultBranchTreeSHA:   git.TreeSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Tree.Oid),
 		ParentRefCommitSHA:           git.CommitSHA(q.ParentRepository.ParentRef.Target.Commit.Oid),
 		ParentRefTreeSHA:             git.TreeSHA(q.ParentRepository.ParentRef.Target.Commit.Tree.Oid),
+		TargetRepositoryNodeID:       q.TargetRepository.ID,
 		TargetBranchCommitSHA:        git.CommitSHA(q.TargetRepository.Ref.Target.Commit.Oid),
 		TargetBranchTreeSHA:          git.TreeSHA(q.TargetRepository.Ref.Target.Commit.Tree.Oid),
 	}
@@ -164,16 +167,31 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 	return &out, nil
 }
 
+type CreateBranchInput struct {
+	RepositoryNodeID InternalRepositoryNodeID
+	BranchName       git.BranchName
+	CommitSHA        git.CommitSHA
+}
+
 // CreateBranch creates a branch and returns nil or an error.
-func (c *GitHub) CreateBranch(ctx context.Context, n git.NewBranch) error {
-	c.Logger.Debugf("Creating a branch %+v", n)
-	_, _, err := c.Client.CreateRef(ctx, n.Repository.Owner, n.Repository.Name, &github.Reference{
-		Ref:    github.String(n.BranchName.QualifiedName().String()),
-		Object: &github.GitObject{SHA: github.String(string(n.CommitSHA))},
-	})
-	if err != nil {
+func (c *GitHub) CreateBranch(ctx context.Context, in CreateBranchInput) error {
+	c.Logger.Debugf("Creating a branch %+v", in.BranchName)
+	v := githubv4.CreateRefInput{
+		RepositoryID: in.RepositoryNodeID,
+		Name:         githubv4.String(in.BranchName.QualifiedName().String()),
+		Oid:          githubv4.GitObjectID(in.CommitSHA),
+	}
+	var m struct {
+		CreateRef struct {
+			Ref struct {
+				Name string
+			}
+		} `graphql:"createRef(input: $input)"`
+	}
+	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
 		return xerrors.Errorf("GitHub API error: %w", err)
 	}
+	c.Logger.Debugf("Got the result: %+v", m)
 	return nil
 }
 
