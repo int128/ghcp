@@ -20,7 +20,7 @@ type Interface interface {
 	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)
 
 	QueryForCommit(ctx context.Context, in QueryForCommitInput) (*QueryForCommitOutput, error)
-	CreateBranch(ctx context.Context, branch git.NewBranch) error
+	CreateBranch(ctx context.Context, in CreateBranchInput) error
 	UpdateBranch(ctx context.Context, branch git.NewBranch, force bool) error
 	CreateCommit(ctx context.Context, commit git.NewCommit) (git.CommitSHA, error)
 

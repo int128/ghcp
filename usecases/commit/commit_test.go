@@ -19,6 +19,8 @@ import (
 var parentRepositoryID = git.RepositoryID{Owner: "upstream", Name: "repo"}
 var targetRepositoryID = git.RepositoryID{Owner: "owner", Name: "repo"}
 
+var targetRepositoryNodeID = github.InternalRepositoryNodeID("OwnerRepo")
+
 var thePathFilter = gomock.AssignableToTypeOf(&pathFilter{})
 var theFiles = []fs.File{
 	{Path: "file1"},
@@ -91,12 +93,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 					CurrentUserName:              "current",
 					ParentDefaultBranchCommitSHA: "masterCommitSHA",
 					ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+					TargetRepositoryNodeID:       targetRepositoryNodeID,
 				}, nil)
 			gitHub.EXPECT().
-				CreateBranch(ctx, git.NewBranch{
-					Repository: targetRepositoryID,
-					BranchName: "topic",
-					CommitSHA:  "commitSHA",
+				CreateBranch(ctx, github.CreateBranchInput{
+					RepositoryNodeID: targetRepositoryNodeID,
+					BranchName:       "topic",
+					CommitSHA:        "commitSHA",
 				}).
 				Return(nil).
 				Times(c.branchOperationTimes)
@@ -138,12 +141,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 						CurrentUserName:              "current",
 						ParentDefaultBranchCommitSHA: "masterCommitSHA",
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
 				gitHub.EXPECT().
-					CreateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
+					CreateBranch(ctx, github.CreateBranchInput{
+						RepositoryNodeID: targetRepositoryNodeID,
+						BranchName:       "topic",
+						CommitSHA:        "commitSHA",
 					}).
 					Return(nil).
 					Times(c.branchOperationTimes)
@@ -223,12 +227,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 						CurrentUserName:              "current",
 						ParentDefaultBranchCommitSHA: "masterCommitSHA",
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
 				gitHub.EXPECT().
-					CreateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
+					CreateBranch(ctx, github.CreateBranchInput{
+						RepositoryNodeID: targetRepositoryNodeID,
+						BranchName:       "topic",
+						CommitSHA:        "commitSHA",
 					}).
 					Return(nil).
 					Times(c.branchOperationTimes)
@@ -311,12 +316,13 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 						ParentRefCommitSHA:           "developCommitSHA",
 						ParentRefTreeSHA:             "developTreeSHA",
+						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
 				gitHub.EXPECT().
-					CreateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
+					CreateBranch(ctx, github.CreateBranchInput{
+						RepositoryNodeID: targetRepositoryNodeID,
+						BranchName:       "topic",
+						CommitSHA:        "commitSHA",
 					}).
 					Return(nil).
 					Times(c.branchOperationTimes)

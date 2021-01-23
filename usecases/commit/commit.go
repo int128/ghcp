@@ -156,11 +156,12 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 	}
 
 	u.Logger.Debugf("Creating a branch (%s)", in.TargetBranchName)
-	if err := u.GitHub.CreateBranch(ctx, git.NewBranch{
-		Repository: in.TargetRepository,
-		BranchName: in.TargetBranchName,
-		CommitSHA:  commit.CommitSHA,
-	}); err != nil {
+	createBranchIn := github.CreateBranchInput{
+		RepositoryNodeID: q.TargetRepositoryNodeID,
+		BranchName:       in.TargetBranchName,
+		CommitSHA:        commit.CommitSHA,
+	}
+	if err := u.GitHub.CreateBranch(ctx, createBranchIn); err != nil {
 		return xerrors.Errorf("error while creating %s branch: %w", in.TargetBranchName, err)
 	}
 	u.Logger.Infof("Created a branch (%s)", in.TargetBranchName)
