@@ -8,9 +8,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v33/github"
-	testingLogger "github.com/int128/ghcp/adaptors/logger/testing"
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/infrastructure/github/mock_github"
+	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"golang.org/x/xerrors"
 )
 

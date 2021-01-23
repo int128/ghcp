@@ -13,7 +13,7 @@ var Set = wire.NewSet(
 
 type NewFunc func(Option) Interface
 
-//go:generate mockgen -destination mock_logger/mock_logger.go github.com/int128/ghcp/adaptors/logger Interface
+//go:generate mockgen -destination mock_logger/mock_logger.go github.com/int128/ghcp/pkg/logger Interface
 
 type Interface interface {
 	Errorf(format string, v ...interface{})

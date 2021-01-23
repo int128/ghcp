@@ -6,10 +6,10 @@ import (
 	"github.com/google/wire"
 	"golang.org/x/xerrors"
 
-	"github.com/int128/ghcp/adaptors/github"
-	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
+	"github.com/int128/ghcp/pkg/github"
+	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/usecases/commit"
 )
 

@@ -6,12 +6,12 @@
 package di
 
 import (
-	"github.com/int128/ghcp/adaptors/cmd"
-	"github.com/int128/ghcp/adaptors/env"
-	"github.com/int128/ghcp/adaptors/fs"
-	github2 "github.com/int128/ghcp/adaptors/github"
-	"github.com/int128/ghcp/adaptors/logger"
 	"github.com/int128/ghcp/infrastructure/github"
+	"github.com/int128/ghcp/pkg/cmd"
+	"github.com/int128/ghcp/pkg/env"
+	"github.com/int128/ghcp/pkg/fs"
+	github2 "github.com/int128/ghcp/pkg/github"
+	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
 	"github.com/int128/ghcp/usecases/gitobject"

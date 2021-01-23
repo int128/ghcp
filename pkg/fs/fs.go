@@ -16,7 +16,7 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*FileSystem)),
 )
 
-//go:generate mockgen -destination mock_fs/mock_fs.go github.com/int128/ghcp/adaptors/fs Interface
+//go:generate mockgen -destination mock_fs/mock_fs.go github.com/int128/ghcp/pkg/fs Interface
 
 type Interface interface {
 	FindFiles(paths []string, filter FindFilesFilter) ([]File, error)

@@ -11,7 +11,7 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*Env)),
 )
 
-//go:generate mockgen -destination mock_env/mock_env.go github.com/int128/ghcp/adaptors/env Interface
+//go:generate mockgen -destination mock_env/mock_env.go github.com/int128/ghcp/pkg/env Interface
 
 type Interface interface {
 	Getenv(key string) string

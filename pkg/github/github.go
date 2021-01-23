@@ -14,7 +14,7 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*GitHub)),
 )
 
-//go:generate mockgen -destination mock_github/mock_github.go github.com/int128/ghcp/adaptors/github Interface
+//go:generate mockgen -destination mock_github/mock_github.go github.com/int128/ghcp/pkg/github Interface
 
 type Interface interface {
 	CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error)

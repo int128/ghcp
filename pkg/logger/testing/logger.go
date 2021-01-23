@@ -3,7 +3,7 @@ package testing
 import (
 	"testing"
 
-	"github.com/int128/ghcp/adaptors/logger"
+	"github.com/int128/ghcp/pkg/logger"
 )
 
 func New(t *testing.T) logger.Interface {
