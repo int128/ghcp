@@ -10,7 +10,7 @@ import (
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
-	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/pkg/usecases/commit"
 )
 
 const commitCmdExample = `  To commit files to the default branch:

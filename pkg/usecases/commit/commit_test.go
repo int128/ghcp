@@ -12,8 +12,8 @@ import (
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
-	"github.com/int128/ghcp/usecases/gitobject"
-	"github.com/int128/ghcp/usecases/gitobject/mock_gitobject"
+	"github.com/int128/ghcp/pkg/usecases/gitobject"
+	"github.com/int128/ghcp/pkg/usecases/gitobject/mock_gitobject"
 )
 
 var parentRepositoryID = git.RepositoryID{Owner: "upstream", Name: "repo"}

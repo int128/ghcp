@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/int128/ghcp/pkg/git"
-	"github.com/int128/ghcp/usecases/pullrequest"
+	"github.com/int128/ghcp/pkg/usecases/pullrequest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/xerrors"

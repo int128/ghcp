@@ -9,8 +9,8 @@ import (
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
-	"github.com/int128/ghcp/usecases/commit"
-	"github.com/int128/ghcp/usecases/commit/mock_commit"
+	"github.com/int128/ghcp/pkg/usecases/commit"
+	"github.com/int128/ghcp/pkg/usecases/commit/mock_commit"
 )
 
 func TestForkCommit_Do(t *testing.T) {

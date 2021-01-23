@@ -13,14 +13,14 @@ import (
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
-	"github.com/int128/ghcp/usecases/commit"
-	"github.com/int128/ghcp/usecases/commit/mock_commit"
-	"github.com/int128/ghcp/usecases/forkcommit"
-	"github.com/int128/ghcp/usecases/forkcommit/mock_forkcommit"
-	"github.com/int128/ghcp/usecases/pullrequest"
-	"github.com/int128/ghcp/usecases/pullrequest/mock_pullrequest"
-	"github.com/int128/ghcp/usecases/release"
-	"github.com/int128/ghcp/usecases/release/mock_release"
+	"github.com/int128/ghcp/pkg/usecases/commit"
+	"github.com/int128/ghcp/pkg/usecases/commit/mock_commit"
+	"github.com/int128/ghcp/pkg/usecases/forkcommit"
+	"github.com/int128/ghcp/pkg/usecases/forkcommit/mock_forkcommit"
+	"github.com/int128/ghcp/pkg/usecases/pullrequest"
+	"github.com/int128/ghcp/pkg/usecases/pullrequest/mock_pullrequest"
+	"github.com/int128/ghcp/pkg/usecases/release"
+	"github.com/int128/ghcp/pkg/usecases/release/mock_release"
 )
 
 func TestCmd_Run(t *testing.T) {

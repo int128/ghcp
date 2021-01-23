@@ -10,7 +10,7 @@ import (
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
-	"github.com/int128/ghcp/usecases/forkcommit"
+	"github.com/int128/ghcp/pkg/usecases/forkcommit"
 )
 
 func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.Command {

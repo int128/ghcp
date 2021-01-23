@@ -11,11 +11,11 @@ import (
 	githubAdaptor "github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
-	"github.com/int128/ghcp/usecases/commit"
-	"github.com/int128/ghcp/usecases/forkcommit"
-	"github.com/int128/ghcp/usecases/gitobject"
-	"github.com/int128/ghcp/usecases/pullrequest"
-	"github.com/int128/ghcp/usecases/release"
+	"github.com/int128/ghcp/pkg/usecases/commit"
+	"github.com/int128/ghcp/pkg/usecases/forkcommit"
+	"github.com/int128/ghcp/pkg/usecases/gitobject"
+	"github.com/int128/ghcp/pkg/usecases/pullrequest"
+	"github.com/int128/ghcp/pkg/usecases/release"
 )
 
 func NewCmd() cmd.Interface {

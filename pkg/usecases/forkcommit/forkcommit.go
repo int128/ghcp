@@ -10,7 +10,7 @@ import (
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/logger"
-	"github.com/int128/ghcp/usecases/commit"
+	"github.com/int128/ghcp/pkg/usecases/commit"
 )
 
 var Set = wire.NewSet(
@@ -18,7 +18,7 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*ForkCommit)),
 )
 
-//go:generate mockgen -destination mock_forkcommit/mock_forkcommit.go github.com/int128/ghcp/usecases/forkcommit Interface
+//go:generate mockgen -destination mock_forkcommit/mock_forkcommit.go github.com/int128/ghcp/pkg/usecases/forkcommit Interface
 
 type Interface interface {
 	Do(ctx context.Context, in Input) error
