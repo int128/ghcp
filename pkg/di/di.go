@@ -8,7 +8,7 @@ import (
 	"github.com/int128/ghcp/pkg/cmd"
 	"github.com/int128/ghcp/pkg/env"
 	"github.com/int128/ghcp/pkg/fs"
-	githubAdaptor "github.com/int128/ghcp/pkg/github"
+	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
@@ -34,7 +34,7 @@ func NewCmdInternalRunner(logger.Interface, client.Interface) *cmd.InternalRunne
 	wire.Build(
 		cmd.Set,
 		fs.Set,
-		githubAdaptor.Set,
+		github.Set,
 
 		gitobject.Set,
 		commit.Set,
