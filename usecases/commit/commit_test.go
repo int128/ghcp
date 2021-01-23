@@ -20,6 +20,7 @@ var parentRepositoryID = git.RepositoryID{Owner: "upstream", Name: "repo"}
 var targetRepositoryID = git.RepositoryID{Owner: "owner", Name: "repo"}
 
 var targetRepositoryNodeID = github.InternalRepositoryNodeID("OwnerRepo")
+var targetBranchNodeID = github.InternalBranchNodeID("OwnerRepoTargetBranch")
 
 var thePathFilter = gomock.AssignableToTypeOf(&pathFilter{})
 var theFiles = []fs.File{
@@ -177,15 +178,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 						CurrentUserName:              "current",
 						ParentDefaultBranchCommitSHA: "masterCommitSHA",
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchNodeID:           targetBranchNodeID,
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
-					UpdateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
-					}, false).
+					UpdateBranch(ctx, github.UpdateBranchInput{
+						BranchRefNodeID: targetBranchNodeID,
+						CommitSHA:       "commitSHA",
+					}).
 					Return(nil).
 					Times(c.branchOperationTimes)
 
@@ -263,15 +264,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 						CurrentUserName:              "current",
 						ParentDefaultBranchCommitSHA: "masterCommitSHA",
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchNodeID:           targetBranchNodeID,
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
-					UpdateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
-					}, false). //TODO: force update
+					UpdateBranch(ctx, github.UpdateBranchInput{
+						BranchRefNodeID: targetBranchNodeID,
+						CommitSHA:       "commitSHA",
+					}).
 					Return(nil).
 					Times(c.branchOperationTimes)
 
@@ -353,17 +354,17 @@ func TestCommitToBranch_Do(t *testing.T) {
 						CurrentUserName:              "current",
 						ParentDefaultBranchCommitSHA: "masterCommitSHA",
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
+						TargetBranchNodeID:           targetBranchNodeID,
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 						ParentRefCommitSHA:           "developCommitSHA",
 						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
 				gitHub.EXPECT().
-					UpdateBranch(ctx, git.NewBranch{
-						Repository: targetRepositoryID,
-						BranchName: "topic",
-						CommitSHA:  "commitSHA",
-					}, false). //TODO: force update
+					UpdateBranch(ctx, github.UpdateBranchInput{
+						BranchRefNodeID: targetBranchNodeID,
+						CommitSHA:       "commitSHA",
+					}).
 					Return(nil).
 					Times(c.branchOperationTimes)
 

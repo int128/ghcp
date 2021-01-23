@@ -229,15 +229,15 @@ func (mr *MockInterfaceMockRecorder) QueryForPullRequest(arg0, arg1 interface{})
 }
 
 // UpdateBranch mocks base method
-func (m *MockInterface) UpdateBranch(arg0 context.Context, arg1 git.NewBranch, arg2 bool) error {
+func (m *MockInterface) UpdateBranch(arg0 context.Context, arg1 github.UpdateBranchInput) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateBranch", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "UpdateBranch", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateBranch indicates an expected call of UpdateBranch
-func (mr *MockInterfaceMockRecorder) UpdateBranch(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockInterfaceMockRecorder) UpdateBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBranch", reflect.TypeOf((*MockInterface)(nil).UpdateBranch), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBranch", reflect.TypeOf((*MockInterface)(nil).UpdateBranch), arg0, arg1)
 }
