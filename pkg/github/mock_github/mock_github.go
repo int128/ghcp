@@ -7,7 +7,7 @@ package mock_github
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	git "github.com/int128/ghcp/domain/git"
+	git "github.com/int128/ghcp/pkg/git"
 	github "github.com/int128/ghcp/pkg/github"
 	reflect "reflect"
 )

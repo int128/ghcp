@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/int128/ghcp/domain/git"
-	"github.com/int128/ghcp/domain/git/commitstrategy"
+	"github.com/int128/ghcp/pkg/git"
+	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/usecases/commit"

@@ -7,9 +7,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/int128/ghcp/domain/git"
-	"github.com/int128/ghcp/domain/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/env/mock_env"
+	"github.com/int128/ghcp/pkg/git"
+	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"

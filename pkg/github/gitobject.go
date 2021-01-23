@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-github/v33/github"
 	"golang.org/x/xerrors"
 
-	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/pkg/git"
 )
 
 // CreateCommit creates a commit and returns SHA of it.

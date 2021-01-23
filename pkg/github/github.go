@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/xerrors"
 )

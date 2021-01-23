@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/google/go-github/v33/github"
-	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/pkg/git"
 	"golang.org/x/xerrors"
 )
 

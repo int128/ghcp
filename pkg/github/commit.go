@@ -5,7 +5,7 @@ import (
 
 	"github.com/cenkalti/backoff"
 	"github.com/google/go-github/v33/github"
-	"github.com/int128/ghcp/domain/git"
+	"github.com/int128/ghcp/pkg/git"
 	githubInfrastructure "github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	"github.com/shurcooL/githubv4"
