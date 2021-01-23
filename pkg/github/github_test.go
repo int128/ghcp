@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/domain/git"
-	"github.com/int128/ghcp/infrastructure/github/mock_github"
+	"github.com/int128/ghcp/pkg/github/client/mock_client"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"golang.org/x/xerrors"
 )
@@ -22,7 +22,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		gitHubClient := mock_github.NewMockInterface(ctrl)
+		gitHubClient := mock_client.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			CreateCommit(ctx, "owner", "repo", &github.Commit{
 				Message: github.String("message"),
@@ -54,7 +54,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		gitHubClient := mock_github.NewMockInterface(ctrl)
+		gitHubClient := mock_client.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			CreateCommit(ctx, "owner", "repo", &github.Commit{
 				Message: github.String("message"),
@@ -90,7 +90,7 @@ func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
 		defer ctrl.Finish()
 		var resp github.Response
 		resp.Response = &http.Response{StatusCode: 200}
-		gitHubClient := mock_github.NewMockInterface(ctrl)
+		gitHubClient := mock_client.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			GetReleaseByTag(ctx, "owner", "repo", "v1.0.0").
 			Return(&github.RepositoryRelease{
@@ -123,7 +123,7 @@ func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
 		defer ctrl.Finish()
 		var resp github.Response
 		resp.Response = &http.Response{StatusCode: 404}
-		gitHubClient := mock_github.NewMockInterface(ctrl)
+		gitHubClient := mock_client.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			GetReleaseByTag(ctx, "owner", "repo", "v1.0.0").
 			Return(nil, &resp, xerrors.New("not found"))

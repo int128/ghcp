@@ -9,8 +9,8 @@ import (
 
 	"github.com/int128/ghcp/domain/git"
 	"github.com/int128/ghcp/domain/git/commitstrategy"
-	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/pkg/env/mock_env"
+	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/usecases/commit"
@@ -43,7 +43,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -78,7 +78,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -114,7 +114,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -151,7 +151,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -178,7 +178,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, nil),
 				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
@@ -206,7 +206,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, nil),
 				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
@@ -231,7 +231,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, nil),
 				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
@@ -266,7 +266,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -302,7 +302,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -338,7 +338,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -372,7 +372,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{ForkCommitUseCase: commitUseCase}),
 			}
@@ -407,7 +407,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{ForkCommitUseCase: commitUseCase}),
 			}
@@ -444,7 +444,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
 			}
@@ -477,7 +477,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
 			}
@@ -515,7 +515,7 @@ func TestCmd_Run(t *testing.T) {
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{ReleaseUseCase: releaseUseCase}),
 			}
@@ -554,7 +554,7 @@ func TestCmd_Run(t *testing.T) {
 				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{Debug: true}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -586,7 +586,7 @@ func TestCmd_Run(t *testing.T) {
 				Chdir("dir")
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               mockEnv,
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -615,7 +615,7 @@ func TestCmd_Run(t *testing.T) {
 				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -639,7 +639,7 @@ func TestCmd_Run(t *testing.T) {
 			defer ctrl.Finish()
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{}),
+				NewGitHub:         newGitHub(t, client.Option{}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubToken: ""}),
 				NewInternalRunner: newInternalRunner(InternalRunner{}),
 			}
@@ -666,7 +666,7 @@ func TestCmd_Run(t *testing.T) {
 				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
 				Env:               newEnv(ctrl, nil),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -695,7 +695,7 @@ func TestCmd_Run(t *testing.T) {
 				Do(ctx, input)
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, github.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
+				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
 				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
 				NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 			}
@@ -726,8 +726,8 @@ func newLogger(t *testing.T, want logger.Option) logger.NewFunc {
 	}
 }
 
-func newGitHub(t *testing.T, want github.Option) github.NewFunc {
-	return func(got github.Option) (github.Interface, error) {
+func newGitHub(t *testing.T, want client.Option) client.NewFunc {
+	return func(got client.Option) (client.Interface, error) {
 		if diff := cmp.Diff(want, got); diff != "" {
 			t.Errorf("mismatch (-want +got):\n%s", diff)
 		}
@@ -744,7 +744,7 @@ func newEnv(ctrl *gomock.Controller, getenv map[string]string) *mock_env.MockInt
 }
 
 func newInternalRunner(base InternalRunner) NewInternalRunnerFunc {
-	return func(l logger.Interface, g github.Interface) *InternalRunner {
+	return func(l logger.Interface, g client.Interface) *InternalRunner {
 		base.Logger = l
 		return &base
 	}

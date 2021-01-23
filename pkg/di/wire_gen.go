@@ -6,11 +6,11 @@
 package di
 
 import (
-	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/pkg/cmd"
 	"github.com/int128/ghcp/pkg/env"
 	"github.com/int128/ghcp/pkg/fs"
-	github2 "github.com/int128/ghcp/pkg/github"
+	"github.com/int128/ghcp/pkg/github"
+	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
@@ -24,12 +24,12 @@ import (
 func NewCmd() cmd.Interface {
 	envEnv := &env.Env{}
 	newFunc := _wireNewFuncValue
-	githubNewFunc := _wireGithubNewFuncValue
+	clientNewFunc := _wireClientNewFuncValue
 	newInternalRunnerFunc := _wireNewInternalRunnerFuncValue
 	runner := &cmd.Runner{
 		Env:               envEnv,
 		NewLogger:         newFunc,
-		NewGitHub:         githubNewFunc,
+		NewGitHub:         clientNewFunc,
 		NewInternalRunner: newInternalRunnerFunc,
 	}
 	return runner
@@ -37,14 +37,14 @@ func NewCmd() cmd.Interface {
 
 var (
 	_wireNewFuncValue               = logger.NewFunc(logger.New)
-	_wireGithubNewFuncValue         = github.NewFunc(github.New)
+	_wireClientNewFuncValue         = client.NewFunc(client.New)
 	_wireNewInternalRunnerFuncValue = cmd.NewInternalRunnerFunc(NewCmdInternalRunner)
 )
 
-func NewCmdInternalRunner(loggerInterface logger.Interface, githubInterface github.Interface) *cmd.InternalRunner {
+func NewCmdInternalRunner(loggerInterface logger.Interface, clientInterface client.Interface) *cmd.InternalRunner {
 	fileSystem := &fs.FileSystem{}
-	gitHub := &github2.GitHub{
-		Client: githubInterface,
+	gitHub := &github.GitHub{
+		Client: clientInterface,
 		Logger: loggerInterface,
 	}
 	createGitObject := &gitobject.CreateGitObject{

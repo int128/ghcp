@@ -1,4 +1,4 @@
-package github
+package client
 
 import (
 	"context"
@@ -19,7 +19,7 @@ var Set = wire.NewSet(
 
 type NewFunc func(Option) (Interface, error)
 
-//go:generate mockgen -destination mock_github/mock_github.go github.com/int128/ghcp/infrastructure/github Interface
+//go:generate mockgen -destination mock_client/mock_client.go github.com/int128/ghcp/pkg/github/client Interface
 
 type Interface interface {
 	QueryService

@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/google/wire"
-	"github.com/int128/ghcp/infrastructure/github"
 	"github.com/int128/ghcp/pkg/env"
+	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/usecases/commit"
 	"github.com/int128/ghcp/usecases/forkcommit"
@@ -47,7 +47,7 @@ type Interface interface {
 type Runner struct {
 	Env               env.Interface
 	NewLogger         logger.NewFunc
-	NewGitHub         github.NewFunc
+	NewGitHub         client.NewFunc
 	NewInternalRunner NewInternalRunnerFunc
 }
 
@@ -100,7 +100,7 @@ func (r *Runner) newRootCmd(o *globalOptions) *cobra.Command {
 	return c
 }
 
-type NewInternalRunnerFunc func(logger.Interface, github.Interface) *InternalRunner
+type NewInternalRunnerFunc func(logger.Interface, client.Interface) *InternalRunner
 
 // InternalRunner has the set of use-cases.
 type InternalRunner struct {
@@ -134,7 +134,7 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 			log.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
 		}
 	}
-	gh, err := r.NewGitHub(github.Option{
+	gh, err := r.NewGitHub(client.Option{
 		Token: o.GitHubToken,
 		URLv3: o.GitHubAPI,
 	})
