@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/google/go-github/v24/github"
+	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/domain/git"
 	"golang.org/x/xerrors"
 )

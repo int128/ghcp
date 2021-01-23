@@ -3,7 +3,7 @@ package github
 import (
 	"context"
 
-	"github.com/google/go-github/v24/github"
+	"github.com/google/go-github/v33/github"
 	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/domain/git"
@@ -12,9 +12,9 @@ import (
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
 	c.Logger.Debugf("Creating a commit %+v", n)
-	var parents []github.Commit
+	var parents []*github.Commit
 	if n.ParentCommitSHA != "" {
-		parents = append(parents, github.Commit{SHA: github.String(string(n.ParentCommitSHA))})
+		parents = append(parents, &github.Commit{SHA: github.String(string(n.ParentCommitSHA))})
 	}
 	commit := github.Commit{
 		Message: github.String(string(n.Message)),
@@ -43,9 +43,9 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 // CreateTree creates a tree and returns SHA of it.
 func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, error) {
 	c.Logger.Debugf("Creating a tree %+v", n)
-	entries := make([]github.TreeEntry, len(n.Files))
+	entries := make([]*github.TreeEntry, len(n.Files))
 	for i, file := range n.Files {
-		entries[i] = github.TreeEntry{
+		entries[i] = &github.TreeEntry{
 			Type: github.String("blob"),
 			Path: github.String(file.Filename),
 			Mode: github.String(file.Mode()),

@@ -7,7 +7,7 @@ package mock_github
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	github "github.com/google/go-github/v24/github"
+	github "github.com/google/go-github/v33/github"
 	githubv4 "github.com/shurcooL/githubv4"
 	os "os"
 	reflect "reflect"
@@ -84,22 +84,6 @@ func (mr *MockInterfaceMockRecorder) CreateFork(arg0, arg1, arg2, arg3 interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockInterface)(nil).CreateFork), arg0, arg1, arg2, arg3)
 }
 
-// CreateRef mocks base method
-func (m *MockInterface) CreateRef(arg0 context.Context, arg1, arg2 string, arg3 *github.Reference) (*github.Reference, *github.Response, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRef", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(*github.Reference)
-	ret1, _ := ret[1].(*github.Response)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// CreateRef indicates an expected call of CreateRef
-func (mr *MockInterfaceMockRecorder) CreateRef(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRef", reflect.TypeOf((*MockInterface)(nil).CreateRef), arg0, arg1, arg2, arg3)
-}
-
 // CreateRelease mocks base method
 func (m *MockInterface) CreateRelease(arg0 context.Context, arg1, arg2 string, arg3 *github.RepositoryRelease) (*github.RepositoryRelease, *github.Response, error) {
 	m.ctrl.T.Helper()
@@ -117,7 +101,7 @@ func (mr *MockInterfaceMockRecorder) CreateRelease(arg0, arg1, arg2, arg3 interf
 }
 
 // CreateTree mocks base method
-func (m *MockInterface) CreateTree(arg0 context.Context, arg1, arg2, arg3 string, arg4 []github.TreeEntry) (*github.Tree, *github.Response, error) {
+func (m *MockInterface) CreateTree(arg0 context.Context, arg1, arg2, arg3 string, arg4 []*github.TreeEntry) (*github.Tree, *github.Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(*github.Tree)
@@ -174,22 +158,6 @@ func (m *MockInterface) Query(arg0 context.Context, arg1 interface{}, arg2 map[s
 func (mr *MockInterfaceMockRecorder) Query(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockInterface)(nil).Query), arg0, arg1, arg2)
-}
-
-// UpdateRef mocks base method
-func (m *MockInterface) UpdateRef(arg0 context.Context, arg1, arg2 string, arg3 *github.Reference, arg4 bool) (*github.Reference, *github.Response, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRef", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].(*github.Reference)
-	ret1, _ := ret[1].(*github.Response)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// UpdateRef indicates an expected call of UpdateRef
-func (mr *MockInterfaceMockRecorder) UpdateRef(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRef", reflect.TypeOf((*MockInterface)(nil).UpdateRef), arg0, arg1, arg2, arg3, arg4)
 }
 
 // UploadReleaseAsset mocks base method
