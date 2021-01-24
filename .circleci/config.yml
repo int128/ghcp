@@ -4,13 +4,11 @@ jobs:
     docker:
       - image: cimg/go:1.15
     steps:
-      - run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0
       - checkout
       - restore_cache:
           keys:
             - go-sum-{{ checksum "go.sum" }}
-      - run: make check
+      - run: make test
       - run: bash <(curl -s https://codecov.io/bash)
       - run:
           command: go get -v github.com/int128/goxzst
