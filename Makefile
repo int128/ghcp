@@ -3,9 +3,8 @@ LDFLAGS := -X main.version=$(CIRCLE_TAG)
 
 all: ghcp
 
-.PHONY: check
-check:
-	golangci-lint run
+.PHONY: test
+test:
 	go test -v -race -cover -coverprofile=coverage.out ./...
 
 ghcp: $(wildcard **/*.go)
