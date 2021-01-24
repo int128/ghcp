@@ -28,6 +28,7 @@ type Input struct {
 	HeadBranchName git.BranchName // if empty, use the default branch of head
 	Title          string
 	Body           string
+	Reviewer       string // optional
 }
 
 // PullRequest provides the use-case to create a pull request.
@@ -65,6 +66,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		BaseBranchName: in.BaseBranchName,
 		HeadRepository: in.HeadRepository,
 		HeadBranchName: in.HeadBranchName,
+		ReviewerUser:   in.Reviewer,
 	})
 	if err != nil {
 		return xerrors.Errorf("could not query for creating a pull request: %w", err)
@@ -79,7 +81,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		return nil
 	}
 
-	out, err := u.GitHub.CreatePullRequest(ctx, github.CreatePullRequestInput{
+	createdPR, err := u.GitHub.CreatePullRequest(ctx, github.CreatePullRequestInput{
 		BaseRepository:       in.BaseRepository,
 		BaseBranchName:       in.BaseBranchName,
 		BaseRepositoryNodeID: q.BaseRepositoryNodeID,
@@ -91,6 +93,17 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 	if err != nil {
 		return xerrors.Errorf("could not create a pull request: %w", err)
 	}
-	u.Logger.Infof("Created a pull request: %s", out.URL)
+	u.Logger.Infof("Created a pull request: %s", createdPR.URL)
+
+	if in.Reviewer == "" {
+		return nil
+	}
+	u.Logger.Infof("Requesting a review to %s", in.Reviewer)
+	if err := u.GitHub.RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
+		PullRequest: createdPR.PullRequestNodeID,
+		User:        q.ReviewerUserNodeID,
+	}); err != nil {
+		return xerrors.Errorf("could not request a review for the pull request: %w", err)
+	}
 	return nil
 }

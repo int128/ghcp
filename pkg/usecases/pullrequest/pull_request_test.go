@@ -159,4 +159,57 @@ func TestPullRequest_Do(t *testing.T) {
 			t.Errorf("err wants nil but %+v", err)
 		}
 	})
+
+	t.Run("when a reviewer is set", func(t *testing.T) {
+		in := Input{
+			BaseRepository: baseRepositoryID,
+			BaseBranchName: "develop",
+			HeadRepository: headRepositoryID,
+			HeadBranchName: "feature",
+			Title:          "the-title",
+			Body:           "the-body",
+			Reviewer:       "the-reviewer",
+		}
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub.EXPECT().
+			QueryForPullRequest(ctx, github.QueryForPullRequestInput{
+				BaseRepository: baseRepositoryID,
+				BaseBranchName: "develop",
+				HeadRepository: headRepositoryID,
+				HeadBranchName: "feature",
+				ReviewerUser:   "the-reviewer",
+			}).
+			Return(&github.QueryForPullRequestOutput{
+				CurrentUserName:     "you",
+				HeadBranchCommitSHA: "HeadCommitSHA",
+				ReviewerUserNodeID:  "TheReviewerID",
+			}, nil)
+		gitHub.EXPECT().
+			CreatePullRequest(ctx, github.CreatePullRequestInput{
+				BaseRepository: baseRepositoryID,
+				BaseBranchName: "develop",
+				HeadRepository: headRepositoryID,
+				HeadBranchName: "feature",
+				Title:          "the-title",
+				Body:           "the-body",
+			}).
+			Return(&github.CreatePullRequestOutput{
+				URL:               "https://github.com/octocat/Spoon-Knife/pull/19445",
+				PullRequestNodeID: "ThePullRequestID",
+			}, nil)
+		gitHub.EXPECT().
+			RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
+				PullRequest: "ThePullRequestID",
+				User:        "TheReviewerID",
+			})
+		useCase := PullRequest{
+			GitHub: gitHub,
+			Logger: testingLogger.New(t),
+		}
+		if err := useCase.Do(ctx, in); err != nil {
+			t.Errorf("err wants nil but %+v", err)
+		}
+	})
 }

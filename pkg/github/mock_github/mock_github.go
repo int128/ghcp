@@ -228,6 +228,20 @@ func (mr *MockInterfaceMockRecorder) QueryForPullRequest(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForPullRequest", reflect.TypeOf((*MockInterface)(nil).QueryForPullRequest), arg0, arg1)
 }
 
+// RequestPullRequestReview mocks base method
+func (m *MockInterface) RequestPullRequestReview(arg0 context.Context, arg1 github.RequestPullRequestReviewInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RequestPullRequestReview", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RequestPullRequestReview indicates an expected call of RequestPullRequestReview
+func (mr *MockInterfaceMockRecorder) RequestPullRequestReview(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestPullRequestReview", reflect.TypeOf((*MockInterface)(nil).RequestPullRequestReview), arg0, arg1)
+}
+
 // UpdateBranch mocks base method
 func (m *MockInterface) UpdateBranch(arg0 context.Context, arg1 github.UpdateBranchInput) error {
 	m.ctrl.T.Helper()

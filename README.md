@@ -199,6 +199,7 @@ Flags:
   -u, --head-owner string   Head repository owner (mandatory)
   -r, --head-repo string    Head repository name (mandatory)
   -h, --help                help for pull-request
+      --reviewer string     If set, request a review
       --title string        Title of a pull request (mandatory)
 ```
 
