@@ -3,70 +3,10 @@ package github
 import (
 	"context"
 
-	"github.com/cenkalti/backoff/v4"
-	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/pkg/git"
-	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/xerrors"
 )
-
-// GitHub provides GitHub API access.
-type GitHub struct {
-	Client client.Interface
-	Logger logger.Interface
-}
-
-// CreateFork creates a fork of the repository.
-// This returns ID of the fork.
-func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.RepositoryID, error) {
-	fork, _, err := c.Client.CreateFork(ctx, id.Owner, id.Name, nil)
-	if err != nil {
-		if _, ok := err.(*github.AcceptedError); !ok {
-			return nil, xerrors.Errorf("GitHub API error: %w", err)
-		}
-		c.Logger.Debugf("Fork in progress: %+v", err)
-	}
-	forkRepository := git.RepositoryID{
-		Owner: fork.GetOwner().GetLogin(),
-		Name:  fork.GetName(),
-	}
-	if err := c.waitUntilGitDataIsAvailable(ctx, forkRepository); err != nil {
-		return nil, xerrors.Errorf("git data is not available on %s: %w", forkRepository, err)
-	}
-	return &forkRepository, nil
-}
-
-func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.RepositoryID) error {
-	operation := func() error {
-		var q struct {
-			Repository struct {
-				DefaultBranchRef struct {
-					Target struct {
-						Commit struct {
-							Oid string
-						} `graphql:"... on Commit"`
-					}
-				}
-			} `graphql:"repository(owner: $owner, name: $repo)"`
-		}
-		v := map[string]interface{}{
-			"owner": githubv4.String(id.Owner),
-			"repo":  githubv4.String(id.Name),
-		}
-		c.Logger.Debugf("Querying the repository with %+v", v)
-		if err := c.Client.Query(ctx, &q, v); err != nil {
-			return xerrors.Errorf("GitHub API error: %w", err)
-		}
-		c.Logger.Debugf("Got the result: %+v", q)
-		return nil
-	}
-	if err := backoff.Retry(operation, backoff.NewExponentialBackOff()); err != nil {
-		return xerrors.Errorf("retry over: %w", err)
-	}
-	return nil
-}
 
 type QueryForCommitInput struct {
 	ParentRepository git.RepositoryID
@@ -91,7 +31,7 @@ func (q *QueryForCommitOutput) TargetBranchExists() bool {
 	return q.TargetBranchCommitSHA != ""
 }
 
-// QueryForCommit returns the repository for updating the branch.
+// QueryForCommit returns the repository for creating or updating the branch.
 func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*QueryForCommitOutput, error) {
 	var q struct {
 		Viewer struct {
@@ -226,41 +166,4 @@ func (c *GitHub) UpdateBranch(ctx context.Context, in UpdateBranchInput) error {
 	}
 	c.Logger.Debugf("Got the result: %+v", m)
 	return nil
-}
-
-type QueryCommitInput struct {
-	Repository git.RepositoryID
-	CommitSHA  git.CommitSHA
-}
-
-type QueryCommitOutput struct {
-	ChangedFiles int
-}
-
-// QueryCommit returns the commit.
-func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCommitOutput, error) {
-	var q struct {
-		Repository struct {
-			Object struct {
-				Commit struct {
-					ChangedFiles int
-				} `graphql:"... on Commit"`
-			} `graphql:"object(oid: $commitSHA)"`
-		} `graphql:"repository(owner: $owner, name: $repo)"`
-	}
-	v := map[string]interface{}{
-		"owner":     githubv4.String(in.Repository.Owner),
-		"repo":      githubv4.String(in.Repository.Name),
-		"commitSHA": githubv4.GitObjectID(in.CommitSHA),
-	}
-	c.Logger.Debugf("Querying the commit with %+v", v)
-	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
-	}
-	c.Logger.Debugf("Got the result: %+v", q)
-	out := QueryCommitOutput{
-		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
-	}
-	c.Logger.Debugf("Returning the commit: %+v", out)
-	return &out, nil
 }
