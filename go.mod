@@ -3,7 +3,7 @@ module github.com/int128/ghcp
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/golang/mock v1.4.4
-	github.com/google/go-cmp v0.5.1
+	github.com/google/go-cmp v0.5.4
 	github.com/google/go-github/v33 v33.0.0
 	github.com/google/wire v0.4.0
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa
