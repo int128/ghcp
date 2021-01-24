@@ -4,10 +4,48 @@ import (
 	"context"
 
 	"github.com/google/go-github/v33/github"
+	"github.com/shurcooL/githubv4"
 	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 )
+
+type QueryCommitInput struct {
+	Repository git.RepositoryID
+	CommitSHA  git.CommitSHA
+}
+
+type QueryCommitOutput struct {
+	ChangedFiles int
+}
+
+// QueryCommit returns the commit.
+func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCommitOutput, error) {
+	var q struct {
+		Repository struct {
+			Object struct {
+				Commit struct {
+					ChangedFiles int
+				} `graphql:"... on Commit"`
+			} `graphql:"object(oid: $commitSHA)"`
+		} `graphql:"repository(owner: $owner, name: $repo)"`
+	}
+	v := map[string]interface{}{
+		"owner":     githubv4.String(in.Repository.Owner),
+		"repo":      githubv4.String(in.Repository.Name),
+		"commitSHA": githubv4.GitObjectID(in.CommitSHA),
+	}
+	c.Logger.Debugf("Querying the commit with %+v", v)
+	if err := c.Client.Query(ctx, &q, v); err != nil {
+		return nil, xerrors.Errorf("GitHub API error: %w", err)
+	}
+	c.Logger.Debugf("Got the result: %+v", q)
+	out := QueryCommitOutput{
+		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
+	}
+	c.Logger.Debugf("Returning the commit: %+v", out)
+	return &out, nil
+}
 
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
