@@ -3,7 +3,7 @@ package github
 import (
 	"context"
 
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github/client"
