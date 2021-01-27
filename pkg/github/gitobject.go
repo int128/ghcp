@@ -2,10 +2,10 @@ package github
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/shurcooL/githubv4"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 )
@@ -37,7 +37,7 @@ func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCo
 	}
 	c.Logger.Debugf("Querying the commit with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	out := QueryCommitOutput{
@@ -73,7 +73,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 	}
 	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit)
 	if err != nil {
-		return "", xerrors.Errorf("GitHub API error: %w", err)
+		return "", fmt.Errorf("GitHub API error: %w", err)
 	}
 	return git.CommitSHA(created.GetSHA()), nil
 }
@@ -92,7 +92,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 	}
 	tree, _, err := c.Client.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
 	if err != nil {
-		return "", xerrors.Errorf("GitHub API error: %w", err)
+		return "", fmt.Errorf("GitHub API error: %w", err)
 	}
 	return git.TreeSHA(tree.GetSHA()), nil
 }
@@ -105,7 +105,7 @@ func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, er
 		Content:  github.String(n.Content),
 	})
 	if err != nil {
-		return "", xerrors.Errorf("GitHub API error: %w", err)
+		return "", fmt.Errorf("GitHub API error: %w", err)
 	}
 	return git.BlobSHA(blob.GetSHA()), nil
 }

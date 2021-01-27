@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/usecases/pullrequest"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 )
 
 const pullRequestCmdExample = ` To create a pull request from the feature branch to the default branch:
@@ -36,7 +36,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 				o.HeadRepositoryName == "" ||
 				o.HeadBranchName == "" ||
 				o.Title == "" {
-				return xerrors.New("mandatory options: -u, -r, -b, --title")
+				return errors.New("mandatory options: -u, -r, -b, --title")
 			}
 			if o.BaseRepositoryOwner == "" {
 				o.BaseRepositoryOwner = o.HeadRepositoryOwner
@@ -49,7 +49,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 		RunE: func(_ *cobra.Command, args []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
-				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
+				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := pullrequest.Input{
 				BaseRepository: git.RepositoryID{
@@ -68,7 +68,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 			}
 			if err := ir.PullRequestUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not create a pull request: %s", err)
+				return fmt.Errorf("could not create a pull request: %s", err)
 			}
 			return nil
 		},

@@ -2,9 +2,10 @@ package forkcommit
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/wire"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
@@ -44,21 +45,21 @@ type ForkCommit struct {
 
 func (u *ForkCommit) Do(ctx context.Context, in Input) error {
 	if !in.ParentRepository.IsValid() {
-		return xerrors.New("you must set GitHub repository")
+		return errors.New("you must set GitHub repository")
 	}
 	if in.TargetBranchName == "" {
-		return xerrors.New("you must set target branch name")
+		return errors.New("you must set target branch name")
 	}
 	if in.CommitMessage == "" {
-		return xerrors.New("you must set commit message")
+		return errors.New("you must set commit message")
 	}
 	if len(in.Paths) == 0 {
-		return xerrors.New("you must set one or more paths")
+		return errors.New("you must set one or more paths")
 	}
 
 	fork, err := u.GitHub.CreateFork(ctx, in.ParentRepository)
 	if err != nil {
-		return xerrors.Errorf("could not fork the repository: %w", err)
+		return fmt.Errorf("could not fork the repository: %w", err)
 	}
 	if err := u.Commit.Do(ctx, commit.Input{
 		TargetRepository: *fork,
@@ -72,7 +73,7 @@ func (u *ForkCommit) Do(ctx context.Context, in Input) error {
 		NoFileMode:       in.NoFileMode,
 		DryRun:           in.DryRun,
 	}); err != nil {
-		return xerrors.Errorf("could not fork and commit: %w", err)
+		return fmt.Errorf("could not fork and commit: %w", err)
 	}
 	return nil
 }

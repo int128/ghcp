@@ -2,13 +2,13 @@ package fs
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/wire"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -52,7 +52,7 @@ func (fs *FileSystem) FindFiles(paths []string, filter FindFilesFilter) ([]File,
 	for _, path := range paths {
 		if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return xerrors.Errorf("error while walk: %w", err)
+				return fmt.Errorf("error while walk: %w", err)
 			}
 			if info.Mode().IsDir() {
 				if filter.SkipDir(path) {
@@ -72,7 +72,7 @@ func (fs *FileSystem) FindFiles(paths []string, filter FindFilesFilter) ([]File,
 			}
 			return nil
 		}); err != nil {
-			return nil, xerrors.Errorf("error while finding files in %s: %w", path, err)
+			return nil, fmt.Errorf("error while finding files in %s: %w", path, err)
 		}
 	}
 	return files, nil
@@ -82,16 +82,16 @@ func (fs *FileSystem) FindFiles(paths []string, filter FindFilesFilter) ([]File,
 func (fs *FileSystem) ReadAsBase64EncodedContent(filename string) (string, error) {
 	r, err := os.Open(filename)
 	if err != nil {
-		return "", xerrors.Errorf("error while opening file %s: %w", filename, err)
+		return "", fmt.Errorf("error while opening file %s: %w", filename, err)
 	}
 	defer r.Close()
 	var s strings.Builder
 	e := base64.NewEncoder(base64.StdEncoding, &s)
 	if _, err := io.Copy(e, r); err != nil {
-		return "", xerrors.Errorf("error while encoding file %s: %w", filename, err)
+		return "", fmt.Errorf("error while encoding file %s: %w", filename, err)
 	}
 	if err := e.Close(); err != nil {
-		return "", xerrors.Errorf("error while encoding file %s: %w", filename, err)
+		return "", fmt.Errorf("error while encoding file %s: %w", filename, err)
 	}
 	return s.String(), nil
 }

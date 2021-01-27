@@ -3,10 +3,11 @@ package commit
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"path/filepath"
 
 	"github.com/google/wire"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
@@ -52,18 +53,18 @@ type Commit struct {
 
 func (u *Commit) Do(ctx context.Context, in Input) error {
 	if !in.TargetRepository.IsValid() {
-		return xerrors.New("you must set GitHub repository")
+		return errors.New("you must set GitHub repository")
 	}
 	if in.CommitMessage == "" {
-		return xerrors.New("you must set commit message")
+		return errors.New("you must set commit message")
 	}
 
 	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{Logger: u.Logger})
 	if err != nil {
-		return xerrors.Errorf("could not find files: %w", err)
+		return fmt.Errorf("could not find files: %w", err)
 	}
 	if len(in.Paths) > 0 && len(files) == 0 {
-		return xerrors.New("no file exists in given paths")
+		return errors.New("no file exists in given paths")
 	}
 
 	if in.TargetBranchName == "" {
@@ -72,7 +73,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 			BaseRepository: in.ParentRepository, // mandatory but not used
 		})
 		if err != nil {
-			return xerrors.Errorf("could not determine the default branch: %w", err)
+			return fmt.Errorf("could not determine the default branch: %w", err)
 		}
 		in.TargetBranchName = q.HeadDefaultBranchName
 	}
@@ -84,17 +85,17 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 		TargetBranchName: in.TargetBranchName,
 	})
 	if err != nil {
-		return xerrors.Errorf("could not find the repository: %w", err)
+		return fmt.Errorf("could not find the repository: %w", err)
 	}
 	u.Logger.Infof("Author and committer: %s", q.CurrentUserName)
 	if q.TargetBranchExists() {
 		if err := u.updateExistingBranch(ctx, in, files, q); err != nil {
-			return xerrors.Errorf("could not update the existing branch (%s): %w", in.TargetBranchName, err)
+			return fmt.Errorf("could not update the existing branch (%s): %w", in.TargetBranchName, err)
 		}
 		return nil
 	}
 	if err := u.createNewBranch(ctx, in, files, q); err != nil {
-		return xerrors.Errorf("could not create a branch (%s) based on the default branch: %w", in.TargetBranchName, err)
+		return fmt.Errorf("could not create a branch (%s) based on the default branch: %w", in.TargetBranchName, err)
 	}
 	return nil
 }
@@ -137,13 +138,13 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 	case in.CommitStrategy.NoParent():
 		u.Logger.Infof("Creating a branch (%s) with no parent", in.TargetBranchName)
 	default:
-		return xerrors.Errorf("unknown commit strategy %+v", in.CommitStrategy)
+		return fmt.Errorf("unknown commit strategy %+v", in.CommitStrategy)
 	}
 
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(gitObj.Files))
 	commit, err := u.CreateGitObject.Do(ctx, gitObj)
 	if err != nil {
-		return xerrors.Errorf("error while creating a commit: %w", err)
+		return fmt.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
 	if len(files) > 0 && commit.ChangedFiles == 0 {
@@ -162,7 +163,7 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 		CommitSHA:        commit.CommitSHA,
 	}
 	if err := u.GitHub.CreateBranch(ctx, createBranchIn); err != nil {
-		return xerrors.Errorf("error while creating %s branch: %w", in.TargetBranchName, err)
+		return fmt.Errorf("error while creating %s branch: %w", in.TargetBranchName, err)
 	}
 	u.Logger.Infof("Created a branch (%s)", in.TargetBranchName)
 	return nil
@@ -189,13 +190,13 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 	case in.CommitStrategy.NoParent():
 		u.Logger.Infof("Updating the branch (%s) to a commit with no parent", in.TargetBranchName)
 	default:
-		return xerrors.Errorf("unknown commit strategy %+v", in.CommitStrategy)
+		return fmt.Errorf("unknown commit strategy %+v", in.CommitStrategy)
 	}
 
 	u.Logger.Debugf("Creating a commit with the %d file(s)", len(gitObj.Files))
 	commit, err := u.CreateGitObject.Do(ctx, gitObj)
 	if err != nil {
-		return xerrors.Errorf("error while creating a commit: %w", err)
+		return fmt.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
 	if len(files) > 0 && commit.ChangedFiles == 0 {
@@ -214,7 +215,7 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 		Force:           in.ForceUpdate,
 	}
 	if err := u.GitHub.UpdateBranch(ctx, updateBranchIn); err != nil {
-		return xerrors.Errorf("error while updating %s branch: %w", in.TargetBranchName, err)
+		return fmt.Errorf("error while updating %s branch: %w", in.TargetBranchName, err)
 	}
 	u.Logger.Infof("Updated the branch (%s)", in.TargetBranchName)
 	return nil

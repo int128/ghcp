@@ -2,12 +2,13 @@ package pullrequest
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/logger"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -39,10 +40,10 @@ type PullRequest struct {
 
 func (u *PullRequest) Do(ctx context.Context, in Input) error {
 	if !in.BaseRepository.IsValid() {
-		return xerrors.New("you must set the base repository")
+		return errors.New("you must set the base repository")
 	}
 	if !in.HeadRepository.IsValid() {
-		return xerrors.New("you must set the head repository")
+		return errors.New("you must set the head repository")
 	}
 
 	if in.HeadBranchName == "" || in.BaseBranchName == "" {
@@ -51,7 +52,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 			HeadRepository: in.HeadRepository,
 		})
 		if err != nil {
-			return xerrors.Errorf("could not determine the default branch: %w", err)
+			return fmt.Errorf("could not determine the default branch: %w", err)
 		}
 		if in.BaseBranchName == "" {
 			in.BaseBranchName = q.BaseDefaultBranchName
@@ -69,11 +70,11 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		ReviewerUser:   in.Reviewer,
 	})
 	if err != nil {
-		return xerrors.Errorf("could not query for creating a pull request: %w", err)
+		return fmt.Errorf("could not query for creating a pull request: %w", err)
 	}
 	u.Logger.Infof("Logged in as %s", q.CurrentUserName)
 	if q.HeadBranchCommitSHA == "" {
-		return xerrors.Errorf("the head branch (%s) does not exist", in.HeadBranchName)
+		return fmt.Errorf("the head branch (%s) does not exist", in.HeadBranchName)
 	}
 	u.Logger.Debugf("Found the head branch (%s) with the commit %s", in.HeadBranchName, q.HeadBranchCommitSHA)
 	if q.PullRequestURL != "" {
@@ -91,7 +92,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		Body:                 in.Body,
 	})
 	if err != nil {
-		return xerrors.Errorf("could not create a pull request: %w", err)
+		return fmt.Errorf("could not create a pull request: %w", err)
 	}
 	u.Logger.Infof("Created a pull request: %s", createdPR.URL)
 
@@ -103,7 +104,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		PullRequest: createdPR.PullRequestNodeID,
 		User:        q.ReviewerUserNodeID,
 	}); err != nil {
-		return xerrors.Errorf("could not request a review for the pull request: %w", err)
+		return fmt.Errorf("could not request a review for the pull request: %w", err)
 	}
 	return nil
 }

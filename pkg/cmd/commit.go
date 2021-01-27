@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
@@ -41,17 +41,17 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 		Example: commitCmdExample,
 		Args: func(_ *cobra.Command, args []string) error {
 			if err := o.validate(); err != nil {
-				return xerrors.Errorf("invalid flag: %w", err)
+				return fmt.Errorf("invalid flag: %w", err)
 			}
 			if len(args) == 0 {
-				return xerrors.New("you need to set one or more paths")
+				return errors.New("you need to set one or more paths")
 			}
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
-				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
+				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := commit.Input{
 				TargetRepository: git.RepositoryID{
@@ -73,7 +73,7 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not commit the files: %s", err)
+				return fmt.Errorf("could not commit the files: %s", err)
 			}
 			return nil
 		},
@@ -96,10 +96,10 @@ type commitOptions struct {
 
 func (o *commitOptions) validate() error {
 	if o.ParentRef != "" && o.NoParent {
-		return xerrors.Errorf("do not set both --parent and --no-parent")
+		return fmt.Errorf("do not set both --parent and --no-parent")
 	}
 	if err := o.commitAttributeOptions.validate(); err != nil {
-		return xerrors.Errorf("%w", err)
+		return fmt.Errorf("%w", err)
 	}
 	return nil
 }

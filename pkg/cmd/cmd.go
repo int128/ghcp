@@ -15,7 +15,6 @@ import (
 	"github.com/int128/ghcp/pkg/usecases/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -115,7 +114,7 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 	log := r.NewLogger(logger.Option{Debug: o.Debug})
 	if o.Chdir != "" {
 		if err := r.Env.Chdir(o.Chdir); err != nil {
-			return nil, xerrors.Errorf("could not change to directory %s: %w", o.Chdir, err)
+			return nil, fmt.Errorf("could not change to directory %s: %w", o.Chdir, err)
 		}
 		log.Infof("Changed to directory %s", o.Chdir)
 	}
@@ -126,7 +125,7 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 		}
 	}
 	if o.GitHubToken == "" {
-		return nil, xerrors.Errorf("no GitHub API token. Set environment variable %s or --token option", envGitHubToken)
+		return nil, fmt.Errorf("no GitHub API token. Set environment variable %s or --token option", envGitHubToken)
 	}
 	if o.GitHubAPI == "" {
 		o.GitHubAPI = r.Env.Getenv(envGitHubAPI)
@@ -139,7 +138,7 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 		URLv3: o.GitHubAPI,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("could not connect to GitHub API: %w", err)
+		return nil, fmt.Errorf("could not connect to GitHub API: %w", err)
 	}
 	return r.NewInternalRunner(log, gh), nil
 }
