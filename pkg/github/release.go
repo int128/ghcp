@@ -2,12 +2,12 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/pkg/git"
-	"golang.org/x/xerrors"
 )
 
 // GetReleaseByTagOrNil returns the release associated to the tag.
@@ -20,7 +20,7 @@ func (c *GitHub) GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID
 		return nil, nil
 	}
 	if err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	return &git.Release{
 		ID: git.ReleaseID{
@@ -41,7 +41,7 @@ func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release
 		TargetCommitish: github.String(r.TargetCommitish),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	return &git.Release{
 		ID: git.ReleaseID{
@@ -59,14 +59,14 @@ func (c *GitHub) CreateReleaseAsset(ctx context.Context, a git.ReleaseAsset) err
 	c.Logger.Debugf("Creating a release asset %+v", a)
 	f, err := os.Open(a.RealPath)
 	if err != nil {
-		return xerrors.Errorf("could not open the file: %w", err)
+		return fmt.Errorf("could not open the file: %w", err)
 	}
 	defer f.Close()
 	_, _, err = c.Client.UploadReleaseAsset(ctx, a.Release.Repository.Owner, a.Release.Repository.Name, a.Release.InternalID, &github.UploadOptions{
 		Name: a.Name,
 	}, f)
 	if err != nil {
-		return xerrors.Errorf("GitHub API error: %w", err)
+		return fmt.Errorf("GitHub API error: %w", err)
 	}
 	return nil
 }

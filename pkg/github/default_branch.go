@@ -2,10 +2,11 @@ package github
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
-	"golang.org/x/xerrors"
 )
 
 type QueryDefaultBranchInput struct {
@@ -22,7 +23,7 @@ type QueryDefaultBranchOutput struct {
 // You can set both repositories or either repository.
 func (c *GitHub) QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchInput) (*QueryDefaultBranchOutput, error) {
 	if !in.BaseRepository.IsValid() || !in.HeadRepository.IsValid() {
-		return nil, xerrors.New("you need to set both BaseRepository and HeadRepository")
+		return nil, errors.New("you need to set both BaseRepository and HeadRepository")
 	}
 	var q struct {
 		BaseRepository struct {
@@ -44,7 +45,7 @@ func (c *GitHub) QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchIn
 	}
 	c.Logger.Debugf("Querying the default branch name with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 	return &QueryDefaultBranchOutput{

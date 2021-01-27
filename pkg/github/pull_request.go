@@ -6,7 +6,6 @@ import (
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
-	"golang.org/x/xerrors"
 )
 
 type QueryForPullRequestInput struct {
@@ -62,7 +61,7 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 	}
 	c.Logger.Debugf("Querying the existing pull request with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", q)
 
@@ -118,7 +117,7 @@ func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInpu
 		} `graphql:"createPullRequest(input: $input)"`
 	}
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
-		return nil, xerrors.Errorf("GitHub API error: %w", err)
+		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", m)
 	return &CreatePullRequestOutput{
@@ -146,7 +145,7 @@ func (c *GitHub) RequestPullRequestReview(ctx context.Context, in RequestPullReq
 		} `graphql:"requestReviews(input: $input)"`
 	}
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
-		return xerrors.Errorf("GitHub API error: %w", err)
+		return fmt.Errorf("GitHub API error: %w", err)
 	}
 	c.Logger.Debugf("Got the result: %+v", m)
 	return nil

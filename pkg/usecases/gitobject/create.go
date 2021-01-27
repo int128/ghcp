@@ -3,9 +3,9 @@ package gitobject
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/wire"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
@@ -50,7 +50,7 @@ type CreateGitObject struct {
 func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 	treeSHA, err := u.uploadFilesIfSet(ctx, in)
 	if err != nil {
-		return nil, xerrors.Errorf("error while creating a tree: %w", err)
+		return nil, fmt.Errorf("error while creating a tree: %w", err)
 	}
 
 	commitSHA, err := u.GitHub.CreateCommit(ctx, git.NewCommit{
@@ -62,7 +62,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 		TreeSHA:         treeSHA,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("error while creating a commit: %w", err)
+		return nil, fmt.Errorf("error while creating a commit: %w", err)
 	}
 	u.Logger.Infof("Created commit %s", commitSHA)
 
@@ -71,7 +71,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 		CommitSHA:  commitSHA,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("error while getting the commit %s: %w", commitSHA, err)
+		return nil, fmt.Errorf("error while getting the commit %s: %w", commitSHA, err)
 	}
 
 	return &Output{
@@ -90,14 +90,14 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 	for i, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
 		if err != nil {
-			return "", xerrors.Errorf("error while reading file %s: %w", file.Path, err)
+			return "", fmt.Errorf("error while reading file %s: %w", file.Path, err)
 		}
 		blobSHA, err := u.GitHub.CreateBlob(ctx, git.NewBlob{
 			Repository: in.Repository,
 			Content:    content,
 		})
 		if err != nil {
-			return "", xerrors.Errorf("error while creating a blob for %s: %w", file.Path, err)
+			return "", fmt.Errorf("error while creating a blob for %s: %w", file.Path, err)
 		}
 		gitFile := git.File{
 			Filename:   file.Path,
@@ -114,7 +114,7 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 		Files:       files,
 	})
 	if err != nil {
-		return "", xerrors.Errorf("error while creating a tree: %w", err)
+		return "", fmt.Errorf("error while creating a tree: %w", err)
 	}
 	u.Logger.Infof("Created tree %s", treeSHA)
 	return treeSHA, nil

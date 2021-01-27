@@ -2,12 +2,12 @@ package github
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/google/go-github/v33/github"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
-	"golang.org/x/xerrors"
 )
 
 // CreateFork creates a fork of the repository.
@@ -16,7 +16,7 @@ func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.Repo
 	fork, _, err := c.Client.CreateFork(ctx, id.Owner, id.Name, nil)
 	if err != nil {
 		if _, ok := err.(*github.AcceptedError); !ok {
-			return nil, xerrors.Errorf("GitHub API error: %w", err)
+			return nil, fmt.Errorf("GitHub API error: %w", err)
 		}
 		c.Logger.Debugf("Fork in progress: %+v", err)
 	}
@@ -25,7 +25,7 @@ func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.Repo
 		Name:  fork.GetName(),
 	}
 	if err := c.waitUntilGitDataIsAvailable(ctx, forkRepository); err != nil {
-		return nil, xerrors.Errorf("git data is not available on %s: %w", forkRepository, err)
+		return nil, fmt.Errorf("git data is not available on %s: %w", forkRepository, err)
 	}
 	return &forkRepository, nil
 }
@@ -49,13 +49,13 @@ func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.Reposit
 		}
 		c.Logger.Debugf("Querying the repository with %+v", v)
 		if err := c.Client.Query(ctx, &q, v); err != nil {
-			return xerrors.Errorf("GitHub API error: %w", err)
+			return fmt.Errorf("GitHub API error: %w", err)
 		}
 		c.Logger.Debugf("Got the result: %+v", q)
 		return nil
 	}
 	if err := backoff.Retry(operation, backoff.NewExponentialBackOff()); err != nil {
-		return xerrors.Errorf("retry over: %w", err)
+		return fmt.Errorf("retry over: %w", err)
 	}
 	return nil
 }

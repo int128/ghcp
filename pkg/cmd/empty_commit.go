@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
@@ -36,17 +36,17 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 		Example: emptyCommitCmdExample,
 		Args: func(_ *cobra.Command, args []string) error {
 			if err := o.validate(); err != nil {
-				return xerrors.Errorf("invalid flag: %w", err)
+				return fmt.Errorf("invalid flag: %w", err)
 			}
 			if len(args) > 0 {
-				return xerrors.New("do not set any argument")
+				return errors.New("do not set any argument")
 			}
 			return nil
 		},
 		RunE: func(*cobra.Command, []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
-				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
+				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := commit.Input{
 				TargetRepository: git.RepositoryID{
@@ -66,7 +66,7 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not create an empty commit: %s", err)
+				return fmt.Errorf("could not create an empty commit: %s", err)
 			}
 			return nil
 		},
@@ -87,7 +87,7 @@ type emptyCommitOptions struct {
 
 func (o *emptyCommitOptions) validate() error {
 	if err := o.commitAttributeOptions.validate(); err != nil {
-		return xerrors.Errorf("%w", err)
+		return fmt.Errorf("%w", err)
 	}
 	return nil
 }

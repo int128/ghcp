@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github/client/mock_client"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
-	"golang.org/x/xerrors"
 )
 
 func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
@@ -59,7 +59,7 @@ func TestGitHub_GetReleaseByTagOrNil(t *testing.T) {
 		gitHubClient := mock_client.NewMockInterface(ctrl)
 		gitHubClient.EXPECT().
 			GetReleaseByTag(ctx, "owner", "repo", "v1.0.0").
-			Return(nil, &resp, xerrors.New("not found"))
+			Return(nil, &resp, errors.New("not found"))
 		gitHub := GitHub{
 			Client: gitHubClient,
 			Logger: testingLogger.New(t),

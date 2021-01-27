@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 )
@@ -25,10 +25,10 @@ func (o *commitAttributeOptions) register(f *pflag.FlagSet) {
 
 func (o *commitAttributeOptions) validate() error {
 	if (o.AuthorName == "" && o.AuthorEmail != "") || (o.AuthorName != "" && o.AuthorEmail == "") {
-		return xerrors.Errorf("you need to set both --author-name and --author-email")
+		return fmt.Errorf("you need to set both --author-name and --author-email")
 	}
 	if (o.CommitterName == "" && o.CommitterEmail != "") || (o.CommitterName != "" && o.CommitterEmail == "") {
-		return xerrors.Errorf("you need to set both --committer-name and --committer-email")
+		return fmt.Errorf("you need to set both --committer-name and --committer-email")
 	}
 	return nil
 }

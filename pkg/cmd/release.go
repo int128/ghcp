@@ -8,7 +8,6 @@ import (
 	"github.com/int128/ghcp/pkg/usecases/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 )
 
 const releaseCmdExample = `  To upload files to the release associated to tag TAG:
@@ -34,7 +33,7 @@ func (r *Runner) newReleaseCmd(ctx context.Context, gOpts *globalOptions) *cobra
 		RunE: func(_ *cobra.Command, args []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
-				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
+				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := release.Input{
 				Repository: git.RepositoryID{
@@ -48,7 +47,7 @@ func (r *Runner) newReleaseCmd(ctx context.Context, gOpts *globalOptions) *cobra
 			}
 			if err := ir.ReleaseUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not release the files: %s", err)
+				return fmt.Errorf("could not release the files: %s", err)
 			}
 			return nil
 		},

@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
@@ -21,14 +21,14 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 		Long:  `This forks the repository and commits the files to a new branch.`,
 		Args: func(*cobra.Command, []string) error {
 			if err := o.validate(); err != nil {
-				return xerrors.Errorf("invalid flag: %w", err)
+				return fmt.Errorf("invalid flag: %w", err)
 			}
 			return nil
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
-				return xerrors.Errorf("error while bootstrap of the dependencies: %w", err)
+				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := forkcommit.Input{
 				ParentRepository: git.RepositoryID{
@@ -46,7 +46,7 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 			}
 			if err := ir.ForkCommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
-				return xerrors.Errorf("could not commit the files: %s", err)
+				return fmt.Errorf("could not commit the files: %s", err)
 			}
 			return nil
 		},
@@ -68,16 +68,16 @@ type forkCommitOptions struct {
 
 func (o *forkCommitOptions) validate() error {
 	if o.UpstreamRepositoryOwner == "" {
-		return xerrors.New("--owner is missing")
+		return errors.New("--owner is missing")
 	}
 	if o.UpstreamRepositoryName == "" {
-		return xerrors.New("--repo is missing")
+		return errors.New("--repo is missing")
 	}
 	if o.TargetBranchName == "" {
-		return xerrors.New("--branch is missing")
+		return errors.New("--branch is missing")
 	}
 	if err := o.commitAttributeOptions.validate(); err != nil {
-		return xerrors.Errorf("%w", err)
+		return fmt.Errorf("%w", err)
 	}
 	return nil
 }

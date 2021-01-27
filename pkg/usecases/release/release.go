@@ -2,6 +2,8 @@ package release
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"path/filepath"
 
 	"github.com/google/wire"
@@ -9,7 +11,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/logger"
-	"golang.org/x/xerrors"
 )
 
 var Set = wire.NewSet(
@@ -40,26 +41,26 @@ type Release struct {
 
 func (u *Release) Do(ctx context.Context, in Input) error {
 	if !in.Repository.IsValid() {
-		return xerrors.New("you must set GitHub repository")
+		return errors.New("you must set GitHub repository")
 	}
 	if in.TagName == "" {
-		return xerrors.New("you must set the tag name")
+		return errors.New("you must set the tag name")
 	}
 	if len(in.Paths) == 0 {
-		return xerrors.New("you must set one or more paths")
+		return errors.New("you must set one or more paths")
 	}
 
 	files, err := u.FileSystem.FindFiles(in.Paths, nil)
 	if err != nil {
-		return xerrors.Errorf("could not find files: %w", err)
+		return fmt.Errorf("could not find files: %w", err)
 	}
 	if len(files) == 0 {
-		return xerrors.New("no file exists in given paths")
+		return errors.New("no file exists in given paths")
 	}
 
 	release, err := u.GitHub.GetReleaseByTagOrNil(ctx, in.Repository, in.TagName)
 	if err != nil {
-		return xerrors.Errorf("could not get the release: %w", err)
+		return fmt.Errorf("could not get the release: %w", err)
 	}
 	if release == nil {
 		u.Logger.Infof("No release on the tag %s", in.TagName)
@@ -74,7 +75,7 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 			TargetCommitish: in.TargetBranchOrCommitSHA,
 		})
 		if err != nil {
-			return xerrors.Errorf("could not create a release: %w", err)
+			return fmt.Errorf("could not create a release: %w", err)
 		}
 		u.Logger.Infof("Created a release %s", release.Name)
 	} else {
@@ -92,7 +93,7 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 			Name:     filepath.Base(file.Path),
 			RealPath: file.Path,
 		}); err != nil {
-			return xerrors.Errorf("could not create a release asset: %w", err)
+			return fmt.Errorf("could not create a release asset: %w", err)
 		}
 		u.Logger.Infof("Uploaded %s", file.Path)
 	}

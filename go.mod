@@ -11,7 +11,6 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20210113205817-d3ed898aa8a3
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 )
 
 go 1.13
