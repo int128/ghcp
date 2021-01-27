@@ -64,6 +64,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 				HeadBranchName: git.BranchName(o.HeadBranchName),
 				Title:          o.Title,
 				Body:           o.Body,
+				Reviewer:       o.Reviewer,
 			}
 			if err := ir.PullRequestUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
@@ -85,6 +86,7 @@ type pullRequestOptions struct {
 	HeadBranchName      string
 	Title               string
 	Body                string
+	Reviewer            string
 }
 
 func (o *pullRequestOptions) register(f *pflag.FlagSet) {
@@ -96,4 +98,5 @@ func (o *pullRequestOptions) register(f *pflag.FlagSet) {
 	f.StringVar(&o.BaseBranchName, "base", "", "Base branch name (default: default branch of base repository)")
 	f.StringVar(&o.Title, "title", "", "Title of a pull request (mandatory)")
 	f.StringVar(&o.Body, "body", "", "Body of a pull request")
+	f.StringVar(&o.Reviewer, "reviewer", "", "If set, request a review")
 }

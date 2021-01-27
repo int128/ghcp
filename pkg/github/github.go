@@ -35,6 +35,7 @@ type Interface interface {
 
 	QueryForPullRequest(ctx context.Context, in QueryForPullRequestInput) (*QueryForPullRequestOutput, error)
 	CreatePullRequest(ctx context.Context, in CreatePullRequestInput) (*CreatePullRequestOutput, error)
+	RequestPullRequestReview(ctx context.Context, in RequestPullRequestReviewInput) error
 
 	QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchInput) (*QueryDefaultBranchOutput, error)
 }
