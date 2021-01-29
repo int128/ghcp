@@ -65,6 +65,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 				Title:          o.Title,
 				Body:           o.Body,
 				Reviewer:       o.Reviewer,
+				Draft:          o.Draft,
 			}
 			if err := ir.PullRequestUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
@@ -87,6 +88,7 @@ type pullRequestOptions struct {
 	Title               string
 	Body                string
 	Reviewer            string
+	Draft               bool
 }
 
 func (o *pullRequestOptions) register(f *pflag.FlagSet) {
@@ -99,4 +101,5 @@ func (o *pullRequestOptions) register(f *pflag.FlagSet) {
 	f.StringVar(&o.Title, "title", "", "Title of a pull request (mandatory)")
 	f.StringVar(&o.Body, "body", "", "Body of a pull request")
 	f.StringVar(&o.Reviewer, "reviewer", "", "If set, request a review")
+	f.BoolVar(&o.Draft, "draft", false, "If set, mark as a draft")
 }

@@ -85,7 +85,8 @@ type CreatePullRequestInput struct {
 	HeadRepository       git.RepositoryID
 	HeadBranchName       git.BranchName
 	Title                string
-	Body                 string
+	Body                 string // optional
+	Draft                bool
 }
 
 type CreatePullRequestOutput struct {
@@ -106,7 +107,12 @@ func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInpu
 		BaseRefName:  githubv4.String(in.BaseBranchName),
 		HeadRefName:  githubv4.String(headRefName),
 		Title:        githubv4.String(in.Title),
-		Body:         githubv4.NewString(githubv4.String(in.Body)),
+	}
+	if in.Body != "" {
+		v.Body = githubv4.NewString(githubv4.String(in.Body))
+	}
+	if in.Draft {
+		v.Draft = githubv4.NewBoolean(true)
 	}
 	var m struct {
 		CreatePullRequest struct {
