@@ -28,8 +28,9 @@ type Input struct {
 	HeadRepository git.RepositoryID
 	HeadBranchName git.BranchName // if empty, use the default branch of head
 	Title          string
-	Body           string
+	Body           string // optional
 	Reviewer       string // optional
+	Draft          bool
 }
 
 // PullRequest provides the use-case to create a pull request.
@@ -90,6 +91,7 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		HeadBranchName:       in.HeadBranchName,
 		Title:                in.Title,
 		Body:                 in.Body,
+		Draft:                in.Draft,
 	})
 	if err != nil {
 		return fmt.Errorf("could not create a pull request: %w", err)

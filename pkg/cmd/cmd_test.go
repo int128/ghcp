@@ -462,7 +462,7 @@ func TestCmd_Run(t *testing.T) {
 				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 			}
 		})
-		t.Run("--base", func(t *testing.T) {
+		t.Run("optional-flags", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			useCase := mock_pullrequest.NewMockInterface(ctrl)
@@ -474,6 +474,8 @@ func TestCmd_Run(t *testing.T) {
 					BaseBranchName: "develop",
 					Title:          "commit-message",
 					Body:           "body",
+					Reviewer:       "the-reviewer",
+					Draft:          true,
 				})
 			r := Runner{
 				NewLogger:         newLogger(t, logger.Option{}),
@@ -493,40 +495,7 @@ func TestCmd_Run(t *testing.T) {
 				"--base", "develop",
 				"--title", "commit-message",
 				"--body", "body",
-			}
-			exitCode := r.Run(args, version)
-			if exitCode != exitCodeOK {
-				t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
-			}
-		})
-		t.Run("--reviewer", func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			useCase := mock_pullrequest.NewMockInterface(ctrl)
-			useCase.EXPECT().
-				Do(ctx, pullrequest.Input{
-					HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
-					HeadBranchName: "feature",
-					BaseRepository: git.RepositoryID{Owner: "upstream-owner", Name: "upstream-repo"},
-					Title:          "commit-message",
-					Reviewer:       "the-reviewer",
-				})
-			r := Runner{
-				NewLogger:         newLogger(t, logger.Option{}),
-				NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-				Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
-				NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
-			}
-			args := []string{
-				cmdName,
-				pullRequestCmdName,
-				"--token", "YOUR_TOKEN",
-				"-u", "owner",
-				"-r", "repo",
-				"-b", "feature",
-				"--base-owner", "upstream-owner",
-				"--base-repo", "upstream-repo",
-				"--title", "commit-message",
+				"--draft",
 				"--reviewer", "the-reviewer",
 			}
 			exitCode := r.Run(args, version)

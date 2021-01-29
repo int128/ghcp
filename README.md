@@ -195,6 +195,7 @@ Flags:
       --base-owner string   Base repository owner (default: head)
       --base-repo string    Base repository name (default: head)
       --body string         Body of a pull request
+      --draft               If set, mark as a draft
   -b, --head string         Head branch name (mandatory)
   -u, --head-owner string   Head repository owner (mandatory)
   -r, --head-repo string    Head repository name (mandatory)
