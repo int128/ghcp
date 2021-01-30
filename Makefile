@@ -28,4 +28,5 @@ release: ghcp dist
 		-C dist/ ghcp.rb
 	# create a pull request
 	./ghcp pull-request -u "$(CIRCLE_PROJECT_USERNAME)" -r "homebrew-$(CIRCLE_PROJECT_REPONAME)" -b "bump-$(CIRCLE_TAG)" \
-		--title "Bump the version to $(CIRCLE_TAG)"
+		--title "Bump the version to $(CIRCLE_TAG)" \
+		--reviewer "$(CIRCLE_PROJECT_USERNAME)"
