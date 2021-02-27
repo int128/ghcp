@@ -37,8 +37,7 @@ func TestCmd_Run_empty_commit(t *testing.T) {
 			cmdName,
 			emptyCommitCmdName,
 			"--token", "YOUR_TOKEN",
-			"-u", "owner",
-			"-r", "repo",
+			"-r", "owner/repo",
 			"-m", "commit-message",
 		}
 		exitCode := r.Run(args, version)

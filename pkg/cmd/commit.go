@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -14,21 +13,21 @@ import (
 )
 
 const commitCmdExample = `  To commit files to the default branch:
-    ghcp commit -u OWNER -r REPO -m MESSAGE FILES...
+    ghcp commit -r OWNER/REPO -m MESSAGE FILES...
 
   To commit files to the branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH -m MESSAGE FILES...
+    ghcp commit -r OWNER/REPO -b BRANCH -m MESSAGE FILES...
 
   If the branch does not exist, ghcp creates a branch from the default branch.
   It the branch exists, ghcp updates the branch by fast-forward.
 
   To commit files to a new branch from the parent branch:
-    ghcp commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
+    ghcp commit -r OWNER/REPO -b BRANCH --parent PARENT -m MESSAGE FILES...
 
   If the branch exists, it will fail.
 
   To commit files to a new branch without any parent:
-    ghcp commit -u OWNER -r REPO -b BRANCH --no-parent -m MESSAGE FILES...
+    ghcp commit -r OWNER/REPO -b BRANCH --no-parent -m MESSAGE FILES...
 
   If the branch exists, it will fail.`
 
@@ -39,37 +38,30 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 		Short:   "Commit files to the branch",
 		Long:    `This commits the files to the branch. This will create a branch if it does not exist.`,
 		Example: commitCmdExample,
-		Args: func(_ *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if err := o.validate(); err != nil {
 				return fmt.Errorf("invalid flag: %w", err)
 			}
-			if len(args) == 0 {
-				return errors.New("you need to set one or more paths")
+			targetRepository, err := o.repositoryID()
+			if err != nil {
+				return fmt.Errorf("invalid flag: %w", err)
 			}
-			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
+
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
 				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := commit.Input{
-				TargetRepository: git.RepositoryID{
-					Owner: o.RepositoryOwner,
-					Name:  o.RepositoryName,
-				},
+				TargetRepository: targetRepository,
 				TargetBranchName: git.BranchName(o.BranchName),
-				ParentRepository: git.RepositoryID{
-					Owner: o.RepositoryOwner,
-					Name:  o.RepositoryName,
-				},
-				CommitStrategy: o.commitStrategy(),
-				CommitMessage:  git.CommitMessage(o.CommitMessage),
-				Author:         o.author(),
-				Committer:      o.committer(),
-				Paths:          args,
-				NoFileMode:     o.NoFileMode,
-				DryRun:         o.DryRun,
+				ParentRepository: targetRepository,
+				CommitStrategy:   o.commitStrategy(),
+				CommitMessage:    git.CommitMessage(o.CommitMessage),
+				Author:           o.author(),
+				Committer:        o.committer(),
+				Paths:            args,
+				NoFileMode:       o.NoFileMode,
+				DryRun:           o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
 				ir.Logger.Debugf("Stacktrace:\n%+v", err)
@@ -84,17 +76,16 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 
 type commitOptions struct {
 	commitAttributeOptions
+	repositoryOptions
 
-	RepositoryOwner string
-	RepositoryName  string
-	BranchName      string
-	ParentRef       string
-	NoParent        bool
-	NoFileMode      bool
-	DryRun          bool
+	BranchName string
+	ParentRef  string
+	NoParent   bool
+	NoFileMode bool
+	DryRun     bool
 }
 
-func (o *commitOptions) validate() error {
+func (o commitOptions) validate() error {
 	if o.ParentRef != "" && o.NoParent {
 		return fmt.Errorf("do not set both --parent and --no-parent")
 	}
@@ -104,7 +95,7 @@ func (o *commitOptions) validate() error {
 	return nil
 }
 
-func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
+func (o commitOptions) commitStrategy() commitstrategy.CommitStrategy {
 	if o.NoParent {
 		return commitstrategy.NoParent
 	}
@@ -115,8 +106,7 @@ func (o *commitOptions) commitStrategy() commitstrategy.CommitStrategy {
 }
 
 func (o *commitOptions) register(f *pflag.FlagSet) {
-	f.StringVarP(&o.RepositoryOwner, "owner", "u", "", "GitHub repository owner (mandatory)")
-	f.StringVarP(&o.RepositoryName, "repo", "r", "", "GitHub repository name (mandatory)")
+	o.repositoryOptions.register(f)
 	f.StringVarP(&o.BranchName, "branch", "b", "", "Name of the branch to create or update (default: the default branch of repository)")
 	f.StringVar(&o.ParentRef, "parent", "", "Create a commit from the parent branch/tag (default: fast-forward)")
 	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")

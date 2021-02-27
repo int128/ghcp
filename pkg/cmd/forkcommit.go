@@ -19,22 +19,21 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 		Use:   fmt.Sprintf("%s [flags] FILES...", forkCommitCmdName),
 		Short: "Fork the repository and commit files to a branch",
 		Long:  `This forks the repository and commits the files to a new branch.`,
-		Args: func(*cobra.Command, []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if err := o.validate(); err != nil {
 				return fmt.Errorf("invalid flag: %w", err)
 			}
-			return nil
-		},
-		RunE: func(_ *cobra.Command, args []string) error {
+			upstreamRepository, err := o.Upstream.repositoryID()
+			if err != nil {
+				return fmt.Errorf("invalid flag: %w", err)
+			}
+
 			ir, err := r.newInternalRunner(gOpts)
 			if err != nil {
 				return fmt.Errorf("error while bootstrap of the dependencies: %w", err)
 			}
 			in := forkcommit.Input{
-				ParentRepository: git.RepositoryID{
-					Owner: o.UpstreamRepositoryOwner,
-					Name:  o.UpstreamRepositoryName,
-				},
+				ParentRepository: upstreamRepository,
 				TargetBranchName: git.BranchName(o.TargetBranchName),
 				CommitStrategy:   o.commitStrategy(),
 				CommitMessage:    git.CommitMessage(o.CommitMessage),
@@ -57,22 +56,15 @@ func (r *Runner) newForkCommitCmd(ctx context.Context, gOpts *globalOptions) *co
 
 type forkCommitOptions struct {
 	commitAttributeOptions
+	Upstream repositoryOptions
 
-	UpstreamRepositoryOwner string
-	UpstreamRepositoryName  string
-	UpstreamBranchName      string
-	TargetBranchName        string
-	NoFileMode              bool
-	DryRun                  bool
+	UpstreamBranchName string
+	TargetBranchName   string
+	NoFileMode         bool
+	DryRun             bool
 }
 
-func (o *forkCommitOptions) validate() error {
-	if o.UpstreamRepositoryOwner == "" {
-		return errors.New("--owner is missing")
-	}
-	if o.UpstreamRepositoryName == "" {
-		return errors.New("--repo is missing")
-	}
+func (o forkCommitOptions) validate() error {
 	if o.TargetBranchName == "" {
 		return errors.New("--branch is missing")
 	}
@@ -82,7 +74,7 @@ func (o *forkCommitOptions) validate() error {
 	return nil
 }
 
-func (o *forkCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
+func (o forkCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
 	if o.UpstreamBranchName != "" {
 		return commitstrategy.RebaseOn(git.RefName(o.UpstreamBranchName))
 	}
@@ -90,8 +82,8 @@ func (o *forkCommitOptions) commitStrategy() commitstrategy.CommitStrategy {
 }
 
 func (o *forkCommitOptions) register(f *pflag.FlagSet) {
-	f.StringVarP(&o.UpstreamRepositoryOwner, "owner", "u", "", "Upstream repository owner (mandatory)")
-	f.StringVarP(&o.UpstreamRepositoryName, "repo", "r", "", "Upstream repository name (mandatory)")
+	f.StringVarP(&o.Upstream.RepositoryName, "repo", "r", "", "Upstream repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)")
+	f.StringVarP(&o.Upstream.RepositoryOwner, "owner", "u", "", "Upstream repository owner")
 	f.StringVar(&o.UpstreamBranchName, "parent", "", "Upstream branch name (default: the default branch of the upstream repository)")
 	f.StringVarP(&o.TargetBranchName, "branch", "b", "", "Name of the branch to create (mandatory)")
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
