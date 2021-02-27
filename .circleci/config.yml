@@ -8,8 +8,6 @@ jobs:
       - restore_cache:
           keys:
             - go-sum-{{ checksum "go.sum" }}
-      - run: make test
-      - run: bash <(curl -s https://codecov.io/bash)
       - run:
           command: go get -v github.com/int128/goxzst
           working_directory: .circleci
