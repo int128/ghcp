@@ -33,13 +33,13 @@ You need to get a personal access token from the [settings](https://github.com/s
 To commit files to the default branch:
 
 ```sh
-ghcp commit -u OWNER -r REPO -m MESSAGE file1 file2
+ghcp commit -r OWNER/REPO -m MESSAGE file1 file2
 ```
 
 To commit files to `feature` branch:
 
 ```sh
-ghcp commit -u OWNER -r REPO -b feature -m MESSAGE file1 file2
+ghcp commit -r OWNER/REPO -b feature -m MESSAGE file1 file2
 ```
 
 If `feature` branch does not exist, ghcp will create it from the default branch.
@@ -47,7 +47,7 @@ If `feature` branch does not exist, ghcp will create it from the default branch.
 To create `feature` branch from `develop` branch:
 
 ```sh
-ghcp commit -u OWNER -r REPO -b feature --parent=develop -m MESSAGE file1 file2
+ghcp commit -r OWNER/REPO -b feature --parent=develop -m MESSAGE file1 file2
 ```
 
 If `feature` branch already exists, ghcp will fail.
@@ -74,9 +74,9 @@ Flags:
   -m, --message string           Commit message (mandatory)
       --no-file-mode             Ignore executable bit of file and treat as 0644
       --no-parent                Create a commit without a parent
-  -u, --owner string             GitHub repository owner (mandatory)
+  -u, --owner string             Repository owner
       --parent string            Create a commit from the parent branch/tag (default: fast-forward)
-  -r, --repo string              GitHub repository name (mandatory)
+  -r, --repo string              Repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)
 ```
 
 
@@ -85,13 +85,13 @@ Flags:
 To create an empty commit to the default branch:
 
 ```sh
-ghcp empty-commit -u OWNER -r REPO -m MESSAGE
+ghcp empty-commit -r OWNER/REPO -m MESSAGE
 ```
 
 To create an empty commit to the branch:
 
 ```sh
-ghcp empty-commit -u OWNER -r REPO -b BRANCH -m MESSAGE
+ghcp empty-commit -r OWNER/REPO -b BRANCH -m MESSAGE
 ```
 
 If the branch does not exist, ghcp creates a branch from the default branch.
@@ -100,7 +100,7 @@ It the branch exists, ghcp updates the branch by fast-forward.
 To create an empty commit to a new branch from the parent branch:
 
 ```sh
-ghcp empty-commit -u OWNER -r REPO -b BRANCH --parent PARENT -m MESSAGE
+ghcp empty-commit -r OWNER/REPO -b BRANCH --parent PARENT -m MESSAGE
 ```
 
 If the branch exists, it will fail.
@@ -117,9 +117,9 @@ Flags:
       --dry-run                  Do not update the branch actually
   -h, --help                     help for empty-commit
   -m, --message string           Commit message (mandatory)
-  -u, --owner string             GitHub repository owner (mandatory)
+  -u, --owner string             Repository owner
       --parent string            Create a commit from the parent branch/tag (default: fast-forward)
-  -r, --repo string              GitHub repository name (mandatory)
+  -r, --repo string              Repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)
 ```
 
 
@@ -128,13 +128,13 @@ Flags:
 To fork repository `UPSTREAM/REPO` and create `feature` branch from the default branch:
 
 ```sh
-ghcp fork-commit -u UPSTREAM -r REPO -b feature -m MESSAGE file1 file2
+ghcp fork-commit -u UPSTREAM/REPO -b feature -m MESSAGE file1 file2
 ```
 
 To fork repository `UPSTREAM/REPO` and create `feature` branch from `develop` branch of the upstream:
 
 ```sh
-ghcp fork-commit -u UPSTREAM -r REPO -b feature --parent develop -m MESSAGE file1 file2
+ghcp fork-commit -u UPSTREAM/REPO -b feature --parent develop -m MESSAGE file1 file2
 ```
 
 If the branch already exists, ghcp will fail.
@@ -153,9 +153,9 @@ Flags:
   -h, --help                     help for fork-commit
   -m, --message string           Commit message (mandatory)
       --no-file-mode             Ignore executable bit of file and treat as 0644
-  -u, --owner string             Upstream repository owner (mandatory)
+  -u, --owner string             Upstream repository owner
       --parent string            Upstream branch name (default: the default branch of the upstream repository)
-  -r, --repo string              Upstream repository name (mandatory)
+  -r, --repo string              Upstream repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)
 ```
 
 
@@ -164,25 +164,25 @@ Flags:
 To create a pull request from `feature` branch to the default branch:
 
 ```sh
-ghcp pull-request -u OWNER -r REPO -b feature --title TITLE --body BODY
+ghcp pull-request -r OWNER/REPO -b feature --title TITLE --body BODY
 ```
 
 To create a pull request from `feature` branch to the `develop` branch:
 
 ```sh
-ghcp pull-request -u OWNER -r REPO -b feature --base develop --title TITLE --body BODY
+ghcp pull-request -r OWNER/REPO -b feature --base develop --title TITLE --body BODY
 ```
 
 To create a pull request from `feature` branch of `OWNER/REPO` repository to the default branch of `UPSTREAM/REPO` repository:
 
 ```sh
-ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --title TITLE --body BODY
+ghcp pull-request -r OWNER/REPO -b feature --base-repo UPSTREAM/REPO --title TITLE --body BODY
 ```
 
 To create a pull request from `feature` branch of `OWNER/REPO` repository to the default branch of `UPSTREAM/REPO` repository:
 
 ```sh
-ghcp pull-request -u OWNER -r REPO -b feature --base-owner UPSTREAM --base-repo REPO --base feature --title TITLE --body BODY
+ghcp pull-request -r OWNER/REPO -b feature --base-repo UPSTREAM/REPO --base feature --title TITLE --body BODY
 ```
 
 If a pull request already exists, ghcp do nothing.
@@ -193,12 +193,12 @@ You can set the following options.
 Flags:
       --base string         Base branch name (default: default branch of base repository)
       --base-owner string   Base repository owner (default: head)
-      --base-repo string    Base repository name (default: head)
+      --base-repo string    Base repository name, either --base-repo OWNER/REPO or --base-owner OWNER --base-repo REPO (default: head)
       --body string         Body of a pull request
       --draft               If set, mark as a draft
   -b, --head string         Head branch name (mandatory)
-  -u, --head-owner string   Head repository owner (mandatory)
-  -r, --head-repo string    Head repository name (mandatory)
+  -u, --head-owner string   Head repository owner
+  -r, --head-repo string    Head repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)
   -h, --help                help for pull-request
       --reviewer string     If set, request a review
       --title string        Title of a pull request (mandatory)
@@ -210,7 +210,7 @@ Flags:
 To upload files to the release associated to tag `v1.0.0`:
 
 ```sh
-ghcp release -u OWNER -r REPO -t v1.0.0 dist/
+ghcp release -r OWNER/REPO -t v1.0.0 dist/
 ```
 
 If the release does not exist, it will create a release.
@@ -219,7 +219,7 @@ If the tag does not exist, it will create a tag from the default branch and crea
 To create a tag and release on commit `COMMIT_SHA` and upload files to the release:
 
 ```sh
-ghcp release -u OWNER -r REPO -t v1.0.0 --target COMMIT_SHA dist/
+ghcp release -r OWNER/REPO -t v1.0.0 --target COMMIT_SHA dist/
 ```
 
 If the tag already exists, it ignores the target commit.
@@ -231,8 +231,8 @@ You can set the following options.
 Flags:
       --dry-run         Do not create a release and assets actually
   -h, --help            help for release
-  -u, --owner string    GitHub repository owner (mandatory)
-  -r, --repo string     GitHub repository name (mandatory)
+  -u, --owner string    Repository owner
+  -r, --repo string     Repository name, either -r OWNER/REPO or -u OWNER -r REPO (mandatory)
   -t, --tag string      Tag name (mandatory)
       --target string   Branch name or commit SHA of a tag. Unused if the Git tag already exists (default: the default branch)
 ```

@@ -36,8 +36,7 @@ func TestCmd_Run_pull_request(t *testing.T) {
 			cmdName,
 			pullRequestCmdName,
 			"--token", "YOUR_TOKEN",
-			"-u", "owner",
-			"-r", "repo",
+			"-r", "owner/repo",
 			"-b", "feature",
 			"--title", "commit-message",
 		}
@@ -46,6 +45,39 @@ func TestCmd_Run_pull_request(t *testing.T) {
 			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
 		}
 	})
+
+	t.Run("--base-repo", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		useCase := mock_pullrequest.NewMockInterface(ctrl)
+		useCase.EXPECT().
+			Do(ctx, pullrequest.Input{
+				HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
+				HeadBranchName: "feature",
+				BaseRepository: git.RepositoryID{Owner: "upstream-owner", Name: "upstream-repo"},
+				Title:          "commit-message",
+			})
+		r := Runner{
+			NewLogger:         newLogger(t, logger.Option{}),
+			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
+			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
+		}
+		args := []string{
+			cmdName,
+			pullRequestCmdName,
+			"--token", "YOUR_TOKEN",
+			"-r", "owner/repo",
+			"--base-repo", "upstream-owner/upstream-repo",
+			"-b", "feature",
+			"--title", "commit-message",
+		}
+		exitCode := r.Run(args, version)
+		if exitCode != exitCodeOK {
+			t.Errorf("exitCode wants %d but %d", exitCodeOK, exitCode)
+		}
+	})
+
 	t.Run("optional-flags", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
