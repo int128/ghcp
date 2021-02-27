@@ -4,16 +4,16 @@ on:
   pull_request:
     branches: [master]
     paths:
-      - '**.go'
       - .github/workflows/lint.yaml
+      - '**.go'
   push:
     branches: [master]
     paths:
-      - '**.go'
       - .github/workflows/lint.yaml
+      - '**.go'
 
 jobs:
-  golangci:
+  golangci-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
