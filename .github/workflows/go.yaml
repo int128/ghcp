@@ -1,0 +1,39 @@
+name: go
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/go.yaml
+      - '**.go'
+      - go.*
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/go.yaml
+      - '**.go'
+      - go.*
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: int128/go-actions/setup@v1
+        with:
+          go-version: 1.17
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.44.2
+          args: --timeout=3m
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: int128/go-actions/setup@v1
+        with:
+          go-version: 1.17
+      - run: go test -v ./...

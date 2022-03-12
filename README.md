@@ -1,4 +1,4 @@
-# ghcp [![CircleCI](https://circleci.com/gh/int128/ghcp.svg?style=shield)](https://circleci.com/gh/int128/ghcp) [![codecov](https://codecov.io/gh/int128/ghcp/branch/master/graph/badge.svg)](https://codecov.io/gh/int128/ghcp) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
+# ghcp [![go](https://github.com/int128/ghcp/actions/workflows/go.yaml/badge.svg)](https://github.com/int128/ghcp/actions/workflows/go.yaml) [![GoDoc](https://godoc.org/github.com/int128/ghcp?status.svg)](https://godoc.org/github.com/int128/ghcp)
 
 This is a release engineering tool for GitHub.
 It depends on GitHub APIs and works without git installation.
