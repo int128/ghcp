@@ -1,0 +1,33 @@
+name: acceptance-test
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/go.yaml
+      - '**.go'
+      - go.*
+      - acceptance_test/**
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/go.yaml
+      - '**.go'
+      - go.*
+      - acceptance_test/**
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: int128/go-actions/setup@v1
+        with:
+          go-version: 1.17
+      - run: go build -ldflags "-X main.version=${GITHUB_REF##*/}"
+      - run: make -C acceptance_test
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: make -C acceptance_test clean-up
+        if: always()
