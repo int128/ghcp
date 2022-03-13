@@ -1,8 +1,9 @@
 GHCP := ../ghcp
-GHCP_FLAGS := --debug -u int128 -r sandbox
+GHCP_FLAGS := --debug -u int128 -r ghcp
 
-CIRCLE_BUILD_NUM ?= 0
-BRANCH_PREFIX := ghcp-ci-$(CIRCLE_BUILD_NUM)
+GITHUB_RUN_NUMBER ?= 0
+BRANCH_PREFIX := ghcp-acceptance-test-$(GITHUB_RUN_NUMBER)
+GITHUB_PR_NUMBER := $(word 3,$(subst /, ,$(GITHUB_REF)))
 
 .PHONY: test
 test:
@@ -17,6 +18,9 @@ test:
 	# create a pull request from feature to master
 	$(GHCP) pull-request $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --base $(BRANCH_PREFIX)-master \
 		--title "ghcp: acceptance-test $(BRANCH_PREFIX)" \
-		--body "ref: $(CIRCLE_PULL_REQUESTS)"
-	# create a release
-	$(GHCP) release $(GHCP_FLAGS) -t $(BRANCH_PREFIX) fixture1.txt
+		--body "ref: #$(GITHUB_PR_NUMBER)"
+
+.PHONY: clean-up
+clean-up:
+	-git push origin --delete $(BRANCH_PREFIX)-master
+	-git push origin --delete $(BRANCH_PREFIX)-feature
