@@ -10,7 +10,7 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20181231061246-d48a9a75455f // indirect
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/oauth2 v0.3.0
+	golang.org/x/oauth2 v0.4.0
 )
 
 go 1.13
