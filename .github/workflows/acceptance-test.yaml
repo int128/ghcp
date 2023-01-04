@@ -3,7 +3,7 @@ name: acceptance-test
 on:
   pull_request:
     paths:
-      - .github/workflows/go.yaml
+      - .github/workflows/acceptance-test.yaml
       - '**.go'
       - go.*
       - acceptance_test/**
@@ -11,7 +11,7 @@ on:
     branches:
       - master
     paths:
-      - .github/workflows/go.yaml
+      - .github/workflows/acceptance-test.yaml
       - '**.go'
       - go.*
       - acceptance_test/**
