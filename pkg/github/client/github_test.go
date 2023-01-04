@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v48/github"
 )
 
 func TestNewGitHubClient(t *testing.T) {

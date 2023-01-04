@@ -7,7 +7,7 @@ package mock_client
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	github "github.com/google/go-github/v33/github"
+	github "github.com/google/go-github/v48/github"
 	githubv4 "github.com/shurcooL/githubv4"
 	os "os"
 	reflect "reflect"
