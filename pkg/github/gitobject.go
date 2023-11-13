@@ -89,7 +89,6 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 			Mode: github.String(file.Mode()),
 		}
 		if !file.Deleted {
-			log.Printf("%s is deleted", file.Filename)
 			entry.SHA = github.String(string(file.BlobSHA))
 		}
 		entries[i] = entry
