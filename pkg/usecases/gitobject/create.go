@@ -26,6 +26,7 @@ type Interface interface {
 
 type Input struct {
 	Files           []fs.File // nil or empty to create an empty commit
+	DeletedFiles    []string
 	Repository      git.RepositoryID
 	CommitMessage   git.CommitMessage
 	Author          *git.CommitAuthor // optional
@@ -81,13 +82,13 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 }
 
 func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.TreeSHA, error) {
-	if len(in.Files) == 0 {
+	if len(in.Files) == 0 && len(in.DeletedFiles) == 0 {
 		u.Logger.Debugf("Using the parent tree (%s) because of nothing to upload", in.ParentTreeSHA)
 		return in.ParentTreeSHA, nil
 	}
 
-	files := make([]git.File, len(in.Files))
-	for i, file := range in.Files {
+	files := make([]git.File, 0, len(in.Files)+len(in.DeletedFiles))
+	for _, file := range in.Files {
 		content, err := u.FileSystem.ReadAsBase64EncodedContent(file.Path)
 		if err != nil {
 			return "", fmt.Errorf("error while reading file %s: %w", file.Path, err)
@@ -104,8 +105,15 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 			BlobSHA:    blobSHA,
 			Executable: !in.NoFileMode && file.Executable,
 		}
-		files[i] = gitFile
+		files = append(files, gitFile)
 		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
+	}
+
+	for _, deletedFile := range in.DeletedFiles {
+		files = append(files, git.File{
+			Filename: deletedFile,
+			Deleted:  true,
+		})
 	}
 
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{

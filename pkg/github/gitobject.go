@@ -83,12 +83,15 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 	c.Logger.Debugf("Creating a tree %+v", n)
 	entries := make([]*github.TreeEntry, len(n.Files))
 	for i, file := range n.Files {
-		entries[i] = &github.TreeEntry{
+		entry := &github.TreeEntry{
 			Type: github.String("blob"),
 			Path: github.String(file.Filename),
 			Mode: github.String(file.Mode()),
-			SHA:  github.String(string(file.BlobSHA)),
 		}
+		if !file.Deleted {
+			entry.SHA = github.String(string(file.BlobSHA))
+		}
+		entries[i] = entry
 	}
 	tree, _, err := c.Client.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
 	if err != nil {

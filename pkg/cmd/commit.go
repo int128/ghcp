@@ -60,6 +60,7 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 				Author:           o.author(),
 				Committer:        o.committer(),
 				Paths:            args,
+				DeletedPaths:     o.DeletedPaths,
 				NoFileMode:       o.NoFileMode,
 				DryRun:           o.DryRun,
 			}
@@ -78,11 +79,12 @@ type commitOptions struct {
 	commitAttributeOptions
 	repositoryOptions
 
-	BranchName string
-	ParentRef  string
-	NoParent   bool
-	NoFileMode bool
-	DryRun     bool
+	BranchName   string
+	ParentRef    string
+	NoParent     bool
+	NoFileMode   bool
+	DryRun       bool
+	DeletedPaths []string
 }
 
 func (o commitOptions) validate() error {
@@ -112,5 +114,6 @@ func (o *commitOptions) register(f *pflag.FlagSet) {
 	f.BoolVar(&o.NoParent, "no-parent", false, "Create a commit without a parent")
 	f.BoolVar(&o.NoFileMode, "no-file-mode", false, "Ignore executable bit of file and treat as 0644")
 	f.BoolVar(&o.DryRun, "dry-run", false, "Upload files but do not update the branch actually")
+	f.StringSliceVarP(&o.DeletedPaths, "delete", "d", nil, "the list of deleted file paths")
 	o.commitAttributeOptions.register(f)
 }
