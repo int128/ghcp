@@ -30,6 +30,7 @@ type File struct {
 	Filename   string  // filename (including path separators)
 	BlobSHA    BlobSHA // blob SHA
 	Executable bool    // if the file is executable
+	Deleted    bool    // if the file is deleted
 }
 
 // Mode returns mode of the file, i.e. 100644 or 100755.

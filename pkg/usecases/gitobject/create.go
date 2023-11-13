@@ -112,6 +112,7 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 	for _, deletedFile := range in.DeletedFiles {
 		files = append(files, git.File{
 			Filename: deletedFile,
+			Deleted:  true,
 		})
 	}
 
