@@ -82,7 +82,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 }
 
 func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.TreeSHA, error) {
-	if len(in.Files) == 0 {
+	if len(in.Files) == 0 && len(in.DeletedFiles) == 0 {
 		u.Logger.Debugf("Using the parent tree (%s) because of nothing to upload", in.ParentTreeSHA)
 		return in.ParentTreeSHA, nil
 	}
