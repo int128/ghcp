@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -14,14 +13,12 @@ import (
 )
 
 func TestCmd_Run_empty_commit(t *testing.T) {
-	ctx := context.TODO()
-
 	t.Run("BasicOptions", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, commit.Input{
+			Do(gomock.Any(), commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.FastForward,

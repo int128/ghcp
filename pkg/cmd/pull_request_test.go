@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -13,14 +12,12 @@ import (
 )
 
 func TestCmd_Run_pull_request(t *testing.T) {
-	ctx := context.TODO()
-
 	t.Run("BasicOptions", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		useCase := mock_pullrequest.NewMockInterface(ctrl)
 		useCase.EXPECT().
-			Do(ctx, pullrequest.Input{
+			Do(gomock.Any(), pullrequest.Input{
 				HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				HeadBranchName: "feature",
 				BaseRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
@@ -51,7 +48,7 @@ func TestCmd_Run_pull_request(t *testing.T) {
 		defer ctrl.Finish()
 		useCase := mock_pullrequest.NewMockInterface(ctrl)
 		useCase.EXPECT().
-			Do(ctx, pullrequest.Input{
+			Do(gomock.Any(), pullrequest.Input{
 				HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				HeadBranchName: "feature",
 				BaseRepository: git.RepositoryID{Owner: "upstream-owner", Name: "upstream-repo"},
@@ -83,7 +80,7 @@ func TestCmd_Run_pull_request(t *testing.T) {
 		defer ctrl.Finish()
 		useCase := mock_pullrequest.NewMockInterface(ctrl)
 		useCase.EXPECT().
-			Do(ctx, pullrequest.Input{
+			Do(gomock.Any(), pullrequest.Input{
 				HeadRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				HeadBranchName: "feature",
 				BaseRepository: git.RepositoryID{Owner: "upstream-owner", Name: "upstream-repo"},
