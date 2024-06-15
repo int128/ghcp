@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -13,14 +12,12 @@ import (
 )
 
 func TestCmd_Run_release(t *testing.T) {
-	ctx := context.TODO()
-
 	t.Run("BasicOptions", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		releaseUseCase := mock_release.NewMockInterface(ctrl)
 		releaseUseCase.EXPECT().
-			Do(ctx, release.Input{
+			Do(gomock.Any(), release.Input{
 				Repository:              git.RepositoryID{Owner: "owner", Name: "repo"},
 				TagName:                 "v1.0.0",
 				TargetBranchOrCommitSHA: "COMMIT_SHA",

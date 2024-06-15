@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -21,8 +20,6 @@ const cmdName = "ghcp"
 const version = "TEST"
 
 func TestCmd_Run(t *testing.T) {
-	ctx := context.TODO()
-
 	input := commit.Input{
 		TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 		ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
@@ -36,7 +33,7 @@ func TestCmd_Run(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, input)
+			Do(gomock.Any(), input)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{Debug: true}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
@@ -65,7 +62,7 @@ func TestCmd_Run(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, input)
+			Do(gomock.Any(), input)
 		mockEnv := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
 		mockEnv.EXPECT().
 			Chdir("dir")
@@ -97,7 +94,7 @@ func TestCmd_Run(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, input)
+			Do(gomock.Any(), input)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
@@ -148,7 +145,7 @@ func TestCmd_Run(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, input)
+			Do(gomock.Any(), input)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
@@ -177,7 +174,7 @@ func TestCmd_Run(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_commit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, input)
+			Do(gomock.Any(), input)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),

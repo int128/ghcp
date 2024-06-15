@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -14,14 +13,12 @@ import (
 )
 
 func TestCmd_Run_forkcommit(t *testing.T) {
-	ctx := context.TODO()
-
 	t.Run("BasicOptions", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		commitUseCase := mock_forkcommit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, forkcommit.Input{
+			Do(gomock.Any(), forkcommit.Input{
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				TargetBranchName: "topic",
 				CommitStrategy:   commitstrategy.FastForward,
@@ -55,7 +52,7 @@ func TestCmd_Run_forkcommit(t *testing.T) {
 		defer ctrl.Finish()
 		commitUseCase := mock_forkcommit.NewMockInterface(ctrl)
 		commitUseCase.EXPECT().
-			Do(ctx, forkcommit.Input{
+			Do(gomock.Any(), forkcommit.Input{
 				TargetBranchName: "topic",
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.RebaseOn("develop"),
