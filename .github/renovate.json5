@@ -1,6 +1,7 @@
 {
   "extends": [
     "github>int128/renovate-base",
+    "github>int128/go-renovate-config#v1.4.1",
     "github>int128/go-renovate-config:github-actions#v1.4.1",
   ],
 }
