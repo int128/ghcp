@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v62/github"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github/client/mock_client"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
@@ -25,7 +25,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 				Message: github.String("message"),
 				Parents: []*github.Commit{{SHA: github.String("parentCommitSHA")}},
 				Tree:    &github.Tree{SHA: github.String("treeSHA")},
-			}).
+			}, nil).
 			Return(&github.Commit{
 				SHA: github.String("commitSHA"),
 			}, nil, nil)
@@ -56,7 +56,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 			CreateCommit(ctx, "owner", "repo", &github.Commit{
 				Message: github.String("message"),
 				Tree:    &github.Tree{SHA: github.String("treeSHA")},
-			}).
+			}, nil).
 			Return(&github.Commit{
 				SHA: github.String("commitSHA"),
 			}, nil, nil)

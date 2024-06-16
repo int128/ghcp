@@ -6,36 +6,37 @@ package mock_github
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	git "github.com/int128/ghcp/pkg/git"
 	github "github.com/int128/ghcp/pkg/github"
-	reflect "reflect"
 )
 
-// MockInterface is a mock of Interface interface
+// MockInterface is a mock of Interface interface.
 type MockInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockInterfaceMockRecorder
 }
 
-// MockInterfaceMockRecorder is the mock recorder for MockInterface
+// MockInterfaceMockRecorder is the mock recorder for MockInterface.
 type MockInterfaceMockRecorder struct {
 	mock *MockInterface
 }
 
-// NewMockInterface creates a new mock instance
+// NewMockInterface creates a new mock instance.
 func NewMockInterface(ctrl *gomock.Controller) *MockInterface {
 	mock := &MockInterface{ctrl: ctrl}
 	mock.recorder = &MockInterfaceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
 }
 
-// CreateBlob mocks base method
+// CreateBlob mocks base method.
 func (m *MockInterface) CreateBlob(arg0 context.Context, arg1 git.NewBlob) (git.BlobSHA, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBlob", arg0, arg1)
@@ -44,13 +45,13 @@ func (m *MockInterface) CreateBlob(arg0 context.Context, arg1 git.NewBlob) (git.
 	return ret0, ret1
 }
 
-// CreateBlob indicates an expected call of CreateBlob
+// CreateBlob indicates an expected call of CreateBlob.
 func (mr *MockInterfaceMockRecorder) CreateBlob(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBlob", reflect.TypeOf((*MockInterface)(nil).CreateBlob), arg0, arg1)
 }
 
-// CreateBranch mocks base method
+// CreateBranch mocks base method.
 func (m *MockInterface) CreateBranch(arg0 context.Context, arg1 github.CreateBranchInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateBranch", arg0, arg1)
@@ -58,13 +59,13 @@ func (m *MockInterface) CreateBranch(arg0 context.Context, arg1 github.CreateBra
 	return ret0
 }
 
-// CreateBranch indicates an expected call of CreateBranch
+// CreateBranch indicates an expected call of CreateBranch.
 func (mr *MockInterfaceMockRecorder) CreateBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBranch", reflect.TypeOf((*MockInterface)(nil).CreateBranch), arg0, arg1)
 }
 
-// CreateCommit mocks base method
+// CreateCommit mocks base method.
 func (m *MockInterface) CreateCommit(arg0 context.Context, arg1 git.NewCommit) (git.CommitSHA, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCommit", arg0, arg1)
@@ -73,13 +74,13 @@ func (m *MockInterface) CreateCommit(arg0 context.Context, arg1 git.NewCommit) (
 	return ret0, ret1
 }
 
-// CreateCommit indicates an expected call of CreateCommit
+// CreateCommit indicates an expected call of CreateCommit.
 func (mr *MockInterfaceMockRecorder) CreateCommit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommit", reflect.TypeOf((*MockInterface)(nil).CreateCommit), arg0, arg1)
 }
 
-// CreateFork mocks base method
+// CreateFork mocks base method.
 func (m *MockInterface) CreateFork(arg0 context.Context, arg1 git.RepositoryID) (*git.RepositoryID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateFork", arg0, arg1)
@@ -88,13 +89,13 @@ func (m *MockInterface) CreateFork(arg0 context.Context, arg1 git.RepositoryID) 
 	return ret0, ret1
 }
 
-// CreateFork indicates an expected call of CreateFork
+// CreateFork indicates an expected call of CreateFork.
 func (mr *MockInterfaceMockRecorder) CreateFork(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFork", reflect.TypeOf((*MockInterface)(nil).CreateFork), arg0, arg1)
 }
 
-// CreatePullRequest mocks base method
+// CreatePullRequest mocks base method.
 func (m *MockInterface) CreatePullRequest(arg0 context.Context, arg1 github.CreatePullRequestInput) (*github.CreatePullRequestOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreatePullRequest", arg0, arg1)
@@ -103,13 +104,13 @@ func (m *MockInterface) CreatePullRequest(arg0 context.Context, arg1 github.Crea
 	return ret0, ret1
 }
 
-// CreatePullRequest indicates an expected call of CreatePullRequest
+// CreatePullRequest indicates an expected call of CreatePullRequest.
 func (mr *MockInterfaceMockRecorder) CreatePullRequest(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePullRequest", reflect.TypeOf((*MockInterface)(nil).CreatePullRequest), arg0, arg1)
 }
 
-// CreateRelease mocks base method
+// CreateRelease mocks base method.
 func (m *MockInterface) CreateRelease(arg0 context.Context, arg1 git.Release) (*git.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1)
@@ -118,13 +119,13 @@ func (m *MockInterface) CreateRelease(arg0 context.Context, arg1 git.Release) (*
 	return ret0, ret1
 }
 
-// CreateRelease indicates an expected call of CreateRelease
+// CreateRelease indicates an expected call of CreateRelease.
 func (mr *MockInterfaceMockRecorder) CreateRelease(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRelease", reflect.TypeOf((*MockInterface)(nil).CreateRelease), arg0, arg1)
 }
 
-// CreateReleaseAsset mocks base method
+// CreateReleaseAsset mocks base method.
 func (m *MockInterface) CreateReleaseAsset(arg0 context.Context, arg1 git.ReleaseAsset) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateReleaseAsset", arg0, arg1)
@@ -132,13 +133,13 @@ func (m *MockInterface) CreateReleaseAsset(arg0 context.Context, arg1 git.Releas
 	return ret0
 }
 
-// CreateReleaseAsset indicates an expected call of CreateReleaseAsset
+// CreateReleaseAsset indicates an expected call of CreateReleaseAsset.
 func (mr *MockInterfaceMockRecorder) CreateReleaseAsset(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReleaseAsset", reflect.TypeOf((*MockInterface)(nil).CreateReleaseAsset), arg0, arg1)
 }
 
-// CreateTree mocks base method
+// CreateTree mocks base method.
 func (m *MockInterface) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.TreeSHA, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTree", arg0, arg1)
@@ -147,13 +148,13 @@ func (m *MockInterface) CreateTree(arg0 context.Context, arg1 git.NewTree) (git.
 	return ret0, ret1
 }
 
-// CreateTree indicates an expected call of CreateTree
+// CreateTree indicates an expected call of CreateTree.
 func (mr *MockInterfaceMockRecorder) CreateTree(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTree", reflect.TypeOf((*MockInterface)(nil).CreateTree), arg0, arg1)
 }
 
-// GetReleaseByTagOrNil mocks base method
+// GetReleaseByTagOrNil mocks base method.
 func (m *MockInterface) GetReleaseByTagOrNil(arg0 context.Context, arg1 git.RepositoryID, arg2 git.TagName) (*git.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetReleaseByTagOrNil", arg0, arg1, arg2)
@@ -162,13 +163,13 @@ func (m *MockInterface) GetReleaseByTagOrNil(arg0 context.Context, arg1 git.Repo
 	return ret0, ret1
 }
 
-// GetReleaseByTagOrNil indicates an expected call of GetReleaseByTagOrNil
+// GetReleaseByTagOrNil indicates an expected call of GetReleaseByTagOrNil.
 func (mr *MockInterfaceMockRecorder) GetReleaseByTagOrNil(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReleaseByTagOrNil", reflect.TypeOf((*MockInterface)(nil).GetReleaseByTagOrNil), arg0, arg1, arg2)
 }
 
-// QueryCommit mocks base method
+// QueryCommit mocks base method.
 func (m *MockInterface) QueryCommit(arg0 context.Context, arg1 github.QueryCommitInput) (*github.QueryCommitOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryCommit", arg0, arg1)
@@ -177,13 +178,13 @@ func (m *MockInterface) QueryCommit(arg0 context.Context, arg1 github.QueryCommi
 	return ret0, ret1
 }
 
-// QueryCommit indicates an expected call of QueryCommit
+// QueryCommit indicates an expected call of QueryCommit.
 func (mr *MockInterfaceMockRecorder) QueryCommit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryCommit", reflect.TypeOf((*MockInterface)(nil).QueryCommit), arg0, arg1)
 }
 
-// QueryDefaultBranch mocks base method
+// QueryDefaultBranch mocks base method.
 func (m *MockInterface) QueryDefaultBranch(arg0 context.Context, arg1 github.QueryDefaultBranchInput) (*github.QueryDefaultBranchOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryDefaultBranch", arg0, arg1)
@@ -192,13 +193,13 @@ func (m *MockInterface) QueryDefaultBranch(arg0 context.Context, arg1 github.Que
 	return ret0, ret1
 }
 
-// QueryDefaultBranch indicates an expected call of QueryDefaultBranch
+// QueryDefaultBranch indicates an expected call of QueryDefaultBranch.
 func (mr *MockInterfaceMockRecorder) QueryDefaultBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryDefaultBranch", reflect.TypeOf((*MockInterface)(nil).QueryDefaultBranch), arg0, arg1)
 }
 
-// QueryForCommit mocks base method
+// QueryForCommit mocks base method.
 func (m *MockInterface) QueryForCommit(arg0 context.Context, arg1 github.QueryForCommitInput) (*github.QueryForCommitOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryForCommit", arg0, arg1)
@@ -207,13 +208,13 @@ func (m *MockInterface) QueryForCommit(arg0 context.Context, arg1 github.QueryFo
 	return ret0, ret1
 }
 
-// QueryForCommit indicates an expected call of QueryForCommit
+// QueryForCommit indicates an expected call of QueryForCommit.
 func (mr *MockInterfaceMockRecorder) QueryForCommit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForCommit", reflect.TypeOf((*MockInterface)(nil).QueryForCommit), arg0, arg1)
 }
 
-// QueryForPullRequest mocks base method
+// QueryForPullRequest mocks base method.
 func (m *MockInterface) QueryForPullRequest(arg0 context.Context, arg1 github.QueryForPullRequestInput) (*github.QueryForPullRequestOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "QueryForPullRequest", arg0, arg1)
@@ -222,13 +223,13 @@ func (m *MockInterface) QueryForPullRequest(arg0 context.Context, arg1 github.Qu
 	return ret0, ret1
 }
 
-// QueryForPullRequest indicates an expected call of QueryForPullRequest
+// QueryForPullRequest indicates an expected call of QueryForPullRequest.
 func (mr *MockInterfaceMockRecorder) QueryForPullRequest(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryForPullRequest", reflect.TypeOf((*MockInterface)(nil).QueryForPullRequest), arg0, arg1)
 }
 
-// RequestPullRequestReview mocks base method
+// RequestPullRequestReview mocks base method.
 func (m *MockInterface) RequestPullRequestReview(arg0 context.Context, arg1 github.RequestPullRequestReviewInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RequestPullRequestReview", arg0, arg1)
@@ -236,13 +237,13 @@ func (m *MockInterface) RequestPullRequestReview(arg0 context.Context, arg1 gith
 	return ret0
 }
 
-// RequestPullRequestReview indicates an expected call of RequestPullRequestReview
+// RequestPullRequestReview indicates an expected call of RequestPullRequestReview.
 func (mr *MockInterfaceMockRecorder) RequestPullRequestReview(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestPullRequestReview", reflect.TypeOf((*MockInterface)(nil).RequestPullRequestReview), arg0, arg1)
 }
 
-// UpdateBranch mocks base method
+// UpdateBranch mocks base method.
 func (m *MockInterface) UpdateBranch(arg0 context.Context, arg1 github.UpdateBranchInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBranch", arg0, arg1)
@@ -250,7 +251,7 @@ func (m *MockInterface) UpdateBranch(arg0 context.Context, arg1 github.UpdateBra
 	return ret0
 }
 
-// UpdateBranch indicates an expected call of UpdateBranch
+// UpdateBranch indicates an expected call of UpdateBranch.
 func (mr *MockInterfaceMockRecorder) UpdateBranch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBranch", reflect.TypeOf((*MockInterface)(nil).UpdateBranch), arg0, arg1)

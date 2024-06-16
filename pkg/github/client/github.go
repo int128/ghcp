@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/google/go-github/v49/github"
+	"github.com/google/go-github/v62/github"
 	"github.com/google/wire"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
@@ -33,7 +33,7 @@ type QueryService interface {
 }
 
 type GitService interface {
-	CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit) (*github.Commit, *github.Response, error)
+	CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)
 	CreateTree(ctx context.Context, owner string, repo string, baseTree string, entries []*github.TreeEntry) (*github.Tree, *github.Response, error)
 	CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)
 }
@@ -81,7 +81,7 @@ func newClients(o Option) (*githubv4.Client, *github.Client, error) {
 	}
 	if o.URLv3 != "" {
 		// https://developer.github.com/enterprise/2.16/v3/
-		v3, err := github.NewEnterpriseClient(o.URLv3, o.URLv3, hc)
+		v3, err := github.NewClient(hc).WithEnterpriseURLs(o.URLv3, o.URLv3)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error while creating a GitHub v3 client: %w", err)
 		}
