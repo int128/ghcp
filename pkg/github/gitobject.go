@@ -71,7 +71,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 			Email: github.String(n.Committer.Email),
 		}
 	}
-	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit)
+	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit, nil)
 	if err != nil {
 		return "", fmt.Errorf("GitHub API error: %w", err)
 	}
