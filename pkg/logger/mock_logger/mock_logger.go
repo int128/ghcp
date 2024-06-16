@@ -5,34 +5,35 @@
 package mock_logger
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockInterface is a mock of Interface interface
+// MockInterface is a mock of Interface interface.
 type MockInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockInterfaceMockRecorder
 }
 
-// MockInterfaceMockRecorder is the mock recorder for MockInterface
+// MockInterfaceMockRecorder is the mock recorder for MockInterface.
 type MockInterfaceMockRecorder struct {
 	mock *MockInterface
 }
 
-// NewMockInterface creates a new mock instance
+// NewMockInterface creates a new mock instance.
 func NewMockInterface(ctrl *gomock.Controller) *MockInterface {
 	mock := &MockInterface{ctrl: ctrl}
 	mock.recorder = &MockInterfaceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
 }
 
-// Debugf mocks base method
+// Debugf mocks base method.
 func (m *MockInterface) Debugf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -42,14 +43,14 @@ func (m *MockInterface) Debugf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.Call(m, "Debugf", varargs...)
 }
 
-// Debugf indicates an expected call of Debugf
+// Debugf indicates an expected call of Debugf.
 func (mr *MockInterfaceMockRecorder) Debugf(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Debugf", reflect.TypeOf((*MockInterface)(nil).Debugf), varargs...)
 }
 
-// Errorf mocks base method
+// Errorf mocks base method.
 func (m *MockInterface) Errorf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -59,14 +60,14 @@ func (m *MockInterface) Errorf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.Call(m, "Errorf", varargs...)
 }
 
-// Errorf indicates an expected call of Errorf
+// Errorf indicates an expected call of Errorf.
 func (mr *MockInterfaceMockRecorder) Errorf(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Errorf", reflect.TypeOf((*MockInterface)(nil).Errorf), varargs...)
 }
 
-// Infof mocks base method
+// Infof mocks base method.
 func (m *MockInterface) Infof(arg0 string, arg1 ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -76,14 +77,14 @@ func (m *MockInterface) Infof(arg0 string, arg1 ...interface{}) {
 	m.ctrl.Call(m, "Infof", varargs...)
 }
 
-// Infof indicates an expected call of Infof
+// Infof indicates an expected call of Infof.
 func (mr *MockInterfaceMockRecorder) Infof(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Infof", reflect.TypeOf((*MockInterface)(nil).Infof), varargs...)
 }
 
-// Warnf mocks base method
+// Warnf mocks base method.
 func (m *MockInterface) Warnf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
@@ -93,7 +94,7 @@ func (m *MockInterface) Warnf(arg0 string, arg1 ...interface{}) {
 	m.ctrl.Call(m, "Warnf", varargs...)
 }
 
-// Warnf indicates an expected call of Warnf
+// Warnf indicates an expected call of Warnf.
 func (mr *MockInterfaceMockRecorder) Warnf(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
