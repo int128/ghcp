@@ -39,7 +39,7 @@ jobs:
         with:
           go-version: 1.22.5
       - run: go mod tidy
-      - uses: int128/update-generated-files-action@96ac74aa35f9d2e748335b60e7f3260304d22a6b # v2.51.0
+      - uses: int128/update-generated-files-action@d01a193ae8a14d7d7699981665a0922bde444389 # v2.52.0
 
   test:
     runs-on: ubuntu-latest
