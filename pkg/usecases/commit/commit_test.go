@@ -94,14 +94,16 @@ func TestCommitToBranch_Do(t *testing.T) {
 					ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 					TargetRepositoryNodeID:       targetRepositoryNodeID,
 				}, nil)
-			gitHub.EXPECT().
-				CreateBranch(ctx, github.CreateBranchInput{
-					RepositoryNodeID: targetRepositoryNodeID,
-					BranchName:       "topic",
-					CommitSHA:        "commitSHA",
-				}).
-				Return(nil).
-				Times(c.branchOperationTimes)
+			if c.branchOperationTimes > 0 {
+				gitHub.EXPECT().
+					CreateBranch(ctx, github.CreateBranchInput{
+						RepositoryNodeID: targetRepositoryNodeID,
+						BranchName:       "topic",
+						CommitSHA:        "commitSHA",
+					}).
+					Return(nil).
+					Times(c.branchOperationTimes)
+			}
 
 			useCase := Commit{
 				CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
@@ -140,14 +142,16 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
@@ -176,13 +180,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "topicCommitSHA", "topicTreeSHA", c.noFileMode, c.changedFiles),
@@ -222,14 +228,16 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
@@ -258,13 +266,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
@@ -307,14 +317,16 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentRefTreeSHA:             "developTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
@@ -346,13 +358,15 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentRefCommitSHA:           "developCommitSHA",
 						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
@@ -373,12 +387,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 			branchOperationTimes: 1,
 		},
 		"NothingToCommit": {
-			changedFiles:         0,
-			branchOperationTimes: 0,
+			changedFiles: 0,
 		},
 		"DryRun": {
-			dryRun:               true,
-			branchOperationTimes: 0,
+			dryRun: true,
 		},
 		"NoFileMode": {
 			noFileMode: true,
