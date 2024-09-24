@@ -32,3 +32,15 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - run: go test -v ./...
+
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+          cache-dependency-path: tools/go.sum
+      - run: make generate
+      - uses: int128/update-generated-files-action@v2
