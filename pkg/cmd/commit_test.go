@@ -3,32 +3,31 @@ package cmd
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/commit_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
-	"github.com/int128/ghcp/pkg/usecases/commit/mock_commit"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestCmd_Run_commit(t *testing.T) {
 	t.Run("BasicOptions", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.FastForward,
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -47,22 +46,21 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--branch", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				TargetBranchName: "gh-pages",
 				CommitStrategy:   commitstrategy.FastForward,
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -83,22 +81,21 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--parent", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				TargetBranchName: "topic",
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.RebaseOn("develop"),
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -120,22 +117,21 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--no-parent", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				TargetBranchName: "topic",
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.NoParent,
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -157,12 +153,10 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--parent and --no-parent", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, nil),
+			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
 		}
 		args := []string{
@@ -185,12 +179,10 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("only --author-name", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, nil),
+			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
 		}
 		args := []string{
@@ -210,12 +202,10 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("only --committer-email", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, nil),
+			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
 		}
 		args := []string{
@@ -235,22 +225,21 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--no-file-mode", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.FastForward,
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
 				NoFileMode:       true,
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -271,22 +260,21 @@ func TestCmd_Run_commit(t *testing.T) {
 	})
 
 	t.Run("--dry-run", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), commit.Input{
+			Do(mock.Anything, commit.Input{
 				TargetRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				ParentRepository: git.RepositoryID{Owner: "owner", Name: "repo"},
 				CommitStrategy:   commitstrategy.FastForward,
 				CommitMessage:    "commit-message",
 				Paths:            []string{"file1", "file2"},
 				DryRun:           true,
-			})
+			}).
+			Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{

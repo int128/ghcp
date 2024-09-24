@@ -4,10 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 )
 
@@ -25,9 +24,7 @@ func TestPullRequest_Do(t *testing.T) {
 			Title:          "the-title",
 		}
 		t.Run("when the pull request does not exist", func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			gitHub := mock_github.NewMockInterface(ctrl)
+			gitHub := github_mock.NewMockInterface(t)
 			gitHub.EXPECT().
 				QueryForPullRequest(ctx, github.QueryForPullRequestInput{
 					BaseRepository: baseRepositoryID,
@@ -59,9 +56,7 @@ func TestPullRequest_Do(t *testing.T) {
 			}
 		})
 		t.Run("when the pull request already exists", func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			gitHub := mock_github.NewMockInterface(ctrl)
+			gitHub := github_mock.NewMockInterface(t)
 			gitHub.EXPECT().
 				QueryForPullRequest(ctx, github.QueryForPullRequestInput{
 					BaseRepository: baseRepositoryID,
@@ -83,9 +78,7 @@ func TestPullRequest_Do(t *testing.T) {
 			}
 		})
 		t.Run("when the head branch does not exist", func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			gitHub := mock_github.NewMockInterface(ctrl)
+			gitHub := github_mock.NewMockInterface(t)
 			gitHub.EXPECT().
 				QueryForPullRequest(ctx, github.QueryForPullRequestInput{
 					BaseRepository: baseRepositoryID,
@@ -113,9 +106,7 @@ func TestPullRequest_Do(t *testing.T) {
 			BaseBranchName: "staging",
 			Title:          "the-title",
 		}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			QueryDefaultBranch(ctx, github.QueryDefaultBranchInput{
 				BaseRepository: baseRepositoryID,
@@ -165,9 +156,7 @@ func TestPullRequest_Do(t *testing.T) {
 			Title:          "the-title",
 			Reviewer:       "the-reviewer",
 		}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			QueryForPullRequest(ctx, github.QueryForPullRequestInput{
 				BaseRepository: baseRepositoryID,
@@ -197,7 +186,8 @@ func TestPullRequest_Do(t *testing.T) {
 			RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
 				PullRequest: "ThePullRequestID",
 				User:        "TheReviewerID",
-			})
+			}).
+			Return(nil)
 		useCase := PullRequest{
 			GitHub: gitHub,
 			Logger: testingLogger.New(t),
@@ -217,9 +207,7 @@ func TestPullRequest_Do(t *testing.T) {
 			Body:           "the-body",
 			Draft:          true,
 		}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			QueryForPullRequest(ctx, github.QueryForPullRequestInput{
 				BaseRepository: baseRepositoryID,

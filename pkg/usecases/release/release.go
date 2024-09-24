@@ -18,8 +18,6 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*Release)),
 )
 
-//go:generate mockgen -destination mock_release/mock_release.go github.com/int128/ghcp/pkg/usecases/release Interface
-
 type Interface interface {
 	Do(ctx context.Context, in Input) error
 }

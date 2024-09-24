@@ -4,14 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/fs_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/fs"
-	"github.com/int128/ghcp/pkg/fs/mock_fs"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 )
 
@@ -20,10 +18,8 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 	repositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
 
 	t.Run("BasicOptions", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 
-		fileSystem := mock_fs.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
 		fileSystem.EXPECT().
 			ReadAsBase64EncodedContent("file1").
 			Return("base64content1", nil)
@@ -31,7 +27,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			ReadAsBase64EncodedContent("file2").
 			Return("base64content2", nil)
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
@@ -105,10 +101,8 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 	})
 
 	t.Run("NoFileMode", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 
-		fileSystem := mock_fs.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
 		fileSystem.EXPECT().
 			ReadAsBase64EncodedContent("file1").
 			Return("base64content1", nil)
@@ -116,7 +110,7 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 			ReadAsBase64EncodedContent("file2").
 			Return("base64content2", nil)
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateBlob(ctx, git.NewBlob{
 				Repository: repositoryID,
@@ -191,12 +185,10 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 	})
 
 	t.Run("NoFile", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 
-		fileSystem := mock_fs.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateCommit(ctx, git.NewCommit{
 				Repository:      repositoryID,
@@ -239,12 +231,10 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 	})
 
 	t.Run("CommitterAndAuthor", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 
-		fileSystem := mock_fs.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateCommit(ctx, git.NewCommit{
 				Repository:      repositoryID,

@@ -4,16 +4,16 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/fs_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/gitobject_mock"
 	"github.com/int128/ghcp/pkg/fs"
-	"github.com/int128/ghcp/pkg/fs/mock_fs"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/gitobject"
-	"github.com/int128/ghcp/pkg/usecases/gitobject/mock_gitobject"
+	"github.com/stretchr/testify/mock"
 )
 
 var parentRepositoryID = git.RepositoryID{Owner: "upstream", Name: "repo"}
@@ -22,20 +22,20 @@ var targetRepositoryID = git.RepositoryID{Owner: "owner", Name: "repo"}
 var targetRepositoryNodeID = github.InternalRepositoryNodeID("OwnerRepo")
 var targetBranchNodeID = github.InternalBranchNodeID("OwnerRepoTargetBranch")
 
-var thePathFilter = gomock.AssignableToTypeOf(&pathFilter{})
+var thePathFilter = mock.Anything
 var theFiles = []fs.File{
 	{Path: "file1"},
 	{Path: "file2", Executable: true},
 }
 
-func newFileSystemMock(ctrl *gomock.Controller) *mock_fs.MockInterface {
-	fileSystem := mock_fs.NewMockInterface(ctrl)
+func newFileSystemMock(t *testing.T) *fs_mock.MockInterface {
+	fileSystem := fs_mock.NewMockInterface(t)
 	fileSystem.EXPECT().FindFiles([]string{"path"}, thePathFilter).Return(theFiles, nil)
 	return fileSystem
 }
 
-func newCreateGitObjectMock(ctx context.Context, ctrl *gomock.Controller, parentCommitSHA git.CommitSHA, parentTreeSHA git.TreeSHA, noFileMode bool, changedFiles int) *mock_gitobject.MockInterface {
-	createGitObject := mock_gitobject.NewMockInterface(ctrl)
+func newCreateGitObjectMock(ctx context.Context, t *testing.T, parentCommitSHA git.CommitSHA, parentTreeSHA git.TreeSHA, noFileMode bool, changedFiles int) *gitobject_mock.MockInterface {
+	createGitObject := gitobject_mock.NewMockInterface(t)
 	createGitObject.EXPECT().
 		Do(ctx, gitobject.Input{
 			Files:           theFiles,
@@ -73,9 +73,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 				NoFileMode:       c.noFileMode,
 				DryRun:           c.dryRun,
 			}
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-			gitHub := mock_github.NewMockInterface(ctrl)
+			gitHub := github_mock.NewMockInterface(t)
 			gitHub.EXPECT().
 				QueryDefaultBranch(ctx, github.QueryDefaultBranchInput{
 					HeadRepository: targetRepositoryID,
@@ -96,18 +94,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 					ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 					TargetRepositoryNodeID:       targetRepositoryNodeID,
 				}, nil)
-			gitHub.EXPECT().
-				CreateBranch(ctx, github.CreateBranchInput{
-					RepositoryNodeID: targetRepositoryNodeID,
-					BranchName:       "topic",
-					CommitSHA:        "commitSHA",
-				}).
-				Return(nil).
-				Times(c.branchOperationTimes)
+			if c.branchOperationTimes > 0 {
+				gitHub.EXPECT().
+					CreateBranch(ctx, github.CreateBranchInput{
+						RepositoryNodeID: targetRepositoryNodeID,
+						BranchName:       "topic",
+						CommitSHA:        "commitSHA",
+					}).
+					Return(nil).
+					Times(c.branchOperationTimes)
+			}
 
 			useCase := Commit{
-				CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
-				FileSystem:      newFileSystemMock(ctrl),
+				CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
+				FileSystem:      newFileSystemMock(t),
 				Logger:          testingLogger.New(t),
 				GitHub:          gitHub,
 			}
@@ -129,9 +129,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			}
 
 			t.Run("when a branch does not exist, it should create it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -144,18 +142,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -165,9 +165,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			})
 
 			t.Run("when the branch exists, it should update it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -182,17 +180,19 @@ func TestCommitToBranch_Do(t *testing.T) {
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "topicCommitSHA", "topicTreeSHA", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "topicCommitSHA", "topicTreeSHA", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -215,9 +215,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			}
 
 			t.Run("when a branch does not exist, it should create it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -230,18 +228,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentDefaultBranchTreeSHA:   "masterTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "", "", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -251,9 +251,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			})
 
 			t.Run("when the branch exists, it should update it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -268,17 +266,19 @@ func TestCommitToBranch_Do(t *testing.T) {
 						TargetBranchCommitSHA:        "topicCommitSHA",
 						TargetBranchTreeSHA:          "topicTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "", "", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -301,9 +301,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			}
 
 			t.Run("when a branch does not exist, it should create it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -319,18 +317,20 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentRefTreeSHA:             "developTreeSHA",
 						TargetRepositoryNodeID:       targetRepositoryNodeID,
 					}, nil)
-				gitHub.EXPECT().
-					CreateBranch(ctx, github.CreateBranchInput{
-						RepositoryNodeID: targetRepositoryNodeID,
-						BranchName:       "topic",
-						CommitSHA:        "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						CreateBranch(ctx, github.CreateBranchInput{
+							RepositoryNodeID: targetRepositoryNodeID,
+							BranchName:       "topic",
+							CommitSHA:        "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -340,9 +340,7 @@ func TestCommitToBranch_Do(t *testing.T) {
 			})
 
 			t.Run("when the branch exists, it should update it", func(t *testing.T) {
-				ctrl := gomock.NewController(t)
-				defer ctrl.Finish()
-				gitHub := mock_github.NewMockInterface(ctrl)
+				gitHub := github_mock.NewMockInterface(t)
 				gitHub.EXPECT().
 					QueryForCommit(ctx, github.QueryForCommitInput{
 						ParentRepository: parentRepositoryID,
@@ -360,17 +358,19 @@ func TestCommitToBranch_Do(t *testing.T) {
 						ParentRefCommitSHA:           "developCommitSHA",
 						ParentRefTreeSHA:             "developTreeSHA",
 					}, nil)
-				gitHub.EXPECT().
-					UpdateBranch(ctx, github.UpdateBranchInput{
-						BranchRefNodeID: targetBranchNodeID,
-						CommitSHA:       "commitSHA",
-					}).
-					Return(nil).
-					Times(c.branchOperationTimes)
+				if c.branchOperationTimes > 0 {
+					gitHub.EXPECT().
+						UpdateBranch(ctx, github.UpdateBranchInput{
+							BranchRefNodeID: targetBranchNodeID,
+							CommitSHA:       "commitSHA",
+						}).
+						Return(nil).
+						Times(c.branchOperationTimes)
+				}
 
 				useCase := Commit{
-					CreateGitObject: newCreateGitObjectMock(ctx, ctrl, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
-					FileSystem:      newFileSystemMock(ctrl),
+					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
+					FileSystem:      newFileSystemMock(t),
 					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
@@ -387,12 +387,10 @@ func TestCommitToBranch_Do(t *testing.T) {
 			branchOperationTimes: 1,
 		},
 		"NothingToCommit": {
-			changedFiles:         0,
-			branchOperationTimes: 0,
+			changedFiles: 0,
 		},
 		"DryRun": {
-			dryRun:               true,
-			branchOperationTimes: 0,
+			dryRun: true,
 		},
 		"NoFileMode": {
 			noFileMode: true,

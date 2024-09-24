@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/fs_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/fs"
-	"github.com/int128/ghcp/pkg/fs/mock_fs"
 	"github.com/int128/ghcp/pkg/git"
-	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRelease_Do(t *testing.T) {
@@ -22,17 +22,15 @@ func TestRelease_Do(t *testing.T) {
 	}
 
 	t.Run("CreateReleaseIfNotFound", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		in := Input{
 			Repository:              targetRepositoryID,
 			TagName:                 targetTagName,
 			TargetBranchOrCommitSHA: "TARGET_COMMIT",
 			Paths:                   []string{"path"},
 		}
-		fileSystem := mock_fs.NewMockInterface(ctrl)
-		fileSystem.EXPECT().FindFiles([]string{"path"}, gomock.Any()).Return(theFiles, nil)
-		gitHub := mock_github.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
+		fileSystem.EXPECT().FindFiles([]string{"path"}, mock.Anything).Return(theFiles, nil)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			GetReleaseByTagOrNil(ctx, targetRepositoryID, targetTagName).
 			Return(nil, nil)
@@ -62,7 +60,8 @@ func TestRelease_Do(t *testing.T) {
 				},
 				Name:     "file1",
 				RealPath: "file1",
-			})
+			}).
+			Return(nil)
 		gitHub.EXPECT().
 			CreateReleaseAsset(ctx, git.ReleaseAsset{
 				Release: git.ReleaseID{
@@ -71,7 +70,8 @@ func TestRelease_Do(t *testing.T) {
 				},
 				Name:     "file2",
 				RealPath: "dir2/file2",
-			})
+			}).
+			Return(nil)
 
 		useCase := Release{
 			FileSystem: fileSystem,
@@ -84,16 +84,14 @@ func TestRelease_Do(t *testing.T) {
 	})
 
 	t.Run("ReleaseAlreadyExists", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		in := Input{
 			Repository: targetRepositoryID,
 			TagName:    targetTagName,
 			Paths:      []string{"path"},
 		}
-		fileSystem := mock_fs.NewMockInterface(ctrl)
-		fileSystem.EXPECT().FindFiles([]string{"path"}, gomock.Any()).Return(theFiles, nil)
-		gitHub := mock_github.NewMockInterface(ctrl)
+		fileSystem := fs_mock.NewMockInterface(t)
+		fileSystem.EXPECT().FindFiles([]string{"path"}, mock.Anything).Return(theFiles, nil)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			GetReleaseByTagOrNil(ctx, targetRepositoryID, targetTagName).
 			Return(&git.Release{
@@ -112,7 +110,8 @@ func TestRelease_Do(t *testing.T) {
 				},
 				Name:     "file1",
 				RealPath: "file1",
-			})
+			}).
+			Return(nil)
 		gitHub.EXPECT().
 			CreateReleaseAsset(ctx, git.ReleaseAsset{
 				Release: git.ReleaseID{
@@ -121,7 +120,8 @@ func TestRelease_Do(t *testing.T) {
 				},
 				Name:     "file2",
 				RealPath: "dir2/file2",
-			})
+			}).
+			Return(nil)
 
 		useCase := Release{
 			FileSystem: fileSystem,
