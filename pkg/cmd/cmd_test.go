@@ -3,17 +3,17 @@ package cmd
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/int128/ghcp/pkg/env/mock_env"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/env_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/commit_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/client"
 	"github.com/int128/ghcp/pkg/logger"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/commit"
-	"github.com/int128/ghcp/pkg/usecases/commit/mock_commit"
 )
 
 const cmdName = "ghcp"
@@ -29,15 +29,13 @@ func TestCmd_Run(t *testing.T) {
 	}
 
 	t.Run("--debug", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), input)
+			Do(mock.Anything, input).Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{Debug: true}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -58,14 +56,12 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("--directory", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), input)
-		mockEnv := newEnv(ctrl, map[string]string{envGitHubAPI: ""})
+			Do(mock.Anything, input).Return(nil)
+		mockEnv := newEnv(t, map[string]string{envGitHubAPI: ""})
 		mockEnv.EXPECT().
-			Chdir("dir")
+			Chdir("dir").Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
@@ -90,15 +86,13 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("env/GITHUB_TOKEN", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), input)
+			Do(mock.Anything, input).Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -117,12 +111,10 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("NoGitHubToken", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubToken: ""}),
+			Env:               newEnv(t, map[string]string{envGitHubToken: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
 		}
 		args := []string{
@@ -141,15 +133,13 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("--api", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), input)
+			Do(mock.Anything, input).Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
-			Env:               newEnv(ctrl, nil),
+			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -170,15 +160,13 @@ func TestCmd_Run(t *testing.T) {
 	})
 
 	t.Run("env/GITHUB_API", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
-			Do(gomock.Any(), input)
+			Do(mock.Anything, input).Return(nil)
 		r := Runner{
 			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
-			Env:               newEnv(ctrl, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
+			Env:               newEnv(t, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
 		}
 		args := []string{
@@ -216,8 +204,8 @@ func newGitHub(t *testing.T, want client.Option) client.NewFunc {
 	}
 }
 
-func newEnv(ctrl *gomock.Controller, getenv map[string]string) *mock_env.MockInterface {
-	env := mock_env.NewMockInterface(ctrl)
+func newEnv(t *testing.T, getenv map[string]string) *env_mock.MockInterface {
+	env := env_mock.NewMockInterface(t)
 	for k, v := range getenv {
 		env.EXPECT().Getenv(k).Return(v)
 	}

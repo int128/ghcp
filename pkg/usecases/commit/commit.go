@@ -22,8 +22,6 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*Commit)),
 )
 
-//go:generate mockgen -destination mock_commit/mock_commit.go github.com/int128/ghcp/pkg/usecases/commit Interface
-
 type Interface interface {
 	Do(ctx context.Context, in Input) error
 }

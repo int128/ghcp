@@ -4,13 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
+	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/commit_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
-	"github.com/int128/ghcp/pkg/github/mock_github"
 	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/commit"
-	"github.com/int128/ghcp/pkg/usecases/commit/mock_commit"
 )
 
 func TestForkCommit_Do(t *testing.T) {
@@ -19,8 +18,6 @@ func TestForkCommit_Do(t *testing.T) {
 	forkedRepositoryID := git.RepositoryID{Owner: "owner", Name: "repo"}
 
 	t.Run("FromDefaultBranch", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		in := Input{
 			ParentRepository: parentRepositoryID,
 			TargetBranchName: "topic",
@@ -29,12 +26,12 @@ func TestForkCommit_Do(t *testing.T) {
 			Paths:            []string{"path"},
 		}
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateFork(ctx, parentRepositoryID).
 			Return(&forkedRepositoryID, nil)
 
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
 			Do(ctx, commit.Input{
 				TargetRepository: forkedRepositoryID,
@@ -43,7 +40,8 @@ func TestForkCommit_Do(t *testing.T) {
 				CommitStrategy:   commitstrategy.FastForward,
 				CommitMessage:    "message",
 				Paths:            []string{"path"},
-			})
+			}).
+			Return(nil)
 
 		u := ForkCommit{
 			Commit: commitUseCase,
@@ -56,8 +54,6 @@ func TestForkCommit_Do(t *testing.T) {
 	})
 
 	t.Run("FromBranch", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		in := Input{
 			TargetBranchName: "topic",
 			ParentRepository: parentRepositoryID,
@@ -66,12 +62,12 @@ func TestForkCommit_Do(t *testing.T) {
 			Paths:            []string{"path"},
 		}
 
-		gitHub := mock_github.NewMockInterface(ctrl)
+		gitHub := github_mock.NewMockInterface(t)
 		gitHub.EXPECT().
 			CreateFork(ctx, parentRepositoryID).
 			Return(&forkedRepositoryID, nil)
 
-		commitUseCase := mock_commit.NewMockInterface(ctrl)
+		commitUseCase := commit_mock.NewMockInterface(t)
 		commitUseCase.EXPECT().
 			Do(ctx, commit.Input{
 				TargetRepository: forkedRepositoryID,
@@ -80,7 +76,8 @@ func TestForkCommit_Do(t *testing.T) {
 				CommitStrategy:   commitstrategy.RebaseOn("develop"),
 				CommitMessage:    "message",
 				Paths:            []string{"path"},
-			})
+			}).
+			Return(nil)
 
 		u := ForkCommit{
 			Commit: commitUseCase,

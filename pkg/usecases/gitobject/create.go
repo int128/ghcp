@@ -18,8 +18,6 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*CreateGitObject)),
 )
 
-//go:generate mockgen -destination mock_gitobject/mock_gitobject.go github.com/int128/ghcp/pkg/usecases/gitobject Interface
-
 type Interface interface {
 	Do(ctx context.Context, in Input) (*Output, error)
 }

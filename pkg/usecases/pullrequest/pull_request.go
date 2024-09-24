@@ -16,8 +16,6 @@ var Set = wire.NewSet(
 	wire.Struct(new(PullRequest), "*"),
 )
 
-//go:generate mockgen -destination mock_pullrequest/mock_pullrequest.go github.com/int128/ghcp/pkg/usecases/pullrequest Interface
-
 type Interface interface {
 	Do(ctx context.Context, in Input) error
 }

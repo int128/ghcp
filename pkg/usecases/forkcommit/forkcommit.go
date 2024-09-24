@@ -19,8 +19,6 @@ var Set = wire.NewSet(
 	wire.Bind(new(Interface), new(*ForkCommit)),
 )
 
-//go:generate mockgen -destination mock_forkcommit/mock_forkcommit.go github.com/int128/ghcp/pkg/usecases/forkcommit Interface
-
 type Interface interface {
 	Do(ctx context.Context, in Input) error
 }
