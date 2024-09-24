@@ -16,7 +16,7 @@ on:
 
 jobs:
   check:
-    uses: int128/go-workflows/.github/workflows/check.yaml@v0.4.0
+    uses: int128/go-workflows/.github/workflows/check.yaml@b75500880100c46fdb647dd0ad21d426651dba19 # v0.4.0
     with:
         go-version-file: go.mod
         cache-dependency-path: go.sum
