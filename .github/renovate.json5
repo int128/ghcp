@@ -1,8 +1,9 @@
 {
   "extends": [
     "github>int128/renovate-base",
-    "github>int128/go-renovate-config#v1.5.0",
-    "github>int128/go-renovate-config:github-actions#v1.5.0",
+    "github>int128/go-renovate-config#v1.6.0",
+    "github>int128/go-renovate-config:go-directive#v1.6.0",
+    "github>int128/go-renovate-config:github-actions#v1.6.0",
     "helpers:pinGitHubActionDigests",
   ],
 }
