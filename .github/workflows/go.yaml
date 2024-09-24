@@ -16,7 +16,7 @@ on:
 
 jobs:
   check:
-    uses: int128/go-workflows/.github/workflows/check.yaml@v0.4.0
+    uses: int128/go-workflows/.github/workflows/check.yaml@b75500880100c46fdb647dd0ad21d426651dba19 # v0.4.0
     with:
         go-version-file: go.mod
         cache-dependency-path: go.sum
@@ -37,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5
         with:
           go-version-file: tools/go.mod
           cache-dependency-path: tools/go.sum
       - run: make generate
-      - uses: int128/update-generated-files-action@v2
+      - uses: int128/update-generated-files-action@6ac8557861efc7d8c34f4e3f182f9c39b26e6e76 # v2
