@@ -34,7 +34,8 @@ type Input struct {
 	CommitMessage    git.CommitMessage
 	Author           *git.CommitAuthor // optional
 	Committer        *git.CommitAuthor // optional
-	Paths            []string          // if empty or nil, create an empty commit
+	Paths            []string          // if Paths and DeletedPaths are empty or nil, create an empty commit
+	DeletedPaths     []string          // if Paths and DeletedPaths are empty or nil, create an empty commit
 	NoFileMode       bool
 	DryRun           bool
 
@@ -118,6 +119,7 @@ func (f *pathFilter) ExcludeFile(string) bool {
 func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitOutput) error {
 	gitObj := gitobject.Input{
 		Files:         files,
+		DeletedFiles:  in.DeletedPaths,
 		Repository:    in.TargetRepository,
 		CommitMessage: in.CommitMessage,
 		Author:        in.Author,
@@ -170,6 +172,7 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.File, q *github.QueryForCommitOutput) error {
 	gitObj := gitobject.Input{
 		Files:         files,
+		DeletedFiles:  in.DeletedPaths,
 		Repository:    in.TargetRepository,
 		CommitMessage: in.CommitMessage,
 		Author:        in.Author,
