@@ -55,6 +55,6 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - run: go build -ldflags '-X main.version=${{ github.ref_name }}'
-      - uses: int128/go-release-action@6e7953aa360179e9fd4a76149cddbe41467d3699 # v2
+      - uses: int128/go-release-action@2979cc5b15ceb7ae458e95b0a9467afc7ae25259 # v2.0.0
         with:
           binary: ghcp
