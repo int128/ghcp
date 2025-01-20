@@ -12,7 +12,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
-	github.com/vektra/mockery/v2 v2.51.0
+	github.com/vektra/mockery/v2 v2.51.1
 	golang.org/x/oauth2 v0.25.0
 )
 
