@@ -1,6 +1,6 @@
 module github.com/int128/ghcp
 
-go 1.23.6
+go 1.24.0
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
