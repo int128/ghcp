@@ -3,7 +3,7 @@ module github.com/int128/ghcp
 go 1.24.1
 
 require (
-	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v66 v66.0.0
 	github.com/google/wire v0.6.0
