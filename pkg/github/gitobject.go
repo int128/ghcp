@@ -52,23 +52,23 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 	c.Logger.Debugf("Creating a commit %+v", n)
 	var parents []*github.Commit
 	if n.ParentCommitSHA != "" {
-		parents = append(parents, &github.Commit{SHA: github.String(string(n.ParentCommitSHA))})
+		parents = append(parents, &github.Commit{SHA: github.Ptr(string(n.ParentCommitSHA))})
 	}
 	commit := github.Commit{
-		Message: github.String(string(n.Message)),
+		Message: github.Ptr(string(n.Message)),
 		Parents: parents,
-		Tree:    &github.Tree{SHA: github.String(string(n.TreeSHA))},
+		Tree:    &github.Tree{SHA: github.Ptr(string(n.TreeSHA))},
 	}
 	if n.Author != nil {
 		commit.Author = &github.CommitAuthor{
-			Name:  github.String(n.Author.Name),
-			Email: github.String(n.Author.Email),
+			Name:  github.Ptr(n.Author.Name),
+			Email: github.Ptr(n.Author.Email),
 		}
 	}
 	if n.Committer != nil {
 		commit.Committer = &github.CommitAuthor{
-			Name:  github.String(n.Committer.Name),
-			Email: github.String(n.Committer.Email),
+			Name:  github.Ptr(n.Committer.Name),
+			Email: github.Ptr(n.Committer.Email),
 		}
 	}
 	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit, nil)
@@ -84,10 +84,10 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 	entries := make([]*github.TreeEntry, len(n.Files))
 	for i, file := range n.Files {
 		entries[i] = &github.TreeEntry{
-			Type: github.String("blob"),
-			Path: github.String(file.Filename),
-			Mode: github.String(file.Mode()),
-			SHA:  github.String(string(file.BlobSHA)),
+			Type: github.Ptr("blob"),
+			Path: github.Ptr(file.Filename),
+			Mode: github.Ptr(file.Mode()),
+			SHA:  github.Ptr(string(file.BlobSHA)),
 		}
 	}
 	tree, _, err := c.Client.CreateTree(ctx, n.Repository.Owner, n.Repository.Name, string(n.BaseTreeSHA), entries)
@@ -101,8 +101,8 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, error) {
 	c.Logger.Debugf("Creating a blob of %d byte(s) on the repository %+v", len(n.Content), n.Repository)
 	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
-		Encoding: github.String("base64"),
-		Content:  github.String(n.Content),
+		Encoding: github.Ptr("base64"),
+		Content:  github.Ptr(n.Content),
 	})
 	if err != nil {
 		return "", fmt.Errorf("GitHub API error: %w", err)
