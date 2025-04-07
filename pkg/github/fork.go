@@ -3,10 +3,11 @@ package github
 import (
 	"context"
 	"fmt"
+	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/google/go-github/v66/github"
 	"github.com/int128/ghcp/pkg/git"
+	"github.com/sethvargo/go-retry"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -31,7 +32,7 @@ func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.Repo
 }
 
 func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.RepositoryID) error {
-	operation := func() error {
+	operation := func(ctx context.Context) error {
 		var q struct {
 			Repository struct {
 				DefaultBranchRef struct {
@@ -43,18 +44,18 @@ func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.Reposit
 				}
 			} `graphql:"repository(owner: $owner, name: $repo)"`
 		}
-		v := map[string]interface{}{
+		v := map[string]any{
 			"owner": githubv4.String(id.Owner),
 			"repo":  githubv4.String(id.Name),
 		}
 		c.Logger.Debugf("Querying the repository with %+v", v)
 		if err := c.Client.Query(ctx, &q, v); err != nil {
-			return fmt.Errorf("GitHub API error: %w", err)
+			return retry.RetryableError(fmt.Errorf("GitHub API error: %w", err))
 		}
 		c.Logger.Debugf("Got the result: %+v", q)
 		return nil
 	}
-	if err := backoff.Retry(operation, backoff.NewExponentialBackOff()); err != nil {
+	if err := retry.Exponential(ctx, 500*time.Millisecond, operation); err != nil {
 		return fmt.Errorf("retry over: %w", err)
 	}
 	return nil
