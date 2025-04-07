@@ -5,7 +5,7 @@ package client_mock
 import (
 	context "context"
 
-	github "github.com/google/go-github/v66/github"
+	github "github.com/google/go-github/v70/github"
 	mock "github.com/stretchr/testify/mock"
 
 	os "os"
