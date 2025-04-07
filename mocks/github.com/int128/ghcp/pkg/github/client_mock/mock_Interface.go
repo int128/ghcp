@@ -545,6 +545,77 @@ func (_c *MockInterface_Query_Call) RunAndReturn(run func(context.Context, inter
 	return _c
 }
 
+// RequestReviewers provides a mock function with given fields: ctx, owner, repo, number, reviewers
+func (_m *MockInterface) RequestReviewers(ctx context.Context, owner string, repo string, number int, reviewers github.ReviewersRequest) (*github.PullRequest, *github.Response, error) {
+	ret := _m.Called(ctx, owner, repo, number, reviewers)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RequestReviewers")
+	}
+
+	var r0 *github.PullRequest
+	var r1 *github.Response
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, int, github.ReviewersRequest) (*github.PullRequest, *github.Response, error)); ok {
+		return rf(ctx, owner, repo, number, reviewers)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, int, github.ReviewersRequest) *github.PullRequest); ok {
+		r0 = rf(ctx, owner, repo, number, reviewers)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*github.PullRequest)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, int, github.ReviewersRequest) *github.Response); ok {
+		r1 = rf(ctx, owner, repo, number, reviewers)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*github.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, string, string, int, github.ReviewersRequest) error); ok {
+		r2 = rf(ctx, owner, repo, number, reviewers)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
+// MockInterface_RequestReviewers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RequestReviewers'
+type MockInterface_RequestReviewers_Call struct {
+	*mock.Call
+}
+
+// RequestReviewers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - owner string
+//   - repo string
+//   - number int
+//   - reviewers github.ReviewersRequest
+func (_e *MockInterface_Expecter) RequestReviewers(ctx interface{}, owner interface{}, repo interface{}, number interface{}, reviewers interface{}) *MockInterface_RequestReviewers_Call {
+	return &MockInterface_RequestReviewers_Call{Call: _e.mock.On("RequestReviewers", ctx, owner, repo, number, reviewers)}
+}
+
+func (_c *MockInterface_RequestReviewers_Call) Run(run func(ctx context.Context, owner string, repo string, number int, reviewers github.ReviewersRequest)) *MockInterface_RequestReviewers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(int), args[4].(github.ReviewersRequest))
+	})
+	return _c
+}
+
+func (_c *MockInterface_RequestReviewers_Call) Return(_a0 *github.PullRequest, _a1 *github.Response, _a2 error) *MockInterface_RequestReviewers_Call {
+	_c.Call.Return(_a0, _a1, _a2)
+	return _c
+}
+
+func (_c *MockInterface_RequestReviewers_Call) RunAndReturn(run func(context.Context, string, string, int, github.ReviewersRequest) (*github.PullRequest, *github.Response, error)) *MockInterface_RequestReviewers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UploadReleaseAsset provides a mock function with given fields: ctx, owner, repo, id, opt, file
 func (_m *MockInterface) UploadReleaseAsset(ctx context.Context, owner string, repo string, id int64, opt *github.UploadOptions, file *os.File) (*github.ReleaseAsset, *github.Response, error) {
 	ret := _m.Called(ctx, owner, repo, id, opt, file)
