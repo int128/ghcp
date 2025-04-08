@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/go-github/v70/github"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
 )
@@ -13,15 +14,13 @@ type QueryForPullRequestInput struct {
 	BaseBranchName git.BranchName
 	HeadRepository git.RepositoryID
 	HeadBranchName git.BranchName
-	ReviewerUser   string // optional
 }
 
 type QueryForPullRequestOutput struct {
 	CurrentUserName      string
 	BaseRepositoryNodeID InternalRepositoryNodeID
 	HeadBranchCommitSHA  git.CommitSHA
-	PullRequestURL       string      // URL of the pull request associated to the head branch, if exists
-	ReviewerUserNodeID   githubv4.ID // optional
+	PullRequestURL       string // URL of the pull request associated to the head branch, if exists
 }
 
 // QueryForPullRequest performs the query for creating a pull request.
@@ -45,19 +44,14 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 				} `graphql:"associatedPullRequests(baseRefName: $baseRefName, first: 1)"`
 			} `graphql:"ref(qualifiedName: $headRefName)"`
 		} `graphql:"headRepository: repository(owner: $headOwner, name: $headRepo)"`
-		ReviewerUser struct {
-			ID githubv4.ID
-		} `graphql:"reviewer: user(login: $reviewerUser) @include(if: $withReviewerUser)"`
 	}
 	v := map[string]interface{}{
-		"baseOwner":        githubv4.String(in.BaseRepository.Owner),
-		"baseRepo":         githubv4.String(in.BaseRepository.Name),
-		"baseRefName":      githubv4.String(in.BaseBranchName),
-		"headOwner":        githubv4.String(in.HeadRepository.Owner),
-		"headRepo":         githubv4.String(in.HeadRepository.Name),
-		"headRefName":      githubv4.String(in.HeadBranchName.QualifiedName().String()),
-		"reviewerUser":     githubv4.String(in.ReviewerUser),
-		"withReviewerUser": githubv4.Boolean(in.ReviewerUser != ""),
+		"baseOwner":   githubv4.String(in.BaseRepository.Owner),
+		"baseRepo":    githubv4.String(in.BaseRepository.Name),
+		"baseRefName": githubv4.String(in.BaseBranchName),
+		"headOwner":   githubv4.String(in.HeadRepository.Owner),
+		"headRepo":    githubv4.String(in.HeadRepository.Name),
+		"headRefName": githubv4.String(in.HeadBranchName.QualifiedName().String()),
 	}
 	c.Logger.Debugf("Querying the existing pull request with %+v", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
@@ -69,7 +63,6 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 		CurrentUserName:      q.Viewer.Login,
 		BaseRepositoryNodeID: q.BaseRepository.ID,
 		HeadBranchCommitSHA:  git.CommitSHA(q.HeadRepository.Ref.Target.OID),
-		ReviewerUserNodeID:   q.ReviewerUser.ID,
 	}
 	if len(q.HeadRepository.Ref.AssociatedPullRequests.Nodes) > 0 {
 		out.PullRequestURL = q.HeadRepository.Ref.AssociatedPullRequests.Nodes[0].URL
@@ -91,6 +84,7 @@ type CreatePullRequestInput struct {
 
 type CreatePullRequestOutput struct {
 	PullRequestNodeID githubv4.ID
+	PullRequestNumber int
 	URL               string
 }
 
@@ -117,8 +111,9 @@ func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInpu
 	var m struct {
 		CreatePullRequest struct {
 			PullRequest struct {
-				ID  githubv4.ID
-				URL string
+				ID     githubv4.ID
+				Number int
+				URL    string
 			}
 		} `graphql:"createPullRequest(input: $input)"`
 	}
@@ -128,31 +123,25 @@ func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInpu
 	c.Logger.Debugf("Got the result: %+v", m)
 	return &CreatePullRequestOutput{
 		PullRequestNodeID: m.CreatePullRequest.PullRequest.ID,
+		PullRequestNumber: m.CreatePullRequest.PullRequest.Number,
 		URL:               m.CreatePullRequest.PullRequest.URL,
 	}, nil
 }
 
 type RequestPullRequestReviewInput struct {
-	PullRequest githubv4.ID
-	User        githubv4.ID
+	Repository git.RepositoryID
+	Number     int
+	User       string
 }
 
 func (c *GitHub) RequestPullRequestReview(ctx context.Context, in RequestPullRequestReviewInput) error {
 	c.Logger.Debugf("Requesting a review for the pull request %+v", in)
-	v := githubv4.RequestReviewsInput{
-		PullRequestID: in.PullRequest,
-		UserIDs:       &[]githubv4.ID{in.User},
-	}
-	var m struct {
-		RequestReviews struct {
-			Actor struct {
-				Login string
-			}
-		} `graphql:"requestReviews(input: $input)"`
-	}
-	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
+	created, _, err := c.Client.RequestReviewers(ctx, in.Repository.Owner, in.Repository.Name, in.Number, github.ReviewersRequest{
+		Reviewers: []string{in.User},
+	})
+	if err != nil {
 		return fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", m)
+	c.Logger.Debugf("Got the result: %+v", created)
 	return nil
 }

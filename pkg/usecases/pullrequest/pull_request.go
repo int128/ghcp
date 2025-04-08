@@ -66,7 +66,6 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		BaseBranchName: in.BaseBranchName,
 		HeadRepository: in.HeadRepository,
 		HeadBranchName: in.HeadBranchName,
-		ReviewerUser:   in.Reviewer,
 	})
 	if err != nil {
 		return fmt.Errorf("could not query for creating a pull request: %w", err)
@@ -101,8 +100,9 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 	}
 	u.Logger.Infof("Requesting a review to %s", in.Reviewer)
 	if err := u.GitHub.RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
-		PullRequest: createdPR.PullRequestNodeID,
-		User:        q.ReviewerUserNodeID,
+		Repository: in.BaseRepository,
+		Number:     createdPR.PullRequestNumber,
+		User:       in.Reviewer,
 	}); err != nil {
 		return fmt.Errorf("could not request a review for the pull request: %w", err)
 	}

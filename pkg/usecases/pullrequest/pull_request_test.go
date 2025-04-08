@@ -163,12 +163,10 @@ func TestPullRequest_Do(t *testing.T) {
 				BaseBranchName: "develop",
 				HeadRepository: headRepositoryID,
 				HeadBranchName: "feature",
-				ReviewerUser:   "the-reviewer",
 			}).
 			Return(&github.QueryForPullRequestOutput{
 				CurrentUserName:     "you",
 				HeadBranchCommitSHA: "HeadCommitSHA",
-				ReviewerUserNodeID:  "TheReviewerID",
 			}, nil)
 		gitHub.EXPECT().
 			CreatePullRequest(ctx, github.CreatePullRequestInput{
@@ -180,12 +178,14 @@ func TestPullRequest_Do(t *testing.T) {
 			}).
 			Return(&github.CreatePullRequestOutput{
 				URL:               "https://github.com/octocat/Spoon-Knife/pull/19445",
+				PullRequestNumber: 19445,
 				PullRequestNodeID: "ThePullRequestID",
 			}, nil)
 		gitHub.EXPECT().
 			RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
-				PullRequest: "ThePullRequestID",
-				User:        "TheReviewerID",
+				Repository: baseRepositoryID,
+				Number:     19445,
+				User:       "TheReviewerID",
 			}).
 			Return(nil)
 		useCase := PullRequest{
@@ -218,7 +218,6 @@ func TestPullRequest_Do(t *testing.T) {
 			Return(&github.QueryForPullRequestOutput{
 				CurrentUserName:     "you",
 				HeadBranchCommitSHA: "HeadCommitSHA",
-				ReviewerUserNodeID:  "TheReviewerID",
 			}, nil)
 		gitHub.EXPECT().
 			CreatePullRequest(ctx, github.CreatePullRequestInput{
@@ -232,6 +231,7 @@ func TestPullRequest_Do(t *testing.T) {
 			}).
 			Return(&github.CreatePullRequestOutput{
 				URL:               "https://github.com/octocat/Spoon-Knife/pull/19445",
+				PullRequestNumber: 19445,
 				PullRequestNodeID: "ThePullRequestID",
 			}, nil)
 		useCase := PullRequest{
