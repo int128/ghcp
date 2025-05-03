@@ -23,6 +23,7 @@ type Interface interface {
 	QueryService
 	GitService
 	RepositoriesService
+	PullRequestsService
 }
 
 type QueryService interface {
@@ -43,6 +44,10 @@ type RepositoriesService interface {
 	UploadReleaseAsset(ctx context.Context, owner, repo string, id int64, opt *github.UploadOptions, file *os.File) (*github.ReleaseAsset, *github.Response, error)
 }
 
+type PullRequestsService interface {
+	RequestReviewers(ctx context.Context, owner, repo string, number int, reviewers github.ReviewersRequest) (*github.PullRequest, *github.Response, error)
+}
+
 type Option struct {
 	// A token for GitHub API.
 	Token string
@@ -56,6 +61,7 @@ type clientSet struct {
 	QueryService
 	GitService
 	RepositoriesService
+	PullRequestsService
 }
 
 func New(o Option) (Interface, error) {
@@ -67,6 +73,7 @@ func New(o Option) (Interface, error) {
 		QueryService:        v4,
 		GitService:          v3.Git,
 		RepositoriesService: v3.Repositories,
+		PullRequestsService: v3.PullRequests,
 	}, nil
 }
 
