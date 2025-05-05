@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-github/v71/github"
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github/client_mock"
 	"github.com/int128/ghcp/pkg/git"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 )
 
 func TestGitHub_CreateCommit(t *testing.T) {
@@ -27,7 +26,6 @@ func TestGitHub_CreateCommit(t *testing.T) {
 			}, nil, nil)
 		gitHub := GitHub{
 			Client: gitHubClient,
-			Logger: testingLogger.New(t),
 		}
 		commitSHA, err := gitHub.CreateCommit(ctx, git.NewCommit{
 			Repository:      repositoryID,
@@ -55,7 +53,6 @@ func TestGitHub_CreateCommit(t *testing.T) {
 			}, nil, nil)
 		gitHub := GitHub{
 			Client: gitHubClient,
-			Logger: testingLogger.New(t),
 		}
 		commitSHA, err := gitHub.CreateCommit(ctx, git.NewCommit{
 			Repository: repositoryID,

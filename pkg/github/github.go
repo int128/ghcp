@@ -6,7 +6,6 @@ import (
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -41,7 +40,6 @@ type Interface interface {
 // GitHub provides GitHub API access.
 type GitHub struct {
 	Client client.Interface
-	Logger logger.Interface
 }
 
 type InternalRepositoryNodeID githubv4.ID

@@ -6,7 +6,6 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/pullrequest_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/pullrequest"
 	"github.com/stretchr/testify/mock"
 )
@@ -23,7 +22,6 @@ func TestCmd_Run_pull_request(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
@@ -53,7 +51,6 @@ func TestCmd_Run_pull_request(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),
@@ -88,7 +85,6 @@ func TestCmd_Run_pull_request(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{PullRequestUseCase: useCase}),

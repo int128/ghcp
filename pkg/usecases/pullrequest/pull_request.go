@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/logger"
 )
 
 var Set = wire.NewSet(
@@ -34,7 +34,6 @@ type Input struct {
 // PullRequest provides the use-case to create a pull request.
 type PullRequest struct {
 	GitHub github.Interface
-	Logger logger.Interface
 }
 
 func (u *PullRequest) Do(ctx context.Context, in Input) error {
@@ -71,13 +70,13 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 	if err != nil {
 		return fmt.Errorf("could not query for creating a pull request: %w", err)
 	}
-	u.Logger.Infof("Logged in as %s", q.CurrentUserName)
+	slog.Info("Logged in", "user", q.CurrentUserName)
 	if q.HeadBranchCommitSHA == "" {
 		return fmt.Errorf("the head branch (%s) does not exist", in.HeadBranchName)
 	}
-	u.Logger.Debugf("Found the head branch (%s) with the commit %s", in.HeadBranchName, q.HeadBranchCommitSHA)
+	slog.Debug("Found the head branch", "branch", in.HeadBranchName, "commit", q.HeadBranchCommitSHA)
 	if q.PullRequestURL != "" {
-		u.Logger.Warnf("A pull request already exists: %s", q.PullRequestURL)
+		slog.Warn("A pull request already exists", "url", q.PullRequestURL)
 		return nil
 	}
 
@@ -94,12 +93,12 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 	if err != nil {
 		return fmt.Errorf("could not create a pull request: %w", err)
 	}
-	u.Logger.Infof("Created a pull request: %s", createdPR.URL)
+	slog.Info("Created a pull request", "url", createdPR.URL)
 
 	if in.Reviewer == "" {
 		return nil
 	}
-	u.Logger.Infof("Requesting a review to %s", in.Reviewer)
+	slog.Info("Requesting a review for pull request", "user", in.Reviewer)
 	if err := u.GitHub.RequestPullRequestReview(ctx, github.RequestPullRequestReviewInput{
 		PullRequest: createdPR.PullRequestNodeID,
 		User:        q.ReviewerUserNodeID,

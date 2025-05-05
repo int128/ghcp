@@ -8,7 +8,6 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -75,7 +74,6 @@ func TestRelease_Do(t *testing.T) {
 
 		useCase := Release{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		if err := useCase.Do(ctx, in); err != nil {
@@ -125,7 +123,6 @@ func TestRelease_Do(t *testing.T) {
 
 		useCase := Release{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		if err := useCase.Do(ctx, in); err != nil {

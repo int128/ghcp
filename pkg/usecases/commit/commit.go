@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"path/filepath"
 
 	"github.com/google/wire"
@@ -13,7 +14,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/gitobject"
 )
 
@@ -45,7 +45,6 @@ type Input struct {
 type Commit struct {
 	CreateGitObject gitobject.Interface
 	FileSystem      fs.Interface
-	Logger          logger.Interface
 	GitHub          github.Interface
 }
 
@@ -57,7 +56,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 		return errors.New("you must set commit message")
 	}
 
-	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{Logger: u.Logger})
+	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{})
 	if err != nil {
 		return fmt.Errorf("could not find files: %w", err)
 	}
@@ -85,7 +84,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 	if err != nil {
 		return fmt.Errorf("could not find the repository: %w", err)
 	}
-	u.Logger.Infof("Author and committer: %s", q.CurrentUserName)
+	slog.Info("Author and committer", "user", q.CurrentUserName)
 	if q.TargetBranchExists() {
 		if err := u.updateExistingBranch(ctx, in, files, q); err != nil {
 			return fmt.Errorf("could not update the existing branch (%s): %w", in.TargetBranchName, err)
@@ -98,14 +97,12 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 	return nil
 }
 
-type pathFilter struct {
-	Logger logger.Interface
-}
+type pathFilter struct{}
 
 func (f *pathFilter) SkipDir(path string) bool {
 	base := filepath.Base(path)
 	if base == ".git" {
-		f.Logger.Debugf("Exclude .git directory: %s", path)
+		slog.Debug("Exclude .git directory", "path", path)
 		return true
 	}
 	return false
@@ -126,35 +123,35 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 	}
 	switch {
 	case in.CommitStrategy.IsFastForward():
-		u.Logger.Infof("Creating a branch (%s) based on the default branch", in.TargetBranchName)
+		slog.Info("Creating a branch", "branch", in.TargetBranchName)
 		gitObj.ParentCommitSHA = q.ParentDefaultBranchCommitSHA
 		gitObj.ParentTreeSHA = q.ParentDefaultBranchTreeSHA
 	case in.CommitStrategy.IsRebase():
-		u.Logger.Infof("Creating a branch (%s) based on the ref (%s)", in.TargetBranchName, in.CommitStrategy.RebaseUpstream())
+		slog.Info("Creating a branch", "branch", in.TargetBranchName, "ref", in.CommitStrategy.RebaseUpstream())
 		gitObj.ParentCommitSHA = q.ParentRefCommitSHA
 		gitObj.ParentTreeSHA = q.ParentRefTreeSHA
 	case in.CommitStrategy.NoParent():
-		u.Logger.Infof("Creating a branch (%s) with no parent", in.TargetBranchName)
+		slog.Info("Creating a branch with no parent", "branch", in.TargetBranchName)
 	default:
 		return fmt.Errorf("unknown commit strategy %+v", in.CommitStrategy)
 	}
 
-	u.Logger.Debugf("Creating a commit with the %d file(s)", len(gitObj.Files))
+	slog.Debug("Creating a commit", "files", len(gitObj.Files))
 	commit, err := u.CreateGitObject.Do(ctx, gitObj)
 	if err != nil {
 		return fmt.Errorf("error while creating a commit: %w", err)
 	}
-	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
+	slog.Info("Created a commit", "changedFiles", commit.ChangedFiles)
 	if len(files) > 0 && commit.ChangedFiles == 0 {
-		u.Logger.Warnf("Nothing to commit because the branch has the same file(s)")
+		slog.Warn("Nothing to commit because the branch has the same file(s)")
 		return nil
 	}
 	if in.DryRun {
-		u.Logger.Infof("Do not create %s branch due to dry-run", in.TargetBranchName)
+		slog.Info("Do not create a branch due to dry-run", "branch", in.TargetBranchName)
 		return nil
 	}
 
-	u.Logger.Debugf("Creating a branch (%s)", in.TargetBranchName)
+	slog.Debug("Creating a branch", "branch", in.TargetBranchName)
 	createBranchIn := github.CreateBranchInput{
 		RepositoryNodeID: q.TargetRepositoryNodeID,
 		BranchName:       in.TargetBranchName,
@@ -163,7 +160,7 @@ func (u *Commit) createNewBranch(ctx context.Context, in Input, files []fs.File,
 	if err := u.GitHub.CreateBranch(ctx, createBranchIn); err != nil {
 		return fmt.Errorf("error while creating %s branch: %w", in.TargetBranchName, err)
 	}
-	u.Logger.Infof("Created a branch (%s)", in.TargetBranchName)
+	slog.Info("Created a branch", "branch", in.TargetBranchName)
 	return nil
 }
 
@@ -178,35 +175,35 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 	}
 	switch {
 	case in.CommitStrategy.IsFastForward():
-		u.Logger.Infof("Updating the branch (%s) by fast-forward", in.TargetBranchName)
+		slog.Info("Updating the branch by fast-forward", "branch", in.TargetBranchName)
 		gitObj.ParentCommitSHA = q.TargetBranchCommitSHA
 		gitObj.ParentTreeSHA = q.TargetBranchTreeSHA
 	case in.CommitStrategy.IsRebase():
-		u.Logger.Infof("Rebasing the branch (%s) on the ref (%s)", in.TargetBranchName, in.CommitStrategy.RebaseUpstream())
+		slog.Info("Rebasing the branch", "branch", in.TargetBranchName, "ref", in.CommitStrategy.RebaseUpstream())
 		gitObj.ParentCommitSHA = q.ParentRefCommitSHA
 		gitObj.ParentTreeSHA = q.ParentRefTreeSHA
 	case in.CommitStrategy.NoParent():
-		u.Logger.Infof("Updating the branch (%s) to a commit with no parent", in.TargetBranchName)
+		slog.Info("Updating the branch to a commit with no parent", "branch", in.TargetBranchName)
 	default:
 		return fmt.Errorf("unknown commit strategy %+v", in.CommitStrategy)
 	}
 
-	u.Logger.Debugf("Creating a commit with the %d file(s)", len(gitObj.Files))
+	slog.Debug("Creating a commit", "files", len(gitObj.Files))
 	commit, err := u.CreateGitObject.Do(ctx, gitObj)
 	if err != nil {
 		return fmt.Errorf("error while creating a commit: %w", err)
 	}
-	u.Logger.Infof("Created a commit with %d changed file(s)", commit.ChangedFiles)
+	slog.Info("Created a commit", "changedFiles", commit.ChangedFiles)
 	if len(files) > 0 && commit.ChangedFiles == 0 {
-		u.Logger.Warnf("Nothing to commit because %s branch has the same file(s)", in.TargetBranchName)
+		slog.Warn("Nothing to commit because the branch has the same file(s)", "branch", in.TargetBranchName)
 		return nil
 	}
 	if in.DryRun {
-		u.Logger.Infof("Do not update %s branch due to dry-run", in.TargetBranchName)
+		slog.Info("Do not update branch due to dry-run", "branch", in.TargetBranchName)
 		return nil
 	}
 
-	u.Logger.Debugf("Updating the branch (%s)", in.TargetBranchName)
+	slog.Debug("Updating the branch", "branch", in.TargetBranchName)
 	updateBranchIn := github.UpdateBranchInput{
 		BranchRefNodeID: q.TargetBranchNodeID,
 		CommitSHA:       commit.CommitSHA,
@@ -215,6 +212,6 @@ func (u *Commit) updateExistingBranch(ctx context.Context, in Input, files []fs.
 	if err := u.GitHub.UpdateBranch(ctx, updateBranchIn); err != nil {
 		return fmt.Errorf("error while updating %s branch: %w", in.TargetBranchName, err)
 	}
-	u.Logger.Infof("Updated the branch (%s)", in.TargetBranchName)
+	slog.Info("Updated the branch", "branch", in.TargetBranchName)
 	return nil
 }

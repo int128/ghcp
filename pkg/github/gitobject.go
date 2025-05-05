@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/google/go-github/v71/github"
 	"github.com/shurcooL/githubv4"
@@ -35,21 +36,21 @@ func (c *GitHub) QueryCommit(ctx context.Context, in QueryCommitInput) (*QueryCo
 		"repo":      githubv4.String(in.Repository.Name),
 		"commitSHA": githubv4.GitObjectID(in.CommitSHA),
 	}
-	c.Logger.Debugf("Querying the commit with %+v", v)
+	slog.Debug("Querying the commit", "params", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", q)
+	slog.Debug("Got the response", "response", q)
 	out := QueryCommitOutput{
 		ChangedFiles: q.Repository.Object.Commit.ChangedFiles,
 	}
-	c.Logger.Debugf("Returning the commit: %+v", out)
+	slog.Debug("Returning the commit", "commit", out)
 	return &out, nil
 }
 
 // CreateCommit creates a commit and returns SHA of it.
 func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitSHA, error) {
-	c.Logger.Debugf("Creating a commit %+v", n)
+	slog.Debug("Creating a commit", "input", n)
 	var parents []*github.Commit
 	if n.ParentCommitSHA != "" {
 		parents = append(parents, &github.Commit{SHA: github.Ptr(string(n.ParentCommitSHA))})
@@ -80,7 +81,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 
 // CreateTree creates a tree and returns SHA of it.
 func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, error) {
-	c.Logger.Debugf("Creating a tree %+v", n)
+	slog.Debug("Creating a tree", "input", n)
 	entries := make([]*github.TreeEntry, len(n.Files))
 	for i, file := range n.Files {
 		entries[i] = &github.TreeEntry{
@@ -99,7 +100,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 
 // CreateBlob creates a blob and returns SHA of it.
 func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, error) {
-	c.Logger.Debugf("Creating a blob of %d byte(s) on the repository %+v", len(n.Content), n.Repository)
+	slog.Debug("Creating a blob", "size", len(n.Content), "repository", n.Repository)
 	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
 		Encoding: github.Ptr("base64"),
 		Content:  github.Ptr(n.Content),
