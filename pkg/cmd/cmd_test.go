@@ -11,8 +11,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 )
 
@@ -33,7 +31,6 @@ func TestCmd_Run(t *testing.T) {
 		commitUseCase.EXPECT().
 			Do(mock.Anything, input).Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{Debug: true}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -63,7 +60,6 @@ func TestCmd_Run(t *testing.T) {
 		mockEnv.EXPECT().
 			Chdir("dir").Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               mockEnv,
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -90,7 +86,6 @@ func TestCmd_Run(t *testing.T) {
 		commitUseCase.EXPECT().
 			Do(mock.Anything, input).Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubToken: "YOUR_TOKEN", envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -112,7 +107,6 @@ func TestCmd_Run(t *testing.T) {
 
 	t.Run("NoGitHubToken", func(t *testing.T) {
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{}),
 			Env:               newEnv(t, map[string]string{envGitHubToken: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
@@ -137,7 +131,6 @@ func TestCmd_Run(t *testing.T) {
 		commitUseCase.EXPECT().
 			Do(mock.Anything, input).Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
 			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -164,7 +157,6 @@ func TestCmd_Run(t *testing.T) {
 		commitUseCase.EXPECT().
 			Do(mock.Anything, input).Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN", URLv3: "https://github.example.com/api/v3/"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: "https://github.example.com/api/v3/"}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -186,15 +178,6 @@ func TestCmd_Run(t *testing.T) {
 	})
 }
 
-func newLogger(t *testing.T, want logger.Option) logger.NewFunc {
-	return func(got logger.Option) logger.Interface {
-		if diff := cmp.Diff(want, got); diff != "" {
-			t.Errorf("mismatch (-want +got):\n%s", diff)
-		}
-		return testingLogger.New(t)
-	}
-}
-
 func newGitHub(t *testing.T, want client.Option) client.NewFunc {
 	return func(got client.Option) (client.Interface, error) {
 		if diff := cmp.Diff(want, got); diff != "" {
@@ -213,8 +196,7 @@ func newEnv(t *testing.T, getenv map[string]string) *env_mock.MockInterface {
 }
 
 func newInternalRunner(base InternalRunner) NewInternalRunnerFunc {
-	return func(l logger.Interface, g client.Interface) *InternalRunner {
-		base.Logger = l
+	return func(g client.Interface) *InternalRunner {
 		return &base
 	}
 }

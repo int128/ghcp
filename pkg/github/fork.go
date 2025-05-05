@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/google/go-github/v71/github"
@@ -19,7 +20,7 @@ func (c *GitHub) CreateFork(ctx context.Context, id git.RepositoryID) (*git.Repo
 		if _, ok := err.(*github.AcceptedError); !ok {
 			return nil, fmt.Errorf("GitHub API error: %w", err)
 		}
-		c.Logger.Debugf("Fork in progress: %+v", err)
+		slog.Debug("Fork in progress", "error", err)
 	}
 	forkRepository := git.RepositoryID{
 		Owner: fork.GetOwner().GetLogin(),
@@ -48,11 +49,11 @@ func (c *GitHub) waitUntilGitDataIsAvailable(ctx context.Context, id git.Reposit
 			"owner": githubv4.String(id.Owner),
 			"repo":  githubv4.String(id.Name),
 		}
-		c.Logger.Debugf("Querying the repository with %+v", v)
+		slog.Debug("Querying the repository", "params", v)
 		if err := c.Client.Query(ctx, &q, v); err != nil {
 			return retry.RetryableError(fmt.Errorf("GitHub API error: %w", err))
 		}
-		c.Logger.Debugf("Got the result: %+v", q)
+		slog.Debug("Got the response", "response", q)
 		return nil
 	}
 	if err := retry.Exponential(ctx, 500*time.Millisecond, operation); err != nil {

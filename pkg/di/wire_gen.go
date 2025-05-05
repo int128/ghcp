@@ -12,7 +12,6 @@ import (
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 	"github.com/int128/ghcp/pkg/usecases/forkcommit"
 	"github.com/int128/ghcp/pkg/usecases/gitobject"
@@ -25,52 +24,43 @@ import (
 func NewCmd() cmd.Interface {
 	envEnv := &env.Env{}
 	newFunc := _wireNewFuncValue
-	clientNewFunc := _wireClientNewFuncValue
 	newInternalRunnerFunc := _wireNewInternalRunnerFuncValue
 	runner := &cmd.Runner{
 		Env:               envEnv,
-		NewLogger:         newFunc,
-		NewGitHub:         clientNewFunc,
+		NewGitHub:         newFunc,
 		NewInternalRunner: newInternalRunnerFunc,
 	}
 	return runner
 }
 
 var (
-	_wireNewFuncValue               = logger.NewFunc(logger.New)
-	_wireClientNewFuncValue         = client.NewFunc(client.New)
+	_wireNewFuncValue               = client.NewFunc(client.New)
 	_wireNewInternalRunnerFuncValue = cmd.NewInternalRunnerFunc(NewCmdInternalRunner)
 )
 
-func NewCmdInternalRunner(loggerInterface logger.Interface, clientInterface client.Interface) *cmd.InternalRunner {
+func NewCmdInternalRunner(clientInterface client.Interface) *cmd.InternalRunner {
 	fileSystem := &fs.FileSystem{}
 	gitHub := &github.GitHub{
 		Client: clientInterface,
-		Logger: loggerInterface,
 	}
 	createGitObject := &gitobject.CreateGitObject{
 		FileSystem: fileSystem,
-		Logger:     loggerInterface,
 		GitHub:     gitHub,
 	}
 	commitCommit := &commit.Commit{
 		CreateGitObject: createGitObject,
 		FileSystem:      fileSystem,
-		Logger:          loggerInterface,
 		GitHub:          gitHub,
 	}
 	forkCommit := &forkcommit.ForkCommit{
 		Commit: commitCommit,
-		Logger: loggerInterface,
 		GitHub: gitHub,
 	}
 	pullRequest := &pullrequest.PullRequest{
 		GitHub: gitHub,
-		Logger: loggerInterface,
 	}
 	releaseRelease := &release.Release{
 		FileSystem: fileSystem,
-		Logger:     loggerInterface,
 		GitHub:     gitHub,
 	}
 	internalRunner := &cmd.InternalRunner{
@@ -78,7 +68,6 @@ func NewCmdInternalRunner(loggerInterface logger.Interface, clientInterface clie
 		ForkCommitUseCase:  forkCommit,
 		PullRequestUseCase: pullRequest,
 		ReleaseUseCase:     releaseRelease,
-		Logger:             loggerInterface,
 	}
 	return internalRunner
 }

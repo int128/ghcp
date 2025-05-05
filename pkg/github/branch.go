@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
@@ -90,11 +91,11 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		"targetRepo":  githubv4.String(in.TargetRepository.Name),
 		"targetRef":   githubv4.String(in.TargetBranchName.QualifiedName().String()),
 	}
-	c.Logger.Debugf("Querying the repository with %+v", v)
+	slog.Debug("Querying the repository with", "params", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", q)
+	slog.Debug("Got the response", "response", q)
 	out := QueryForCommitOutput{
 		CurrentUserName:              q.Viewer.Login,
 		ParentDefaultBranchCommitSHA: git.CommitSHA(q.ParentRepository.DefaultBranchRef.Target.Commit.Oid),
@@ -106,7 +107,7 @@ func (c *GitHub) QueryForCommit(ctx context.Context, in QueryForCommitInput) (*Q
 		TargetBranchCommitSHA:        git.CommitSHA(q.TargetRepository.Ref.Target.Commit.Oid),
 		TargetBranchTreeSHA:          git.TreeSHA(q.TargetRepository.Ref.Target.Commit.Tree.Oid),
 	}
-	c.Logger.Debugf("Returning the repository: %+v", out)
+	slog.Debug("Returning the repository", "repository", out)
 	return &out, nil
 }
 
@@ -124,7 +125,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, in CreateBranchInput) error {
 		Name:         githubv4.String(in.BranchName.QualifiedName().String()),
 		Oid:          githubv4.GitObjectID(in.CommitSHA),
 	}
-	c.Logger.Debugf("Mutation createRef(%+v)", v)
+	slog.Debug("Mutation createRef", "params", v)
 	var m struct {
 		CreateRef struct {
 			Ref struct {
@@ -135,7 +136,7 @@ func (c *GitHub) CreateBranch(ctx context.Context, in CreateBranchInput) error {
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
 		return fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", m)
+	slog.Debug("Got the response", "response", m)
 	return nil
 }
 
@@ -153,7 +154,7 @@ func (c *GitHub) UpdateBranch(ctx context.Context, in UpdateBranchInput) error {
 		Oid:   githubv4.GitObjectID(in.CommitSHA),
 		Force: githubv4.NewBoolean(githubv4.Boolean(in.Force)),
 	}
-	c.Logger.Debugf("Mutation updateRef(%+v)", v)
+	slog.Debug("Mutation updateRef", "params", v)
 	var m struct {
 		UpdateRef struct {
 			Ref struct {
@@ -164,6 +165,6 @@ func (c *GitHub) UpdateBranch(ctx context.Context, in UpdateBranchInput) error {
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
 		return fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", m)
+	slog.Debug("Got the response", "response", m)
 	return nil
 }

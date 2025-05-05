@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
@@ -59,11 +60,11 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 		"reviewerUser":     githubv4.String(in.ReviewerUser),
 		"withReviewerUser": githubv4.Boolean(in.ReviewerUser != ""),
 	}
-	c.Logger.Debugf("Querying the existing pull request with %+v", v)
+	slog.Debug("Querying the existing pull request", "params", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", q)
+	slog.Debug("Got the response", "response", q)
 
 	out := QueryForPullRequestOutput{
 		CurrentUserName:      q.Viewer.Login,
@@ -74,7 +75,7 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 	if len(q.HeadRepository.Ref.AssociatedPullRequests.Nodes) > 0 {
 		out.PullRequestURL = q.HeadRepository.Ref.AssociatedPullRequests.Nodes[0].URL
 	}
-	c.Logger.Debugf("Returning the result: %+v", out)
+	slog.Debug("Returning the result", "result", out)
 	return &out, nil
 }
 
@@ -95,7 +96,7 @@ type CreatePullRequestOutput struct {
 }
 
 func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInput) (*CreatePullRequestOutput, error) {
-	c.Logger.Debugf("Creating a pull request %+v", in)
+	slog.Debug("Creating a pull request", "input", in)
 	headRefName := string(in.HeadBranchName)
 	if in.BaseRepository != in.HeadRepository {
 		// For cross-repository pull requests.
@@ -125,7 +126,7 @@ func (c *GitHub) CreatePullRequest(ctx context.Context, in CreatePullRequestInpu
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
 		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", m)
+	slog.Debug("Got the response", "response", m)
 	return &CreatePullRequestOutput{
 		PullRequestNodeID: m.CreatePullRequest.PullRequest.ID,
 		URL:               m.CreatePullRequest.PullRequest.URL,
@@ -138,7 +139,7 @@ type RequestPullRequestReviewInput struct {
 }
 
 func (c *GitHub) RequestPullRequestReview(ctx context.Context, in RequestPullRequestReviewInput) error {
-	c.Logger.Debugf("Requesting a review for the pull request %+v", in)
+	slog.Debug("Requesting a review for the pull request", "pullRequest", in.PullRequest, "user", in.User)
 	v := githubv4.RequestReviewsInput{
 		PullRequestID: in.PullRequest,
 		UserIDs:       &[]githubv4.ID{in.User},
@@ -153,6 +154,6 @@ func (c *GitHub) RequestPullRequestReview(ctx context.Context, in RequestPullReq
 	if err := c.Client.Mutate(ctx, &m, v, nil); err != nil {
 		return fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", m)
+	slog.Debug("Got the response", "response", m)
 	return nil
 }

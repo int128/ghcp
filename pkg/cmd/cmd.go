@@ -4,11 +4,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
+	"log/slog"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/env"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 	"github.com/int128/ghcp/pkg/usecases/forkcommit"
 	"github.com/int128/ghcp/pkg/usecases/pullrequest"
@@ -45,7 +46,6 @@ type Interface interface {
 // It bootstraps the InternalRunner and runs the specified use-case.
 type Runner struct {
 	Env               env.Interface
-	NewLogger         logger.NewFunc
 	NewGitHub         client.NewFunc
 	NewInternalRunner NewInternalRunnerFunc
 }
@@ -99,7 +99,7 @@ func (r *Runner) newRootCmd(o *globalOptions) *cobra.Command {
 	return c
 }
 
-type NewInternalRunnerFunc func(logger.Interface, client.Interface) *InternalRunner
+type NewInternalRunnerFunc func(client.Interface) *InternalRunner
 
 // InternalRunner has the set of use-cases.
 type InternalRunner struct {
@@ -107,21 +107,23 @@ type InternalRunner struct {
 	ForkCommitUseCase  forkcommit.Interface
 	PullRequestUseCase pullrequest.Interface
 	ReleaseUseCase     release.Interface
-	Logger             logger.Interface
 }
 
 func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
-	log := r.NewLogger(logger.Option{Debug: o.Debug})
+	log.SetFlags(log.Lmicroseconds)
+	if o.Debug {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
 	if o.Chdir != "" {
 		if err := r.Env.Chdir(o.Chdir); err != nil {
 			return nil, fmt.Errorf("could not change to directory %s: %w", o.Chdir, err)
 		}
-		log.Infof("Changed to directory %s", o.Chdir)
+		slog.Info("Changed to directory", "directory", o.Chdir)
 	}
 	if o.GitHubToken == "" {
 		o.GitHubToken = r.Env.Getenv(envGitHubToken)
 		if o.GitHubToken != "" {
-			log.Debugf("Using token from environment variable $%s", envGitHubToken)
+			slog.Debug("Using token from environment variable", "variable", envGitHubToken)
 		}
 	}
 	if o.GitHubToken == "" {
@@ -130,7 +132,7 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 	if o.GitHubAPI == "" {
 		o.GitHubAPI = r.Env.Getenv(envGitHubAPI)
 		if o.GitHubAPI != "" {
-			log.Debugf("Using GitHub Enterprise URL from environment variable $%s", envGitHubAPI)
+			slog.Debug("Using GitHub Enterprise URL from environment variable", "variable", envGitHubAPI)
 		}
 	}
 	gh, err := r.NewGitHub(client.Option{
@@ -140,5 +142,5 @@ func (r *Runner) newInternalRunner(o *globalOptions) (*InternalRunner, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to GitHub API: %w", err)
 	}
-	return r.NewInternalRunner(log, gh), nil
+	return r.NewInternalRunner(gh), nil
 }

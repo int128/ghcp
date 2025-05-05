@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"path/filepath"
 
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/logger"
 )
 
 var Set = wire.NewSet(
@@ -33,7 +33,6 @@ type Input struct {
 // Release create a release with the files to the tag in the repository.
 type Release struct {
 	FileSystem fs.Interface
-	Logger     logger.Interface
 	GitHub     github.Interface
 }
 
@@ -61,9 +60,9 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 		return fmt.Errorf("could not get the release: %w", err)
 	}
 	if release == nil {
-		u.Logger.Infof("No release on the tag %s", in.TagName)
+		slog.Info("No release on the tag", "tag", in.TagName)
 		if in.DryRun {
-			u.Logger.Infof("Do not create a release due to dry-run")
+			slog.Info("Do not create a release due to dry-run")
 			return nil
 		}
 		release, err = u.GitHub.CreateRelease(ctx, git.Release{
@@ -75,16 +74,16 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 		if err != nil {
 			return fmt.Errorf("could not create a release: %w", err)
 		}
-		u.Logger.Infof("Created a release %s", release.Name)
+		slog.Info("Created a release", "release", release.Name)
 	} else {
-		u.Logger.Infof("Found the release on the tag %s", in.TagName)
+		slog.Info("Found the release on the tag", "tag", in.TagName)
 	}
 
 	if in.DryRun {
-		u.Logger.Infof("Do not upload files to the release %s due to dry-run", release.Name)
+		slog.Info("Do not upload files to the release due to dry-run", "release", release.Name)
 		return nil
 	}
-	u.Logger.Infof("Uploading %d file(s)", len(files))
+	slog.Info("Uploading", "files", len(files))
 	for _, file := range files {
 		if err := u.GitHub.CreateReleaseAsset(ctx, git.ReleaseAsset{
 			Release:  release.ID,
@@ -93,7 +92,7 @@ func (u *Release) Do(ctx context.Context, in Input) error {
 		}); err != nil {
 			return fmt.Errorf("could not create a release asset: %w", err)
 		}
-		u.Logger.Infof("Uploaded %s", file.Path)
+		slog.Info("Uploaded", "file", file.Path)
 	}
 	return nil
 }

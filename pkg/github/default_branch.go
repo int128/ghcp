@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/shurcooL/githubv4"
@@ -43,11 +44,11 @@ func (c *GitHub) QueryDefaultBranch(ctx context.Context, in QueryDefaultBranchIn
 		"headOwner": githubv4.String(in.HeadRepository.Owner),
 		"headRepo":  githubv4.String(in.HeadRepository.Name),
 	}
-	c.Logger.Debugf("Querying the default branch name with %+v", v)
+	slog.Debug("Querying the default branch name with", "params", v)
 	if err := c.Client.Query(ctx, &q, v); err != nil {
 		return nil, fmt.Errorf("GitHub API error: %w", err)
 	}
-	c.Logger.Debugf("Got the result: %+v", q)
+	slog.Debug("Got the response", "response", q)
 	return &QueryDefaultBranchOutput{
 		BaseDefaultBranchName: git.BranchName(q.BaseRepository.DefaultBranchRef.Name),
 		HeadDefaultBranchName: git.BranchName(q.HeadRepository.DefaultBranchRef.Name),

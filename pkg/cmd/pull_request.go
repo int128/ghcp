@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/usecases/pullrequest"
@@ -63,7 +64,7 @@ func (r *Runner) newPullRequestCmd(ctx context.Context, gOpts *globalOptions) *c
 				Draft:          o.Draft,
 			}
 			if err := ir.PullRequestUseCase.Do(ctx, in); err != nil {
-				ir.Logger.Debugf("Stacktrace:\n%+v", err)
+				slog.Debug("Stacktrace", "stacktrace", err)
 				return fmt.Errorf("could not create a pull request: %s", err)
 			}
 			return nil

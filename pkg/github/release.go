@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -13,10 +14,10 @@ import (
 // GetReleaseByTagOrNil returns the release associated to the tag.
 // It returns nil if it does not exist.
 func (c *GitHub) GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID, tag git.TagName) (*git.Release, error) {
-	c.Logger.Debugf("Getting the release associated to the tag %v on the repository %+v", tag, repo)
+	slog.Debug("Getting the release associated to the tag", "tag", tag, "repository", repo)
 	release, resp, err := c.Client.GetReleaseByTag(ctx, repo.Owner, repo.Name, tag.Name())
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		c.Logger.Debugf("GitHub API returned 404: %s", err)
+		slog.Debug("GitHub API returned 404", "tag", tag, "repository", repo, "error", err)
 		return nil, nil
 	}
 	if err != nil {
@@ -34,7 +35,7 @@ func (c *GitHub) GetReleaseByTagOrNil(ctx context.Context, repo git.RepositoryID
 
 // CreateRelease creates a release.
 func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release, error) {
-	c.Logger.Debugf("Creating a release %+v", r)
+	slog.Debug("Creating a release", "release", r)
 	release, _, err := c.Client.CreateRelease(ctx, r.ID.Repository.Owner, r.ID.Repository.Name, &github.RepositoryRelease{
 		Name:            github.Ptr(r.Name),
 		TagName:         github.Ptr(r.TagName.Name()),
@@ -56,7 +57,7 @@ func (c *GitHub) CreateRelease(ctx context.Context, r git.Release) (*git.Release
 
 // CreateRelease creates a release asset.
 func (c *GitHub) CreateReleaseAsset(ctx context.Context, a git.ReleaseAsset) error {
-	c.Logger.Debugf("Creating a release asset %+v", a)
+	slog.Debug("Creating a release asset", "asset", a)
 	f, err := os.Open(a.RealPath)
 	if err != nil {
 		return fmt.Errorf("could not open the file: %w", err)

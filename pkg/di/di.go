@@ -11,7 +11,6 @@ import (
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/github"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 	"github.com/int128/ghcp/pkg/usecases/forkcommit"
 	"github.com/int128/ghcp/pkg/usecases/gitobject"
@@ -22,7 +21,6 @@ import (
 func NewCmd() cmd.Interface {
 	wire.Build(
 		cmd.Set,
-		logger.Set,
 		client.Set,
 		env.Set,
 
@@ -31,7 +29,7 @@ func NewCmd() cmd.Interface {
 	return nil
 }
 
-func NewCmdInternalRunner(logger.Interface, client.Interface) *cmd.InternalRunner {
+func NewCmdInternalRunner(client.Interface) *cmd.InternalRunner {
 	wire.Build(
 		cmd.Set,
 		fs.Set,

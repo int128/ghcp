@@ -11,7 +11,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/gitobject"
 	"github.com/stretchr/testify/mock"
 )
@@ -108,7 +107,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 			useCase := Commit{
 				CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
 				FileSystem:      newFileSystemMock(t),
-				Logger:          testingLogger.New(t),
 				GitHub:          gitHub,
 			}
 			if err := useCase.Do(ctx, in); err != nil {
@@ -156,7 +154,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "masterCommitSHA", "masterTreeSHA", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -193,7 +190,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "topicCommitSHA", "topicTreeSHA", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -242,7 +238,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -279,7 +274,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "", "", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -331,7 +325,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -371,7 +364,6 @@ func TestCommitToBranch_Do(t *testing.T) {
 				useCase := Commit{
 					CreateGitObject: newCreateGitObjectMock(ctx, t, "developCommitSHA", "developTreeSHA", c.noFileMode, c.changedFiles),
 					FileSystem:      newFileSystemMock(t),
-					Logger:          testingLogger.New(t),
 					GitHub:          gitHub,
 				}
 				if err := useCase.Do(ctx, in); err != nil {
@@ -414,7 +406,7 @@ func Test_pathFilter_SkipDir(t *testing.T) {
 		{path: "foo/.git", skip: true},
 	} {
 		t.Run(c.path, func(t *testing.T) {
-			f := &pathFilter{Logger: testingLogger.New(t)}
+			var f pathFilter
 			skip := f.SkipDir(c.path)
 			if skip != c.skip {
 				t.Errorf("skip wants %v but %v", c.skip, skip)
@@ -424,7 +416,7 @@ func Test_pathFilter_SkipDir(t *testing.T) {
 }
 
 func Test_pathFilter_ExcludeFile(t *testing.T) {
-	f := &pathFilter{Logger: testingLogger.New(t)}
+	var f pathFilter
 	exclude := f.ExcludeFile("foo")
 	if exclude {
 		t.Errorf("exclude wants %v but %v", false, exclude)
