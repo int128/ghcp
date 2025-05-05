@@ -56,7 +56,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 		return errors.New("you must set commit message")
 	}
 
-	files, err := u.FileSystem.FindFiles(in.Paths, &pathFilter{})
+	files, err := u.FileSystem.FindFiles(in.Paths, pathFilter{})
 	if err != nil {
 		return fmt.Errorf("could not find files: %w", err)
 	}
@@ -99,7 +99,7 @@ func (u *Commit) Do(ctx context.Context, in Input) error {
 
 type pathFilter struct{}
 
-func (f *pathFilter) SkipDir(path string) bool {
+func (f pathFilter) SkipDir(path string) bool {
 	base := filepath.Base(path)
 	if base == ".git" {
 		slog.Debug("Exclude .git directory", "path", path)
@@ -108,7 +108,7 @@ func (f *pathFilter) SkipDir(path string) bool {
 	return false
 }
 
-func (f *pathFilter) ExcludeFile(string) bool {
+func (f pathFilter) ExcludeFile(string) bool {
 	return false
 }
 

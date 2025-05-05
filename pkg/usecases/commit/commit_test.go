@@ -406,7 +406,7 @@ func Test_pathFilter_SkipDir(t *testing.T) {
 		{path: "foo/.git", skip: true},
 	} {
 		t.Run(c.path, func(t *testing.T) {
-			f := &pathFilter{}
+			var f pathFilter
 			skip := f.SkipDir(c.path)
 			if skip != c.skip {
 				t.Errorf("skip wants %v but %v", c.skip, skip)
@@ -416,7 +416,7 @@ func Test_pathFilter_SkipDir(t *testing.T) {
 }
 
 func Test_pathFilter_ExcludeFile(t *testing.T) {
-	f := &pathFilter{}
+	var f pathFilter
 	exclude := f.ExcludeFile("foo")
 	if exclude {
 		t.Errorf("exclude wants %v but %v", false, exclude)
