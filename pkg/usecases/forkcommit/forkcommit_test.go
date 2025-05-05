@@ -8,7 +8,6 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/usecases/commit_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 )
 
@@ -46,7 +45,6 @@ func TestForkCommit_Do(t *testing.T) {
 		u := ForkCommit{
 			Commit: commitUseCase,
 			GitHub: gitHub,
-			Logger: testingLogger.New(t),
 		}
 		if err := u.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)
@@ -82,7 +80,6 @@ func TestForkCommit_Do(t *testing.T) {
 		u := ForkCommit{
 			Commit: commitUseCase,
 			GitHub: gitHub,
-			Logger: testingLogger.New(t),
 		}
 		if err := u.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)

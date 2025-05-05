@@ -4,13 +4,13 @@ package gitobject
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/google/wire"
 
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/logger"
 )
 
 var Set = wire.NewSet(
@@ -41,7 +41,6 @@ type Output struct {
 // CreateGitObject creates blob(s), a tree and a commit.
 type CreateGitObject struct {
 	FileSystem fs.Interface
-	Logger     logger.Interface
 	GitHub     github.Interface
 }
 
@@ -62,7 +61,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error while creating a commit: %w", err)
 	}
-	u.Logger.Infof("Created commit %s", commitSHA)
+	slog.Info("Created commit", "sha", commitSHA)
 
 	commit, err := u.GitHub.QueryCommit(ctx, github.QueryCommitInput{
 		Repository: in.Repository,
@@ -80,7 +79,7 @@ func (u *CreateGitObject) Do(ctx context.Context, in Input) (*Output, error) {
 
 func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.TreeSHA, error) {
 	if len(in.Files) == 0 {
-		u.Logger.Debugf("Using the parent tree (%s) because of nothing to upload", in.ParentTreeSHA)
+		slog.Debug("Using the parent tree", "tree", in.ParentTreeSHA)
 		return in.ParentTreeSHA, nil
 	}
 
@@ -103,7 +102,7 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 			Executable: !in.NoFileMode && file.Executable,
 		}
 		files[i] = gitFile
-		u.Logger.Infof("Uploaded %s as blob %s", file.Path, blobSHA)
+		slog.Info("Uploaded", "file", file.Path, "blob", blobSHA)
 	}
 
 	treeSHA, err := u.GitHub.CreateTree(ctx, git.NewTree{
@@ -114,6 +113,6 @@ func (u *CreateGitObject) uploadFilesIfSet(ctx context.Context, in Input) (git.T
 	if err != nil {
 		return "", fmt.Errorf("error while creating a tree: %w", err)
 	}
-	u.Logger.Infof("Created tree %s", treeSHA)
+	slog.Info("Created a tree", "tree", treeSHA)
 	return treeSHA, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/usecases/release"
@@ -52,7 +53,7 @@ func (r *Runner) newReleaseCmd(ctx context.Context, gOpts *globalOptions) *cobra
 				DryRun:                  o.DryRun,
 			}
 			if err := ir.ReleaseUseCase.Do(ctx, in); err != nil {
-				ir.Logger.Debugf("Stacktrace:\n%+v", err)
+				slog.Debug("Stacktrace", "stacktrace", err)
 				return fmt.Errorf("could not release the files: %s", err)
 			}
 			return nil

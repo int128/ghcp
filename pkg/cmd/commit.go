@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -64,7 +65,7 @@ func (r *Runner) newCommitCmd(ctx context.Context, gOpts *globalOptions) *cobra.
 				DryRun:           o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
-				ir.Logger.Debugf("Stacktrace:\n%+v", err)
+				slog.Debug("Stacktrace", "stacktrace", err)
 				return fmt.Errorf("could not commit the files: %s", err)
 			}
 			return nil

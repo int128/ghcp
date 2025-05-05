@@ -10,7 +10,6 @@ import (
 	"github.com/int128/ghcp/pkg/fs"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 )
 
 func TestCreateBlobTreeCommit_Do(t *testing.T) {
@@ -75,7 +74,6 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 
 		useCase := CreateGitObject{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		got, err := useCase.Do(ctx, Input{
@@ -158,7 +156,6 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 
 		useCase := CreateGitObject{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		got, err := useCase.Do(ctx, Input{
@@ -208,7 +205,6 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 
 		useCase := CreateGitObject{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		got, err := useCase.Do(ctx, Input{
@@ -256,7 +252,6 @@ func TestCreateBlobTreeCommit_Do(t *testing.T) {
 
 		useCase := CreateGitObject{
 			FileSystem: fileSystem,
-			Logger:     testingLogger.New(t),
 			GitHub:     gitHub,
 		}
 		got, err := useCase.Do(ctx, Input{

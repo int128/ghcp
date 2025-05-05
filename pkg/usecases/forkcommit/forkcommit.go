@@ -10,7 +10,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 )
 
@@ -37,7 +36,6 @@ type Input struct {
 
 type ForkCommit struct {
 	Commit commit.Interface
-	Logger logger.Interface
 	GitHub github.Interface
 }
 

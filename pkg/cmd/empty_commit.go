@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -58,7 +59,7 @@ func (r *Runner) newEmptyCommitCmd(ctx context.Context, gOpts *globalOptions) *c
 				DryRun:           o.DryRun,
 			}
 			if err := ir.CommitUseCase.Do(ctx, in); err != nil {
-				ir.Logger.Debugf("Stacktrace:\n%+v", err)
+				slog.Debug("Stacktrace", "stacktrace", err)
 				return fmt.Errorf("could not create an empty commit: %s", err)
 			}
 			return nil

@@ -7,7 +7,6 @@ import (
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/git/commitstrategy"
 	"github.com/int128/ghcp/pkg/github/client"
-	"github.com/int128/ghcp/pkg/logger"
 	"github.com/int128/ghcp/pkg/usecases/commit"
 	"github.com/stretchr/testify/mock"
 )
@@ -25,7 +24,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -58,7 +56,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -93,7 +90,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -129,7 +125,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -154,7 +149,6 @@ func TestCmd_Run_commit(t *testing.T) {
 
 	t.Run("--parent and --no-parent", func(t *testing.T) {
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
@@ -180,7 +174,6 @@ func TestCmd_Run_commit(t *testing.T) {
 
 	t.Run("only --author-name", func(t *testing.T) {
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
@@ -203,7 +196,6 @@ func TestCmd_Run_commit(t *testing.T) {
 
 	t.Run("only --committer-email", func(t *testing.T) {
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, nil),
 			NewInternalRunner: newInternalRunner(InternalRunner{}),
@@ -237,7 +229,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),
@@ -272,7 +263,6 @@ func TestCmd_Run_commit(t *testing.T) {
 			}).
 			Return(nil)
 		r := Runner{
-			NewLogger:         newLogger(t, logger.Option{}),
 			NewGitHub:         newGitHub(t, client.Option{Token: "YOUR_TOKEN"}),
 			Env:               newEnv(t, map[string]string{envGitHubAPI: ""}),
 			NewInternalRunner: newInternalRunner(InternalRunner{CommitUseCase: commitUseCase}),

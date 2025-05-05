@@ -7,7 +7,6 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	testingLogger "github.com/int128/ghcp/pkg/logger/testing"
 )
 
 func TestPullRequest_Do(t *testing.T) {
@@ -49,7 +48,6 @@ func TestPullRequest_Do(t *testing.T) {
 				}, nil)
 			useCase := PullRequest{
 				GitHub: gitHub,
-				Logger: testingLogger.New(t),
 			}
 			if err := useCase.Do(ctx, in); err != nil {
 				t.Errorf("err wants nil but %+v", err)
@@ -71,7 +69,6 @@ func TestPullRequest_Do(t *testing.T) {
 				}, nil)
 			useCase := PullRequest{
 				GitHub: gitHub,
-				Logger: testingLogger.New(t),
 			}
 			if err := useCase.Do(ctx, in); err != nil {
 				t.Errorf("err wants nil but %+v", err)
@@ -91,7 +88,6 @@ func TestPullRequest_Do(t *testing.T) {
 				}, nil)
 			useCase := PullRequest{
 				GitHub: gitHub,
-				Logger: testingLogger.New(t),
 			}
 			if err := useCase.Do(ctx, in); err == nil {
 				t.Errorf("err wants non-nil but got nil")
@@ -140,7 +136,6 @@ func TestPullRequest_Do(t *testing.T) {
 			}, nil)
 		useCase := PullRequest{
 			GitHub: gitHub,
-			Logger: testingLogger.New(t),
 		}
 		if err := useCase.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)
@@ -190,7 +185,6 @@ func TestPullRequest_Do(t *testing.T) {
 			Return(nil)
 		useCase := PullRequest{
 			GitHub: gitHub,
-			Logger: testingLogger.New(t),
 		}
 		if err := useCase.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)
@@ -236,7 +230,6 @@ func TestPullRequest_Do(t *testing.T) {
 			}, nil)
 		useCase := PullRequest{
 			GitHub: gitHub,
-			Logger: testingLogger.New(t),
 		}
 		if err := useCase.Do(ctx, in); err != nil {
 			t.Errorf("err wants nil but %+v", err)
