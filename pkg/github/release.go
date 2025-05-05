@@ -62,7 +62,11 @@ func (c *GitHub) CreateReleaseAsset(ctx context.Context, a git.ReleaseAsset) err
 	if err != nil {
 		return fmt.Errorf("could not open the file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			slog.Error("Failed to close the file", "error", err)
+		}
+	}()
 	_, _, err = c.Client.UploadReleaseAsset(ctx, a.Release.Repository.Owner, a.Release.Repository.Name, a.Release.InternalID, &github.UploadOptions{
 		Name: a.Name,
 	}, f)
