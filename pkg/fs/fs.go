@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -82,7 +83,11 @@ func (fs *FileSystem) ReadAsBase64EncodedContent(filename string) (string, error
 	if err != nil {
 		return "", fmt.Errorf("error while opening file %s: %w", filename, err)
 	}
-	defer r.Close()
+	defer func() {
+		if err := r.Close(); err != nil {
+			slog.Error("Failed to close the file", "error", err)
+		}
+	}()
 	var s strings.Builder
 	e := base64.NewEncoder(base64.StdEncoding, &s)
 	if _, err := io.Copy(e, r); err != nil {
