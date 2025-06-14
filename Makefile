@@ -1,5 +1,6 @@
-ghcp:
-	CGO_ENABLED=0 go build -o $@ -ldflags '-X main.version=$(GITHUB_REF_NAME)'
+.PHONY: build
+build:
+	CGO_ENABLED=0 go build -ldflags '-X main.version=$(GITHUB_REF_NAME)'
 
 .PHONY: generate
 generate:
