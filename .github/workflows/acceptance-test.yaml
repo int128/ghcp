@@ -27,6 +27,8 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - run: go build -ldflags '-X main.version=${{ github.ref_name }}'
+        env:
+          CGO_ENABLED: "0"
       - run: make -C acceptance_test
         env:
           GITHUB_TOKEN: ${{ github.token }}
