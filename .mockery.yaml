@@ -1,10 +1,9 @@
-outpkg: "{{.PackageName}}_mock"
-dir: "mocks/{{.PackagePath}}_mock"
-
+dir: mocks/{{.SrcPackagePath}}_mock
+pkgname: '{{.SrcPackageName}}_mock'
+filename: mocks.go
+template: testify
 packages:
   github.com/int128/ghcp:
     config:
       all: true
       recursive: true
-      exclude:
-        - tools

@@ -3,10 +3,10 @@ all:
 
 .PHONY: generate
 generate:
-	go tool github.com/google/wire/cmd/wire ./pkg/di
+	go tool wire ./pkg/di
 	rm -fr mocks/
-	go tool github.com/vektra/mockery/v2
+	go tool mockery
 
 .PHONY: lint
 lint:
-	go tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint run
+	go tool golangci-lint run
