@@ -21,8 +21,13 @@ type QueryForPullRequestOutput struct {
 	CurrentUserName      string
 	BaseRepositoryNodeID InternalRepositoryNodeID
 	HeadBranchCommitSHA  git.CommitSHA
-	PullRequestURL       string      // URL of the pull request associated to the head branch, if exists
+	ExistingPullRequests []ExistingPullRequest
 	ReviewerUserNodeID   githubv4.ID // optional
+}
+
+type ExistingPullRequest struct {
+	URL   string
+	State githubv4.PullRequestState
 }
 
 // QueryForPullRequest performs the query for creating a pull request.
@@ -40,9 +45,7 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 					OID string
 				}
 				AssociatedPullRequests struct {
-					Nodes []struct {
-						URL string
-					}
+					Nodes []ExistingPullRequest
 				} `graphql:"associatedPullRequests(baseRefName: $baseRefName, first: 1)"`
 			} `graphql:"ref(qualifiedName: $headRefName)"`
 		} `graphql:"headRepository: repository(owner: $headOwner, name: $headRepo)"`
@@ -70,10 +73,8 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 		CurrentUserName:      q.Viewer.Login,
 		BaseRepositoryNodeID: q.BaseRepository.ID,
 		HeadBranchCommitSHA:  git.CommitSHA(q.HeadRepository.Ref.Target.OID),
+		ExistingPullRequests: q.HeadRepository.Ref.AssociatedPullRequests.Nodes,
 		ReviewerUserNodeID:   q.ReviewerUser.ID,
-	}
-	if len(q.HeadRepository.Ref.AssociatedPullRequests.Nodes) > 0 {
-		out.PullRequestURL = q.HeadRepository.Ref.AssociatedPullRequests.Nodes[0].URL
 	}
 	slog.Debug("Returning the result", "result", out)
 	return &out, nil
