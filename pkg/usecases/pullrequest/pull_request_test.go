@@ -7,6 +7,7 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
+	"github.com/shurcooL/githubv4"
 )
 
 func TestPullRequest_Do(t *testing.T) {
@@ -53,7 +54,7 @@ func TestPullRequest_Do(t *testing.T) {
 				t.Errorf("err wants nil but %+v", err)
 			}
 		})
-		t.Run("when the pull request already exists", func(t *testing.T) {
+		t.Run("when an open pull request already exists", func(t *testing.T) {
 			gitHub := github_mock.NewMockInterface(t)
 			gitHub.EXPECT().
 				QueryForPullRequest(ctx, github.QueryForPullRequestInput{
@@ -65,7 +66,12 @@ func TestPullRequest_Do(t *testing.T) {
 				Return(&github.QueryForPullRequestOutput{
 					CurrentUserName:     "you",
 					HeadBranchCommitSHA: "HeadCommitSHA",
-					PullRequestURL:      "https://github.com/octocat/Spoon-Knife/pull/19445",
+					ExistingPullRequests: []github.ExistingPullRequest{
+						{
+							State: githubv4.PullRequestStateOpen,
+							URL:   "https://github.com/octocat/Spoon-Knife/pull/19445",
+						},
+					},
 				}, nil)
 			useCase := PullRequest{
 				GitHub: gitHub,

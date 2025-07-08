@@ -185,7 +185,7 @@ To create a pull request from `feature` branch of `OWNER/REPO` repository to the
 ghcp pull-request -r OWNER/REPO -b feature --base-repo UPSTREAM/REPO --base feature --title TITLE --body BODY
 ```
 
-If a pull request already exists, ghcp do nothing.
+If an open pull request already exists, ghcp do nothing.
 
 You can set the following options.
 
