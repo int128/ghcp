@@ -19,6 +19,9 @@ test:
 	$(GHCP) pull-request $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --base $(BRANCH_PREFIX)-master \
 		--title "ghcp: acceptance-test $(BRANCH_PREFIX)" \
 		--body "ref: #$(GITHUB_PR_NUMBER)"
+	$(GHCP) pull-request $(GHCP_FLAGS) -b $(BRANCH_PREFIX)-feature --base $(BRANCH_PREFIX)-master \
+		--title "ghcp: acceptance-test $(BRANCH_PREFIX)" \
+		--body "This should not create a new pull request"
 
 .PHONY: clean-up
 clean-up:
