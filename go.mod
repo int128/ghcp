@@ -4,7 +4,7 @@ go 1.24.5
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v73 v73.0.0
+	github.com/google/go-github/v74 v74.0.0
 	github.com/google/wire v0.6.0
 	github.com/sethvargo/go-retry v0.3.0
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
