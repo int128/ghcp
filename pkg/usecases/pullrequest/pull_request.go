@@ -9,7 +9,6 @@ import (
 	"github.com/google/wire"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/shurcooL/githubv4"
 )
 
 var Set = wire.NewSet(
@@ -76,13 +75,10 @@ func (u *PullRequest) Do(ctx context.Context, in Input) error {
 		return fmt.Errorf("the head branch (%s) does not exist", in.HeadBranchName)
 	}
 	slog.Debug("Found the head branch", "branch", in.HeadBranchName, "commit", q.HeadBranchCommitSHA)
-	for _, pr := range q.ExistingPullRequests {
-		if pr.State == githubv4.PullRequestStateOpen {
-			slog.Warn("An open pull request already exists", "url", pr.URL)
-			return nil
-		}
+	if len(q.ExistingPullRequests) > 0 {
+		slog.Info("An open pull request already exists", "url", q.ExistingPullRequests[0].URL)
+		return nil
 	}
-
 	createdPR, err := u.GitHub.CreatePullRequest(ctx, github.CreatePullRequestInput{
 		BaseRepository:       in.BaseRepository,
 		BaseBranchName:       in.BaseBranchName,

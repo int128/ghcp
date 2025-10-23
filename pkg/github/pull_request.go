@@ -26,8 +26,7 @@ type QueryForPullRequestOutput struct {
 }
 
 type ExistingPullRequest struct {
-	URL   string
-	State githubv4.PullRequestState
+	URL string
 }
 
 // QueryForPullRequest performs the query for creating a pull request.
@@ -46,7 +45,7 @@ func (c *GitHub) QueryForPullRequest(ctx context.Context, in QueryForPullRequest
 				}
 				AssociatedPullRequests struct {
 					Nodes []ExistingPullRequest
-				} `graphql:"associatedPullRequests(baseRefName: $baseRefName, first: 1)"`
+				} `graphql:"associatedPullRequests(baseRefName: $baseRefName, states: [OPEN], first: 1)"`
 			} `graphql:"ref(qualifiedName: $headRefName)"`
 		} `graphql:"headRepository: repository(owner: $headOwner, name: $headRepo)"`
 		ReviewerUser struct {

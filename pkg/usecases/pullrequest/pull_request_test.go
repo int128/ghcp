@@ -7,7 +7,6 @@ import (
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github_mock"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/int128/ghcp/pkg/github"
-	"github.com/shurcooL/githubv4"
 )
 
 func TestPullRequest_Do(t *testing.T) {
@@ -68,8 +67,7 @@ func TestPullRequest_Do(t *testing.T) {
 					HeadBranchCommitSHA: "HeadCommitSHA",
 					ExistingPullRequests: []github.ExistingPullRequest{
 						{
-							State: githubv4.PullRequestStateOpen,
-							URL:   "https://github.com/octocat/Spoon-Knife/pull/19445",
+							URL: "https://github.com/octocat/Spoon-Knife/pull/19445",
 						},
 					},
 				}, nil)
