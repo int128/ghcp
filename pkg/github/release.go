@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v78/github"
 	"github.com/int128/ghcp/pkg/git"
 )
 
