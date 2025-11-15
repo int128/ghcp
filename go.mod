@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.32.0
+	golang.org/x/oauth2 v0.33.0
 )
 
 require (
