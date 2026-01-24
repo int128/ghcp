@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v81/github"
 	"github.com/int128/ghcp/pkg/git"
 	"github.com/sethvargo/go-retry"
 	"github.com/shurcooL/githubv4"
