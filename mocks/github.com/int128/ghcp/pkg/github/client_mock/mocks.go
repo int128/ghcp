@@ -41,7 +41,7 @@ func (_m *MockInterface) EXPECT() *MockInterface_Expecter {
 }
 
 // CreateBlob provides a mock function for the type MockInterface
-func (_mock *MockInterface) CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error) {
+func (_mock *MockInterface) CreateBlob(ctx context.Context, owner string, repo string, blob github.Blob) (*github.Blob, *github.Response, error) {
 	ret := _mock.Called(ctx, owner, repo, blob)
 
 	if len(ret) == 0 {
@@ -51,24 +51,24 @@ func (_mock *MockInterface) CreateBlob(ctx context.Context, owner string, repo s
 	var r0 *github.Blob
 	var r1 *github.Response
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Blob) (*github.Blob, *github.Response, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Blob) (*github.Blob, *github.Response, error)); ok {
 		return returnFunc(ctx, owner, repo, blob)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Blob) *github.Blob); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Blob) *github.Blob); ok {
 		r0 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*github.Blob)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *github.Blob) *github.Response); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, github.Blob) *github.Response); ok {
 		r1 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*github.Response)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, *github.Blob) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, github.Blob) error); ok {
 		r2 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		r2 = ret.Error(2)
@@ -85,12 +85,12 @@ type MockInterface_CreateBlob_Call struct {
 //   - ctx context.Context
 //   - owner string
 //   - repo string
-//   - blob *github.Blob
+//   - blob github.Blob
 func (_e *MockInterface_Expecter) CreateBlob(ctx interface{}, owner interface{}, repo interface{}, blob interface{}) *MockInterface_CreateBlob_Call {
 	return &MockInterface_CreateBlob_Call{Call: _e.mock.On("CreateBlob", ctx, owner, repo, blob)}
 }
 
-func (_c *MockInterface_CreateBlob_Call) Run(run func(ctx context.Context, owner string, repo string, blob *github.Blob)) *MockInterface_CreateBlob_Call {
+func (_c *MockInterface_CreateBlob_Call) Run(run func(ctx context.Context, owner string, repo string, blob github.Blob)) *MockInterface_CreateBlob_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -104,9 +104,9 @@ func (_c *MockInterface_CreateBlob_Call) Run(run func(ctx context.Context, owner
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 *github.Blob
+		var arg3 github.Blob
 		if args[3] != nil {
-			arg3 = args[3].(*github.Blob)
+			arg3 = args[3].(github.Blob)
 		}
 		run(
 			arg0,
@@ -123,13 +123,13 @@ func (_c *MockInterface_CreateBlob_Call) Return(blob1 *github.Blob, response *gi
 	return _c
 }
 
-func (_c *MockInterface_CreateBlob_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)) *MockInterface_CreateBlob_Call {
+func (_c *MockInterface_CreateBlob_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, blob github.Blob) (*github.Blob, *github.Response, error)) *MockInterface_CreateBlob_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CreateCommit provides a mock function for the type MockInterface
-func (_mock *MockInterface) CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error) {
+func (_mock *MockInterface) CreateCommit(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error) {
 	ret := _mock.Called(ctx, owner, repo, commit, opts)
 
 	if len(ret) == 0 {
@@ -139,24 +139,24 @@ func (_mock *MockInterface) CreateCommit(ctx context.Context, owner string, repo
 	var r0 *github.Commit
 	var r1 *github.Response
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) (*github.Commit, *github.Response, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) (*github.Commit, *github.Response, error)); ok {
 		return returnFunc(ctx, owner, repo, commit, opts)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) *github.Commit); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) *github.Commit); ok {
 		r0 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*github.Commit)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) *github.Response); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) *github.Response); ok {
 		r1 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*github.Response)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) error); ok {
 		r2 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		r2 = ret.Error(2)
@@ -173,13 +173,13 @@ type MockInterface_CreateCommit_Call struct {
 //   - ctx context.Context
 //   - owner string
 //   - repo string
-//   - commit *github.Commit
+//   - commit github.Commit
 //   - opts *github.CreateCommitOptions
 func (_e *MockInterface_Expecter) CreateCommit(ctx interface{}, owner interface{}, repo interface{}, commit interface{}, opts interface{}) *MockInterface_CreateCommit_Call {
 	return &MockInterface_CreateCommit_Call{Call: _e.mock.On("CreateCommit", ctx, owner, repo, commit, opts)}
 }
 
-func (_c *MockInterface_CreateCommit_Call) Run(run func(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions)) *MockInterface_CreateCommit_Call {
+func (_c *MockInterface_CreateCommit_Call) Run(run func(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions)) *MockInterface_CreateCommit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -193,9 +193,9 @@ func (_c *MockInterface_CreateCommit_Call) Run(run func(ctx context.Context, own
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 *github.Commit
+		var arg3 github.Commit
 		if args[3] != nil {
-			arg3 = args[3].(*github.Commit)
+			arg3 = args[3].(github.Commit)
 		}
 		var arg4 *github.CreateCommitOptions
 		if args[4] != nil {
@@ -217,7 +217,7 @@ func (_c *MockInterface_CreateCommit_Call) Return(commit1 *github.Commit, respon
 	return _c
 }
 
-func (_c *MockInterface_CreateCommit_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)) *MockInterface_CreateCommit_Call {
+func (_c *MockInterface_CreateCommit_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)) *MockInterface_CreateCommit_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -999,7 +999,7 @@ func (_m *MockGitService) EXPECT() *MockGitService_Expecter {
 }
 
 // CreateBlob provides a mock function for the type MockGitService
-func (_mock *MockGitService) CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error) {
+func (_mock *MockGitService) CreateBlob(ctx context.Context, owner string, repo string, blob github.Blob) (*github.Blob, *github.Response, error) {
 	ret := _mock.Called(ctx, owner, repo, blob)
 
 	if len(ret) == 0 {
@@ -1009,24 +1009,24 @@ func (_mock *MockGitService) CreateBlob(ctx context.Context, owner string, repo 
 	var r0 *github.Blob
 	var r1 *github.Response
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Blob) (*github.Blob, *github.Response, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Blob) (*github.Blob, *github.Response, error)); ok {
 		return returnFunc(ctx, owner, repo, blob)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Blob) *github.Blob); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Blob) *github.Blob); ok {
 		r0 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*github.Blob)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *github.Blob) *github.Response); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, github.Blob) *github.Response); ok {
 		r1 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*github.Response)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, *github.Blob) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, github.Blob) error); ok {
 		r2 = returnFunc(ctx, owner, repo, blob)
 	} else {
 		r2 = ret.Error(2)
@@ -1043,12 +1043,12 @@ type MockGitService_CreateBlob_Call struct {
 //   - ctx context.Context
 //   - owner string
 //   - repo string
-//   - blob *github.Blob
+//   - blob github.Blob
 func (_e *MockGitService_Expecter) CreateBlob(ctx interface{}, owner interface{}, repo interface{}, blob interface{}) *MockGitService_CreateBlob_Call {
 	return &MockGitService_CreateBlob_Call{Call: _e.mock.On("CreateBlob", ctx, owner, repo, blob)}
 }
 
-func (_c *MockGitService_CreateBlob_Call) Run(run func(ctx context.Context, owner string, repo string, blob *github.Blob)) *MockGitService_CreateBlob_Call {
+func (_c *MockGitService_CreateBlob_Call) Run(run func(ctx context.Context, owner string, repo string, blob github.Blob)) *MockGitService_CreateBlob_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1062,9 +1062,9 @@ func (_c *MockGitService_CreateBlob_Call) Run(run func(ctx context.Context, owne
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 *github.Blob
+		var arg3 github.Blob
 		if args[3] != nil {
-			arg3 = args[3].(*github.Blob)
+			arg3 = args[3].(github.Blob)
 		}
 		run(
 			arg0,
@@ -1081,13 +1081,13 @@ func (_c *MockGitService_CreateBlob_Call) Return(blob1 *github.Blob, response *g
 	return _c
 }
 
-func (_c *MockGitService_CreateBlob_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)) *MockGitService_CreateBlob_Call {
+func (_c *MockGitService_CreateBlob_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, blob github.Blob) (*github.Blob, *github.Response, error)) *MockGitService_CreateBlob_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CreateCommit provides a mock function for the type MockGitService
-func (_mock *MockGitService) CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error) {
+func (_mock *MockGitService) CreateCommit(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error) {
 	ret := _mock.Called(ctx, owner, repo, commit, opts)
 
 	if len(ret) == 0 {
@@ -1097,24 +1097,24 @@ func (_mock *MockGitService) CreateCommit(ctx context.Context, owner string, rep
 	var r0 *github.Commit
 	var r1 *github.Response
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) (*github.Commit, *github.Response, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) (*github.Commit, *github.Response, error)); ok {
 		return returnFunc(ctx, owner, repo, commit, opts)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) *github.Commit); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) *github.Commit); ok {
 		r0 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*github.Commit)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) *github.Response); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) *github.Response); ok {
 		r1 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*github.Response)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, *github.Commit, *github.CreateCommitOptions) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, string, github.Commit, *github.CreateCommitOptions) error); ok {
 		r2 = returnFunc(ctx, owner, repo, commit, opts)
 	} else {
 		r2 = ret.Error(2)
@@ -1131,13 +1131,13 @@ type MockGitService_CreateCommit_Call struct {
 //   - ctx context.Context
 //   - owner string
 //   - repo string
-//   - commit *github.Commit
+//   - commit github.Commit
 //   - opts *github.CreateCommitOptions
 func (_e *MockGitService_Expecter) CreateCommit(ctx interface{}, owner interface{}, repo interface{}, commit interface{}, opts interface{}) *MockGitService_CreateCommit_Call {
 	return &MockGitService_CreateCommit_Call{Call: _e.mock.On("CreateCommit", ctx, owner, repo, commit, opts)}
 }
 
-func (_c *MockGitService_CreateCommit_Call) Run(run func(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions)) *MockGitService_CreateCommit_Call {
+func (_c *MockGitService_CreateCommit_Call) Run(run func(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions)) *MockGitService_CreateCommit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1151,9 +1151,9 @@ func (_c *MockGitService_CreateCommit_Call) Run(run func(ctx context.Context, ow
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 *github.Commit
+		var arg3 github.Commit
 		if args[3] != nil {
-			arg3 = args[3].(*github.Commit)
+			arg3 = args[3].(github.Commit)
 		}
 		var arg4 *github.CreateCommitOptions
 		if args[4] != nil {
@@ -1175,7 +1175,7 @@ func (_c *MockGitService_CreateCommit_Call) Return(commit1 *github.Commit, respo
 	return _c
 }
 
-func (_c *MockGitService_CreateCommit_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)) *MockGitService_CreateCommit_Call {
+func (_c *MockGitService_CreateCommit_Call) RunAndReturn(run func(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)) *MockGitService_CreateCommit_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -72,7 +72,7 @@ func (c *GitHub) CreateCommit(ctx context.Context, n git.NewCommit) (git.CommitS
 			Email: github.Ptr(n.Committer.Email),
 		}
 	}
-	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, &commit, nil)
+	created, _, err := c.Client.CreateCommit(ctx, n.Repository.Owner, n.Repository.Name, commit, nil)
 	if err != nil {
 		return "", fmt.Errorf("GitHub API error: %w", err)
 	}
@@ -101,7 +101,7 @@ func (c *GitHub) CreateTree(ctx context.Context, n git.NewTree) (git.TreeSHA, er
 // CreateBlob creates a blob and returns SHA of it.
 func (c *GitHub) CreateBlob(ctx context.Context, n git.NewBlob) (git.BlobSHA, error) {
 	slog.Debug("Creating a blob", "size", len(n.Content), "repository", n.Repository)
-	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, &github.Blob{
+	blob, _, err := c.Client.CreateBlob(ctx, n.Repository.Owner, n.Repository.Name, github.Blob{
 		Encoding: github.Ptr("base64"),
 		Content:  github.Ptr(n.Content),
 	})

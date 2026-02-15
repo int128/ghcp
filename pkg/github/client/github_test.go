@@ -52,7 +52,7 @@ func TestNewGitHubClient(t *testing.T) {
 	}
 
 	// v3 API
-	if _, _, err := c.CreateBlob(ctx, "owner", "repo", &github.Blob{}); err != nil {
+	if _, _, err := c.CreateBlob(ctx, "owner", "repo", github.Blob{}); err != nil {
 		t.Errorf("CreateBlob returned error: %s", err)
 	}
 }

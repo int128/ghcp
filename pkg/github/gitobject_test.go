@@ -16,7 +16,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 	t.Run("SingleParent", func(t *testing.T) {
 		gitHubClient := client_mock.NewMockInterface(t)
 		gitHubClient.EXPECT().
-			CreateCommit(ctx, "owner", "repo", &github.Commit{
+			CreateCommit(ctx, "owner", "repo", github.Commit{
 				Message: github.Ptr("message"),
 				Parents: []*github.Commit{{SHA: github.Ptr("parentCommitSHA")}},
 				Tree:    &github.Tree{SHA: github.Ptr("treeSHA")},
@@ -44,7 +44,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 	t.Run("NoParent", func(t *testing.T) {
 		gitHubClient := client_mock.NewMockInterface(t)
 		gitHubClient.EXPECT().
-			CreateCommit(ctx, "owner", "repo", &github.Commit{
+			CreateCommit(ctx, "owner", "repo", github.Commit{
 				Message: github.Ptr("message"),
 				Tree:    &github.Tree{SHA: github.Ptr("treeSHA")},
 			}, (*github.CreateCommitOptions)(nil)).
