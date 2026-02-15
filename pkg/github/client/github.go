@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/google/wire"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
@@ -31,9 +31,9 @@ type QueryService interface {
 }
 
 type GitService interface {
-	CreateCommit(ctx context.Context, owner string, repo string, commit *github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)
+	CreateCommit(ctx context.Context, owner string, repo string, commit github.Commit, opts *github.CreateCommitOptions) (*github.Commit, *github.Response, error)
 	CreateTree(ctx context.Context, owner string, repo string, baseTree string, entries []*github.TreeEntry) (*github.Tree, *github.Response, error)
-	CreateBlob(ctx context.Context, owner string, repo string, blob *github.Blob) (*github.Blob, *github.Response, error)
+	CreateBlob(ctx context.Context, owner string, repo string, blob github.Blob) (*github.Blob, *github.Response, error)
 }
 
 type RepositoriesService interface {

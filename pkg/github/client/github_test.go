@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 )
 
 func TestNewGitHubClient(t *testing.T) {
@@ -52,7 +52,7 @@ func TestNewGitHubClient(t *testing.T) {
 	}
 
 	// v3 API
-	if _, _, err := c.CreateBlob(ctx, "owner", "repo", &github.Blob{}); err != nil {
+	if _, _, err := c.CreateBlob(ctx, "owner", "repo", github.Blob{}); err != nil {
 		t.Errorf("CreateBlob returned error: %s", err)
 	}
 }

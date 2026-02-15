@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github/client_mock"
 	"github.com/int128/ghcp/pkg/git"
 )
@@ -16,7 +16,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 	t.Run("SingleParent", func(t *testing.T) {
 		gitHubClient := client_mock.NewMockInterface(t)
 		gitHubClient.EXPECT().
-			CreateCommit(ctx, "owner", "repo", &github.Commit{
+			CreateCommit(ctx, "owner", "repo", github.Commit{
 				Message: github.Ptr("message"),
 				Parents: []*github.Commit{{SHA: github.Ptr("parentCommitSHA")}},
 				Tree:    &github.Tree{SHA: github.Ptr("treeSHA")},
@@ -44,7 +44,7 @@ func TestGitHub_CreateCommit(t *testing.T) {
 	t.Run("NoParent", func(t *testing.T) {
 		gitHubClient := client_mock.NewMockInterface(t)
 		gitHubClient.EXPECT().
-			CreateCommit(ctx, "owner", "repo", &github.Commit{
+			CreateCommit(ctx, "owner", "repo", github.Commit{
 				Message: github.Ptr("message"),
 				Tree:    &github.Tree{SHA: github.Ptr("treeSHA")},
 			}, (*github.CreateCommitOptions)(nil)).

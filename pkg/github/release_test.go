@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github/client_mock"
 	"github.com/int128/ghcp/pkg/git"
 )
