@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build -ldflags '-X main.version=$(GITHUB_REF_NAME)'
+	CGO_ENABLED=0 go build -ldflags '-X main.version=$(RELEASE_NAME)'
 
 .PHONY: generate
 generate:
