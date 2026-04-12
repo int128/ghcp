@@ -26,22 +26,26 @@ on:
         type: string
         required: true
 
+env:
+  RELEASE_NAME: ${{ inputs.release-name || case(github.ref_type == 'tag', github.ref_name, '') }}
+
 jobs:
-  draft:
+  create:
     runs-on: ubuntu-slim
     timeout-minutes: 10
     permissions:
       contents: write
     outputs:
-      created-release-name: ${{ steps.create.outputs.created-release-name }}
+      already-exists: ${{ steps.create.outputs.already-exists }}
     steps:
       - id: create
-        uses: int128/go-release-action/create-draft-release@a66c6363c3786fda1b453243ade66b09bb5390cd # v2.2.0
+        uses: int128/go-release-action/create-draft-release@e5dd98a4a1cebeb7762eff49b373cab656f7efb0 # v2.3.0
         with:
-          release-name: ${{ inputs.release-name || case(github.ref_type == 'tag', github.ref_name, '') }}
+          release-name: ${{ env.RELEASE_NAME }}
 
   build:
-    needs: draft
+    if: needs.create.outputs.already-exists != 'true'
+    needs: create
     strategy:
       matrix:
         platform:
@@ -77,9 +81,7 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - run: make
-        env:
-          RELEASE_NAME: ${{ needs.draft.outputs.created-release-name }}
-      - uses: int128/go-release-action@a66c6363c3786fda1b453243ade66b09bb5390cd # v2.2.0
+      - uses: int128/go-release-action@e5dd98a4a1cebeb7762eff49b373cab656f7efb0 # v2.3.0
         with:
           binary: ghcp
-          release-name: ${{ needs.draft.outputs.created-release-name }}
+          release-name: ${{ env.RELEASE_NAME }}
