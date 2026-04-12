@@ -30,8 +30,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-    outputs:
-      already-exists: ${{ steps.create.outputs.already-exists }}
     steps:
       - id: create
         uses: int128/go-release-action/create-draft-release@d41b0078a58c1c5360be181566937fdd79caef6e # v2.4.0
