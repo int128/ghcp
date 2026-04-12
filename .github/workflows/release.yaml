@@ -9,8 +9,7 @@ on:
       - pkg/**
       - '*.go'
       - go.*
-    tags:
-      - v*
+      - Makefile
   pull_request:
     branches:
       - master
@@ -19,15 +18,7 @@ on:
       - pkg/**
       - '*.go'
       - go.*
-  workflow_dispatch:
-    inputs:
-      release-name:
-        description: Name to create a draft release
-        type: string
-        required: true
-
-env:
-  RELEASE_NAME: ${{ inputs.release-name || case(github.ref_type == 'tag', github.ref_name, '') }}
+      - Makefile
 
 jobs:
   create:
@@ -39,12 +30,11 @@ jobs:
       already-exists: ${{ steps.create.outputs.already-exists }}
     steps:
       - id: create
-        uses: int128/go-release-action/create-draft-release@e5dd98a4a1cebeb7762eff49b373cab656f7efb0 # v2.3.0
+        uses: int128/go-release-action/create-draft-release@d41b0078a58c1c5360be181566937fdd79caef6e # v2.4.0
         with:
-          release-name: ${{ env.RELEASE_NAME }}
+          release-name: ${{ case(github.event_name == 'push', 'next', '') }}
 
   build:
-    if: needs.create.outputs.already-exists != 'true'
     needs: create
     strategy:
       matrix:
@@ -81,7 +71,7 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - run: make
-      - uses: int128/go-release-action@e5dd98a4a1cebeb7762eff49b373cab656f7efb0 # v2.3.0
+      - uses: int128/go-release-action@d41b0078a58c1c5360be181566937fdd79caef6e # v2.4.0
         with:
           binary: ghcp
-          release-name: ${{ env.RELEASE_NAME }}
+          release-name: ${{ case(github.event_name == 'push', 'next', '') }}
