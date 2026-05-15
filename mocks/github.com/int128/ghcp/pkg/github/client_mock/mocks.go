@@ -8,7 +8,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v86/github"
 	"github.com/shurcooL/githubv4"
 	mock "github.com/stretchr/testify/mock"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v86/github"
 	"github.com/int128/ghcp/mocks/github.com/int128/ghcp/pkg/github/client_mock"
 	"github.com/int128/ghcp/pkg/git"
 )
