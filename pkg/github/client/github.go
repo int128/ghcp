@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v86/github"
 	"github.com/google/wire"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
