@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v88/github"
 	"github.com/google/wire"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
@@ -79,12 +79,15 @@ func newClients(o Option) (*githubv4.Client, *github.Client, error) {
 	}
 	if o.URLv3 != "" {
 		// https://developer.github.com/enterprise/2.16/v3/
-		v3, err := github.NewClient(hc).WithEnterpriseURLs(o.URLv3, o.URLv3)
+		v3, err := github.NewClient(
+			github.WithHTTPClient(hc),
+			github.WithEnterpriseURLs(o.URLv3, o.URLv3),
+		)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error while creating a GitHub v3 client: %w", err)
 		}
 		// https://developer.github.com/enterprise/2.16/v4/guides/forming-calls/
-		v4URL, err := buildV4URL(v3.BaseURL)
+		v4URL, err := buildV4URL(v3.BaseURL())
 		if err != nil {
 			return nil, nil, fmt.Errorf("error while creating a GitHub v4 client: %w", err)
 		}
@@ -92,12 +95,19 @@ func newClients(o Option) (*githubv4.Client, *github.Client, error) {
 		return v4, v3, nil
 	}
 	v4 := githubv4.NewClient(hc)
-	v3 := github.NewClient(hc)
+	v3, err := github.NewClient(github.WithHTTPClient(hc))
+	if err != nil {
+		return nil, nil, fmt.Errorf("error while creating a GitHub v3 client: %w", err)
+	}
 	return v4, v3, nil
 }
 
-func buildV4URL(v3 *url.URL) (string, error) {
-	v4, err := v3.Parse("../graphql")
+func buildV4URL(v3 string) (string, error) {
+	v3URL, err := url.Parse(v3)
+	if err != nil {
+		return "", fmt.Errorf("error while parsing v3 URL: %w", err)
+	}
+	v4, err := v3URL.Parse("../graphql")
 	if err != nil {
 		return "", fmt.Errorf("error while building v4 URL: %w", err)
 	}
