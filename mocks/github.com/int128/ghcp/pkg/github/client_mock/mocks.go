@@ -86,7 +86,7 @@ type MockInterface_CreateBlob_Call struct {
 //   - owner string
 //   - repo string
 //   - blob github.Blob
-func (_e *MockInterface_Expecter) CreateBlob(ctx interface{}, owner interface{}, repo interface{}, blob interface{}) *MockInterface_CreateBlob_Call {
+func (_e *MockInterface_Expecter) CreateBlob(ctx any, owner any, repo any, blob any) *MockInterface_CreateBlob_Call {
 	return &MockInterface_CreateBlob_Call{Call: _e.mock.On("CreateBlob", ctx, owner, repo, blob)}
 }
 
@@ -175,7 +175,7 @@ type MockInterface_CreateCommit_Call struct {
 //   - repo string
 //   - commit github.Commit
 //   - opts *github.CreateCommitOptions
-func (_e *MockInterface_Expecter) CreateCommit(ctx interface{}, owner interface{}, repo interface{}, commit interface{}, opts interface{}) *MockInterface_CreateCommit_Call {
+func (_e *MockInterface_Expecter) CreateCommit(ctx any, owner any, repo any, commit any, opts any) *MockInterface_CreateCommit_Call {
 	return &MockInterface_CreateCommit_Call{Call: _e.mock.On("CreateCommit", ctx, owner, repo, commit, opts)}
 }
 
@@ -268,7 +268,7 @@ type MockInterface_CreateFork_Call struct {
 //   - owner string
 //   - repo string
 //   - opt *github.RepositoryCreateForkOptions
-func (_e *MockInterface_Expecter) CreateFork(ctx interface{}, owner interface{}, repo interface{}, opt interface{}) *MockInterface_CreateFork_Call {
+func (_e *MockInterface_Expecter) CreateFork(ctx any, owner any, repo any, opt any) *MockInterface_CreateFork_Call {
 	return &MockInterface_CreateFork_Call{Call: _e.mock.On("CreateFork", ctx, owner, repo, opt)}
 }
 
@@ -356,7 +356,7 @@ type MockInterface_CreateRelease_Call struct {
 //   - owner string
 //   - repo string
 //   - release *github.RepositoryRelease
-func (_e *MockInterface_Expecter) CreateRelease(ctx interface{}, owner interface{}, repo interface{}, release interface{}) *MockInterface_CreateRelease_Call {
+func (_e *MockInterface_Expecter) CreateRelease(ctx any, owner any, repo any, release any) *MockInterface_CreateRelease_Call {
 	return &MockInterface_CreateRelease_Call{Call: _e.mock.On("CreateRelease", ctx, owner, repo, release)}
 }
 
@@ -445,7 +445,7 @@ type MockInterface_CreateTree_Call struct {
 //   - repo string
 //   - baseTree string
 //   - entries []*github.TreeEntry
-func (_e *MockInterface_Expecter) CreateTree(ctx interface{}, owner interface{}, repo interface{}, baseTree interface{}, entries interface{}) *MockInterface_CreateTree_Call {
+func (_e *MockInterface_Expecter) CreateTree(ctx any, owner any, repo any, baseTree any, entries any) *MockInterface_CreateTree_Call {
 	return &MockInterface_CreateTree_Call{Call: _e.mock.On("CreateTree", ctx, owner, repo, baseTree, entries)}
 }
 
@@ -538,7 +538,7 @@ type MockInterface_GetReleaseByTag_Call struct {
 //   - owner string
 //   - repo string
 //   - tag string
-func (_e *MockInterface_Expecter) GetReleaseByTag(ctx interface{}, owner interface{}, repo interface{}, tag interface{}) *MockInterface_GetReleaseByTag_Call {
+func (_e *MockInterface_Expecter) GetReleaseByTag(ctx any, owner any, repo any, tag any) *MockInterface_GetReleaseByTag_Call {
 	return &MockInterface_GetReleaseByTag_Call{Call: _e.mock.On("GetReleaseByTag", ctx, owner, repo, tag)}
 }
 
@@ -607,7 +607,7 @@ type MockInterface_Mutate_Call struct {
 //   - m interface{}
 //   - input githubv4.Input
 //   - variables map[string]interface{}
-func (_e *MockInterface_Expecter) Mutate(ctx interface{}, m interface{}, input interface{}, variables interface{}) *MockInterface_Mutate_Call {
+func (_e *MockInterface_Expecter) Mutate(ctx any, m any, input any, variables any) *MockInterface_Mutate_Call {
 	return &MockInterface_Mutate_Call{Call: _e.mock.On("Mutate", ctx, m, input, variables)}
 }
 
@@ -675,7 +675,7 @@ type MockInterface_Query_Call struct {
 //   - ctx context.Context
 //   - q interface{}
 //   - variables map[string]interface{}
-func (_e *MockInterface_Expecter) Query(ctx interface{}, q interface{}, variables interface{}) *MockInterface_Query_Call {
+func (_e *MockInterface_Expecter) Query(ctx any, q any, variables any) *MockInterface_Query_Call {
 	return &MockInterface_Query_Call{Call: _e.mock.On("Query", ctx, q, variables)}
 }
 
@@ -760,7 +760,7 @@ type MockInterface_UploadReleaseAsset_Call struct {
 //   - id int64
 //   - opt *github.UploadOptions
 //   - file *os.File
-func (_e *MockInterface_Expecter) UploadReleaseAsset(ctx interface{}, owner interface{}, repo interface{}, id interface{}, opt interface{}, file interface{}) *MockInterface_UploadReleaseAsset_Call {
+func (_e *MockInterface_Expecter) UploadReleaseAsset(ctx any, owner any, repo any, id any, opt any, file any) *MockInterface_UploadReleaseAsset_Call {
 	return &MockInterface_UploadReleaseAsset_Call{Call: _e.mock.On("UploadReleaseAsset", ctx, owner, repo, id, opt, file)}
 }
 
@@ -866,7 +866,7 @@ type MockQueryService_Mutate_Call struct {
 //   - m interface{}
 //   - input githubv4.Input
 //   - variables map[string]interface{}
-func (_e *MockQueryService_Expecter) Mutate(ctx interface{}, m interface{}, input interface{}, variables interface{}) *MockQueryService_Mutate_Call {
+func (_e *MockQueryService_Expecter) Mutate(ctx any, m any, input any, variables any) *MockQueryService_Mutate_Call {
 	return &MockQueryService_Mutate_Call{Call: _e.mock.On("Mutate", ctx, m, input, variables)}
 }
 
@@ -934,7 +934,7 @@ type MockQueryService_Query_Call struct {
 //   - ctx context.Context
 //   - q interface{}
 //   - variables map[string]interface{}
-func (_e *MockQueryService_Expecter) Query(ctx interface{}, q interface{}, variables interface{}) *MockQueryService_Query_Call {
+func (_e *MockQueryService_Expecter) Query(ctx any, q any, variables any) *MockQueryService_Query_Call {
 	return &MockQueryService_Query_Call{Call: _e.mock.On("Query", ctx, q, variables)}
 }
 
@@ -1044,7 +1044,7 @@ type MockGitService_CreateBlob_Call struct {
 //   - owner string
 //   - repo string
 //   - blob github.Blob
-func (_e *MockGitService_Expecter) CreateBlob(ctx interface{}, owner interface{}, repo interface{}, blob interface{}) *MockGitService_CreateBlob_Call {
+func (_e *MockGitService_Expecter) CreateBlob(ctx any, owner any, repo any, blob any) *MockGitService_CreateBlob_Call {
 	return &MockGitService_CreateBlob_Call{Call: _e.mock.On("CreateBlob", ctx, owner, repo, blob)}
 }
 
@@ -1133,7 +1133,7 @@ type MockGitService_CreateCommit_Call struct {
 //   - repo string
 //   - commit github.Commit
 //   - opts *github.CreateCommitOptions
-func (_e *MockGitService_Expecter) CreateCommit(ctx interface{}, owner interface{}, repo interface{}, commit interface{}, opts interface{}) *MockGitService_CreateCommit_Call {
+func (_e *MockGitService_Expecter) CreateCommit(ctx any, owner any, repo any, commit any, opts any) *MockGitService_CreateCommit_Call {
 	return &MockGitService_CreateCommit_Call{Call: _e.mock.On("CreateCommit", ctx, owner, repo, commit, opts)}
 }
 
@@ -1227,7 +1227,7 @@ type MockGitService_CreateTree_Call struct {
 //   - repo string
 //   - baseTree string
 //   - entries []*github.TreeEntry
-func (_e *MockGitService_Expecter) CreateTree(ctx interface{}, owner interface{}, repo interface{}, baseTree interface{}, entries interface{}) *MockGitService_CreateTree_Call {
+func (_e *MockGitService_Expecter) CreateTree(ctx any, owner any, repo any, baseTree any, entries any) *MockGitService_CreateTree_Call {
 	return &MockGitService_CreateTree_Call{Call: _e.mock.On("CreateTree", ctx, owner, repo, baseTree, entries)}
 }
 
@@ -1347,7 +1347,7 @@ type MockRepositoriesService_CreateFork_Call struct {
 //   - owner string
 //   - repo string
 //   - opt *github.RepositoryCreateForkOptions
-func (_e *MockRepositoriesService_Expecter) CreateFork(ctx interface{}, owner interface{}, repo interface{}, opt interface{}) *MockRepositoriesService_CreateFork_Call {
+func (_e *MockRepositoriesService_Expecter) CreateFork(ctx any, owner any, repo any, opt any) *MockRepositoriesService_CreateFork_Call {
 	return &MockRepositoriesService_CreateFork_Call{Call: _e.mock.On("CreateFork", ctx, owner, repo, opt)}
 }
 
@@ -1435,7 +1435,7 @@ type MockRepositoriesService_CreateRelease_Call struct {
 //   - owner string
 //   - repo string
 //   - release *github.RepositoryRelease
-func (_e *MockRepositoriesService_Expecter) CreateRelease(ctx interface{}, owner interface{}, repo interface{}, release interface{}) *MockRepositoriesService_CreateRelease_Call {
+func (_e *MockRepositoriesService_Expecter) CreateRelease(ctx any, owner any, repo any, release any) *MockRepositoriesService_CreateRelease_Call {
 	return &MockRepositoriesService_CreateRelease_Call{Call: _e.mock.On("CreateRelease", ctx, owner, repo, release)}
 }
 
@@ -1523,7 +1523,7 @@ type MockRepositoriesService_GetReleaseByTag_Call struct {
 //   - owner string
 //   - repo string
 //   - tag string
-func (_e *MockRepositoriesService_Expecter) GetReleaseByTag(ctx interface{}, owner interface{}, repo interface{}, tag interface{}) *MockRepositoriesService_GetReleaseByTag_Call {
+func (_e *MockRepositoriesService_Expecter) GetReleaseByTag(ctx any, owner any, repo any, tag any) *MockRepositoriesService_GetReleaseByTag_Call {
 	return &MockRepositoriesService_GetReleaseByTag_Call{Call: _e.mock.On("GetReleaseByTag", ctx, owner, repo, tag)}
 }
 
@@ -1613,7 +1613,7 @@ type MockRepositoriesService_UploadReleaseAsset_Call struct {
 //   - id int64
 //   - opt *github.UploadOptions
 //   - file *os.File
-func (_e *MockRepositoriesService_Expecter) UploadReleaseAsset(ctx interface{}, owner interface{}, repo interface{}, id interface{}, opt interface{}, file interface{}) *MockRepositoriesService_UploadReleaseAsset_Call {
+func (_e *MockRepositoriesService_Expecter) UploadReleaseAsset(ctx any, owner any, repo any, id any, opt any, file any) *MockRepositoriesService_UploadReleaseAsset_Call {
 	return &MockRepositoriesService_UploadReleaseAsset_Call{Call: _e.mock.On("UploadReleaseAsset", ctx, owner, repo, id, opt, file)}
 }
 

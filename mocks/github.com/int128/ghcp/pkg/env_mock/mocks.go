@@ -59,7 +59,7 @@ type MockInterface_Chdir_Call struct {
 
 // Chdir is a helper method to define mock.On call
 //   - dir string
-func (_e *MockInterface_Expecter) Chdir(dir interface{}) *MockInterface_Chdir_Call {
+func (_e *MockInterface_Expecter) Chdir(dir any) *MockInterface_Chdir_Call {
 	return &MockInterface_Chdir_Call{Call: _e.mock.On("Chdir", dir)}
 }
 
@@ -110,7 +110,7 @@ type MockInterface_Getenv_Call struct {
 
 // Getenv is a helper method to define mock.On call
 //   - key string
-func (_e *MockInterface_Expecter) Getenv(key interface{}) *MockInterface_Getenv_Call {
+func (_e *MockInterface_Expecter) Getenv(key any) *MockInterface_Getenv_Call {
 	return &MockInterface_Getenv_Call{Call: _e.mock.On("Getenv", key)}
 }
 

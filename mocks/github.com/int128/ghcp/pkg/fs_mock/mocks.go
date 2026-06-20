@@ -72,7 +72,7 @@ type MockInterface_FindFiles_Call struct {
 // FindFiles is a helper method to define mock.On call
 //   - paths []string
 //   - filter fs.FindFilesFilter
-func (_e *MockInterface_Expecter) FindFiles(paths interface{}, filter interface{}) *MockInterface_FindFiles_Call {
+func (_e *MockInterface_Expecter) FindFiles(paths any, filter any) *MockInterface_FindFiles_Call {
 	return &MockInterface_FindFiles_Call{Call: _e.mock.On("FindFiles", paths, filter)}
 }
 
@@ -137,7 +137,7 @@ type MockInterface_ReadAsBase64EncodedContent_Call struct {
 
 // ReadAsBase64EncodedContent is a helper method to define mock.On call
 //   - filename string
-func (_e *MockInterface_Expecter) ReadAsBase64EncodedContent(filename interface{}) *MockInterface_ReadAsBase64EncodedContent_Call {
+func (_e *MockInterface_Expecter) ReadAsBase64EncodedContent(filename any) *MockInterface_ReadAsBase64EncodedContent_Call {
 	return &MockInterface_ReadAsBase64EncodedContent_Call{Call: _e.mock.On("ReadAsBase64EncodedContent", filename)}
 }
 
@@ -215,7 +215,7 @@ type MockFindFilesFilter_ExcludeFile_Call struct {
 
 // ExcludeFile is a helper method to define mock.On call
 //   - path string
-func (_e *MockFindFilesFilter_Expecter) ExcludeFile(path interface{}) *MockFindFilesFilter_ExcludeFile_Call {
+func (_e *MockFindFilesFilter_Expecter) ExcludeFile(path any) *MockFindFilesFilter_ExcludeFile_Call {
 	return &MockFindFilesFilter_ExcludeFile_Call{Call: _e.mock.On("ExcludeFile", path)}
 }
 
@@ -266,7 +266,7 @@ type MockFindFilesFilter_SkipDir_Call struct {
 
 // SkipDir is a helper method to define mock.On call
 //   - path string
-func (_e *MockFindFilesFilter_Expecter) SkipDir(path interface{}) *MockFindFilesFilter_SkipDir_Call {
+func (_e *MockFindFilesFilter_Expecter) SkipDir(path any) *MockFindFilesFilter_SkipDir_Call {
 	return &MockFindFilesFilter_SkipDir_Call{Call: _e.mock.On("SkipDir", path)}
 }
 

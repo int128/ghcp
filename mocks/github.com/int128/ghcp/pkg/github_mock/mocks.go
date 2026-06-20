@@ -73,7 +73,7 @@ type MockInterface_CreateBlob_Call struct {
 // CreateBlob is a helper method to define mock.On call
 //   - ctx context.Context
 //   - blob git.NewBlob
-func (_e *MockInterface_Expecter) CreateBlob(ctx interface{}, blob interface{}) *MockInterface_CreateBlob_Call {
+func (_e *MockInterface_Expecter) CreateBlob(ctx any, blob any) *MockInterface_CreateBlob_Call {
 	return &MockInterface_CreateBlob_Call{Call: _e.mock.On("CreateBlob", ctx, blob)}
 }
 
@@ -130,7 +130,7 @@ type MockInterface_CreateBranch_Call struct {
 // CreateBranch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.CreateBranchInput
-func (_e *MockInterface_Expecter) CreateBranch(ctx interface{}, in interface{}) *MockInterface_CreateBranch_Call {
+func (_e *MockInterface_Expecter) CreateBranch(ctx any, in any) *MockInterface_CreateBranch_Call {
 	return &MockInterface_CreateBranch_Call{Call: _e.mock.On("CreateBranch", ctx, in)}
 }
 
@@ -196,7 +196,7 @@ type MockInterface_CreateCommit_Call struct {
 // CreateCommit is a helper method to define mock.On call
 //   - ctx context.Context
 //   - commit git.NewCommit
-func (_e *MockInterface_Expecter) CreateCommit(ctx interface{}, commit interface{}) *MockInterface_CreateCommit_Call {
+func (_e *MockInterface_Expecter) CreateCommit(ctx any, commit any) *MockInterface_CreateCommit_Call {
 	return &MockInterface_CreateCommit_Call{Call: _e.mock.On("CreateCommit", ctx, commit)}
 }
 
@@ -264,7 +264,7 @@ type MockInterface_CreateFork_Call struct {
 // CreateFork is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id git.RepositoryID
-func (_e *MockInterface_Expecter) CreateFork(ctx interface{}, id interface{}) *MockInterface_CreateFork_Call {
+func (_e *MockInterface_Expecter) CreateFork(ctx any, id any) *MockInterface_CreateFork_Call {
 	return &MockInterface_CreateFork_Call{Call: _e.mock.On("CreateFork", ctx, id)}
 }
 
@@ -332,7 +332,7 @@ type MockInterface_CreatePullRequest_Call struct {
 // CreatePullRequest is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.CreatePullRequestInput
-func (_e *MockInterface_Expecter) CreatePullRequest(ctx interface{}, in interface{}) *MockInterface_CreatePullRequest_Call {
+func (_e *MockInterface_Expecter) CreatePullRequest(ctx any, in any) *MockInterface_CreatePullRequest_Call {
 	return &MockInterface_CreatePullRequest_Call{Call: _e.mock.On("CreatePullRequest", ctx, in)}
 }
 
@@ -400,7 +400,7 @@ type MockInterface_CreateRelease_Call struct {
 // CreateRelease is a helper method to define mock.On call
 //   - ctx context.Context
 //   - r git.Release
-func (_e *MockInterface_Expecter) CreateRelease(ctx interface{}, r interface{}) *MockInterface_CreateRelease_Call {
+func (_e *MockInterface_Expecter) CreateRelease(ctx any, r any) *MockInterface_CreateRelease_Call {
 	return &MockInterface_CreateRelease_Call{Call: _e.mock.On("CreateRelease", ctx, r)}
 }
 
@@ -457,7 +457,7 @@ type MockInterface_CreateReleaseAsset_Call struct {
 // CreateReleaseAsset is a helper method to define mock.On call
 //   - ctx context.Context
 //   - a git.ReleaseAsset
-func (_e *MockInterface_Expecter) CreateReleaseAsset(ctx interface{}, a interface{}) *MockInterface_CreateReleaseAsset_Call {
+func (_e *MockInterface_Expecter) CreateReleaseAsset(ctx any, a any) *MockInterface_CreateReleaseAsset_Call {
 	return &MockInterface_CreateReleaseAsset_Call{Call: _e.mock.On("CreateReleaseAsset", ctx, a)}
 }
 
@@ -523,7 +523,7 @@ type MockInterface_CreateTree_Call struct {
 // CreateTree is a helper method to define mock.On call
 //   - ctx context.Context
 //   - tree git.NewTree
-func (_e *MockInterface_Expecter) CreateTree(ctx interface{}, tree interface{}) *MockInterface_CreateTree_Call {
+func (_e *MockInterface_Expecter) CreateTree(ctx any, tree any) *MockInterface_CreateTree_Call {
 	return &MockInterface_CreateTree_Call{Call: _e.mock.On("CreateTree", ctx, tree)}
 }
 
@@ -592,7 +592,7 @@ type MockInterface_GetReleaseByTagOrNil_Call struct {
 //   - ctx context.Context
 //   - repo git.RepositoryID
 //   - tag git.TagName
-func (_e *MockInterface_Expecter) GetReleaseByTagOrNil(ctx interface{}, repo interface{}, tag interface{}) *MockInterface_GetReleaseByTagOrNil_Call {
+func (_e *MockInterface_Expecter) GetReleaseByTagOrNil(ctx any, repo any, tag any) *MockInterface_GetReleaseByTagOrNil_Call {
 	return &MockInterface_GetReleaseByTagOrNil_Call{Call: _e.mock.On("GetReleaseByTagOrNil", ctx, repo, tag)}
 }
 
@@ -665,7 +665,7 @@ type MockInterface_QueryCommit_Call struct {
 // QueryCommit is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.QueryCommitInput
-func (_e *MockInterface_Expecter) QueryCommit(ctx interface{}, in interface{}) *MockInterface_QueryCommit_Call {
+func (_e *MockInterface_Expecter) QueryCommit(ctx any, in any) *MockInterface_QueryCommit_Call {
 	return &MockInterface_QueryCommit_Call{Call: _e.mock.On("QueryCommit", ctx, in)}
 }
 
@@ -733,7 +733,7 @@ type MockInterface_QueryDefaultBranch_Call struct {
 // QueryDefaultBranch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.QueryDefaultBranchInput
-func (_e *MockInterface_Expecter) QueryDefaultBranch(ctx interface{}, in interface{}) *MockInterface_QueryDefaultBranch_Call {
+func (_e *MockInterface_Expecter) QueryDefaultBranch(ctx any, in any) *MockInterface_QueryDefaultBranch_Call {
 	return &MockInterface_QueryDefaultBranch_Call{Call: _e.mock.On("QueryDefaultBranch", ctx, in)}
 }
 
@@ -801,7 +801,7 @@ type MockInterface_QueryForCommit_Call struct {
 // QueryForCommit is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.QueryForCommitInput
-func (_e *MockInterface_Expecter) QueryForCommit(ctx interface{}, in interface{}) *MockInterface_QueryForCommit_Call {
+func (_e *MockInterface_Expecter) QueryForCommit(ctx any, in any) *MockInterface_QueryForCommit_Call {
 	return &MockInterface_QueryForCommit_Call{Call: _e.mock.On("QueryForCommit", ctx, in)}
 }
 
@@ -869,7 +869,7 @@ type MockInterface_QueryForPullRequest_Call struct {
 // QueryForPullRequest is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.QueryForPullRequestInput
-func (_e *MockInterface_Expecter) QueryForPullRequest(ctx interface{}, in interface{}) *MockInterface_QueryForPullRequest_Call {
+func (_e *MockInterface_Expecter) QueryForPullRequest(ctx any, in any) *MockInterface_QueryForPullRequest_Call {
 	return &MockInterface_QueryForPullRequest_Call{Call: _e.mock.On("QueryForPullRequest", ctx, in)}
 }
 
@@ -926,7 +926,7 @@ type MockInterface_RequestPullRequestReview_Call struct {
 // RequestPullRequestReview is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.RequestPullRequestReviewInput
-func (_e *MockInterface_Expecter) RequestPullRequestReview(ctx interface{}, in interface{}) *MockInterface_RequestPullRequestReview_Call {
+func (_e *MockInterface_Expecter) RequestPullRequestReview(ctx any, in any) *MockInterface_RequestPullRequestReview_Call {
 	return &MockInterface_RequestPullRequestReview_Call{Call: _e.mock.On("RequestPullRequestReview", ctx, in)}
 }
 
@@ -983,7 +983,7 @@ type MockInterface_UpdateBranch_Call struct {
 // UpdateBranch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in github.UpdateBranchInput
-func (_e *MockInterface_Expecter) UpdateBranch(ctx interface{}, in interface{}) *MockInterface_UpdateBranch_Call {
+func (_e *MockInterface_Expecter) UpdateBranch(ctx any, in any) *MockInterface_UpdateBranch_Call {
 	return &MockInterface_UpdateBranch_Call{Call: _e.mock.On("UpdateBranch", ctx, in)}
 }
 
