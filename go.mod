@@ -1,6 +1,6 @@
 module github.com/int128/ghcp
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/google/go-cmp v0.7.0
