@@ -74,14 +74,14 @@ func (_e *MockInterface_Expecter) Run(args any, version any) *MockInterface_Run_
 }
 
 func (_c *MockInterface_Run_Call) Run(run func(args []string, version string)) *MockInterface_Run_Call {
-	_c.Call.Run(func(args mock.Arguments) {
+	_c.Call.Run(func(args1 mock.Arguments) {
 		var arg0 []string
-		if args[0] != nil {
-			arg0 = args[0].([]string)
+		if args1[0] != nil {
+			arg0 = args1[0].([]string)
 		}
 		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
+		if args1[1] != nil {
+			arg1 = args1[1].(string)
 		}
 		run(
 			arg0,
